@@ -1,0 +1,31 @@
+{
+  "name": "@live-photo-studio/orchestrator",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "start": "node dist/main.js",
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "tsx --test src/**/*.test.ts",
+    "demo": "tsx src/demo.ts"
+  },
+  "dependencies": {
+    "@langchain/langgraph": "^1.0.0",
+    "@langchain/langgraph-checkpoint-postgres": "^1.0.0",
+    "@live-photo-studio/graph-contracts": "workspace:*",
+    "@live-photo-studio/graph-runtime": "workspace:*",
+    "bullmq": "^6.0.0",
+    "dotenv": "^17.0.0",
+    "ioredis": "^5.7.0",
+    "pg": "^8.16.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/pg": "^8.15.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0"
+  }
+}

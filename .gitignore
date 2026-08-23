@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# Test & coverage
+coverage/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs & temp
+logs/
+*.log
+tmp/
+.temp/
+
+# Media pipeline scratch space (per-job temp dirs)
+.media-tmp/
+
+# macOS metadata (external volume AppleDouble files)
+._*
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editors
+.idea/
+.vscode/
+*.swp

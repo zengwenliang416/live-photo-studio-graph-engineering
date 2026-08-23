@@ -1,0 +1,14 @@
+services:
+  orchestrator:
+    build:
+      context: .
+      dockerfile: infra/docker/orchestrator.Dockerfile
+    env_file:
+      - .env
+    command: pnpm --filter @live-photo-studio/orchestrator dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
