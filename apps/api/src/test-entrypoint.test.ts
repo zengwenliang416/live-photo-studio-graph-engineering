@@ -1,4 +1,6 @@
-// Keep the import list exhaustive so API fixtures run in one deterministic process.
+// Keep the import list exhaustive for ad-hoc single-process API fixture runs.
+// The package test command lists real test files explicitly and does not
+// discover this aggregation harness, avoiding duplicate collection.
 import "./exports/application/export-package-service.test.ts";
 import "./exports/export-packages.controller.test.ts";
 import "./exports/infrastructure/object-storage-signed-download-port.test.ts";

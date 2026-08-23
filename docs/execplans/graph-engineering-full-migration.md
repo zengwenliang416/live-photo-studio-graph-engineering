@@ -298,6 +298,13 @@ migration.
   `002-durable-orchestration`) still block handoff. This pass will append only
   runner-generated `specnav.validationAdjudication.v1` successor records, then
   rerun task acceptance and the development handoff contract.
+- [~] 2026-08-23: During current-HEAD receipt refresh, the API test harness
+  failed nondeterministically because a synthetic `test-entrypoint.test.ts`
+  imported all suites while the glob-based runner also discovered test files,
+  causing duplicate collection and shared-process fixture interference. The
+  real eight API test files pass when listed explicitly with
+  `--test-concurrency=1`; the package script now uses that explicit list while
+  the aggregation harness remains available only for ad-hoc runs.
 
 ## Surprises and discoveries
 
@@ -416,6 +423,11 @@ migration.
   runner must append an exact task/command/assertion-set adjudication that
   names both the preserved failed evidence log and its later successful
   successor.
+- 2026-08-23: A Node test entrypoint that imports every API test file is not
+  equivalent to serial file execution: the runner can collect the imported
+  top-level tests into one shared process, and a glob that also includes the
+  entrypoint duplicates all tests. The stable contract is an explicit list of
+  real test files with `--test-concurrency=1`.
 
 ## Decision log
 
@@ -527,6 +539,10 @@ migration.
   these failures are same-command retest failures with matching current-head
   PASS receipts, so the narrower `retest_pass` adjudication is the applicable
   contract.
+- 2026-08-23: Keep test collection deterministic through the package script
+  rather than relying on an experimental Node isolation flag or a synthetic
+  import harness. This preserves every real test file while preventing
+  duplicate discovery and cross-suite fixture interference.
 
 ## Outcomes and retrospective
 

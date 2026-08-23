@@ -8,7 +8,7 @@
     "start": "node dist/main.js",
     "build": "tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
-    "test": "tsx --test --test-concurrency=1 src/test-entrypoint.test.ts"
+    "test": "tsx --test --test-concurrency=1 src/exports/application/export-package-service.test.ts src/exports/export-packages.controller.test.ts src/exports/infrastructure/object-storage-signed-download-port.test.ts src/workflow-operations.test.ts src/workflow-service.test.ts src/workflows.controller.test.ts src/workflows/infrastructure/outbox-dispatcher.test.ts src/workflows/infrastructure/pg-workflow-operations.integration.test.ts"
   },
   "dependencies": {
     "@live-photo-studio/database": "workspace:*",
