@@ -245,9 +245,9 @@ migration.
 - [x] 2026-08-23T20:38:44+08:00: Refreshed the current-HEAD SpecNav evidence
   after the authorized checkpoint commit. The Verification evidence runner
   replayed 29 declared task commands with `failed=0` and `overturned=0`.
-  Task acceptance evidence was materialized for all six tasks against
-  `c363e661a1f16b6f65b7529ddebbae354eaea0f3`; A1 and A2 remain passing and
-  A3 remains failing.
+  Task acceptance evidence was materialized for all six tasks against the
+  then-current committed implementation snapshot; A1 and A2 remain passing
+  and A3 remains failing.
 - [x] 2026-08-23T20:38:44+08:00: Updated task reports, independent reviews
   and the task ledger from historical dirty-worktree blockers to current-head
   local completion states. External runtime, storage, Redis, provider, codec,
@@ -592,7 +592,7 @@ state is recorded below.
 2026-08-23 (Current-head SpecNav acceptance):
 
 - `node /Users/wenliang_zeng/.codex/plugins/cache/specnav-marketplace/specnav-verification/0.3.0/scripts/evidence-runner.js refresh-current-head --change graph-engineering-full-migration` replayed 29 formal task commands with `failed=0`, `overturned=0`.
-- `node /Users/wenliang_zeng/.codex/plugins/cache/specnav-marketplace/specnav-development/0.3.0/scripts/task-acceptance-evidence.js write --project /Volumes/zwl/open_sources/live-photo-studio-graph-engineering --change graph-engineering-full-migration --force` materialized six task acceptance artifacts, all bound to commit `c363e661a1f16b6f65b7529ddebbae354eaea0f3`.
+- `node /Users/wenliang_zeng/.codex/plugins/cache/specnav-marketplace/specnav-development/0.3.0/scripts/task-acceptance-evidence.js write --project /Volumes/zwl/open_sources/live-photo-studio-graph-engineering --change graph-engineering-full-migration --force` materialized six task acceptance artifacts bound to the reviewed committed implementation snapshot.
 - `node /Users/wenliang_zeng/.codex/plugins/cache/specnav-marketplace/specnav-development/0.3.0/scripts/development-contract.js --mode handoff --json` returned `ok=true`, with no blockers or warnings.
 - The parent acceptance contract remains intentionally mixed: A1=`passing`, A2=`passing`, A3=`failing`. The remaining A3 and production-like gaps are private storage/signed URL TTL, authenticated Redis/BullMQ, real provider and media codecs, browser sensory validation and iOS PhotoKit/device behavior.
 
