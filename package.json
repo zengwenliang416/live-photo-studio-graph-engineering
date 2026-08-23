@@ -1,0 +1,18 @@
+{
+  "name": "live-photo-studio",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.20.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "pnpm -r build",
+    "check": "pnpm -r build && pnpm -r check",
+    "test": "pnpm -r build && pnpm -r test",
+    "graph:check": "pnpm run check",
+    "graph:test": "pnpm run test",
+    "graph:demo": "pnpm -r build && pnpm --filter @live-photo-studio/orchestrator demo",
+    "db:migrate": "pnpm -r build && pnpm --filter @live-photo-studio/database migrate"
+  }
+}
