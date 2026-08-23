@@ -22,12 +22,79 @@ migration.
 - [x] 2026-08-23: Added `apps/orchestrator`, PostgreSQL checkpointer wiring, a v1
   generation-review-render graph, PostgreSQL adapters, an in-memory demo and
   route/resume tests.
-- [ ] Establish a clean installed baseline and correct any dependency/API drift.
-- [ ] Add NestJS workflow command/query endpoints and feature flags.
+- [x] 2026-08-23: Established a clean installed baseline and corrected
+  dependency/API drift. Recreated the missing root `package.json` and
+  `pnpm-workspace.yaml`; installed with pnpm 10.20.0 on Node.js v22.19.0
+  (production images stay on Node 24); generated `pnpm-lock.yaml`. Fixed two
+  real drifts found by the baseline checks: workspace packages export `./dist`,
+  so every documented command now builds packages first, and `ioredis` requires
+  a named `Redis` import under NodeNext ESM. Updated the orchestrator Dockerfile
+  to `pnpm install --frozen-lockfile` plus a topological `pnpm -r build`.
+  Verified: `pnpm check`, `pnpm test`, `pnpm graph:check`, `pnpm graph:test`
+  all pass; `pnpm graph:demo` prints WAITING_GENERATION → REVIEW_ANCHOR →
+  WAITING_RENDER → COMPLETED. Locked versions: @langchain/langgraph 1.4.12,
+  @langchain/langgraph-checkpoint-postgres 1.0.5 (@langchain/core 1.2.9),
+  bullmq 6.2.0, zod 3.25.76, pg 8.23.0, ioredis 5.11.1, dotenv 17.4.2,
+  typescript 5.9.3, tsx 4.23.12. Tests observed: contracts suite pass,
+  graph-runtime 2/2 pass, orchestrator happy-path interrupt/resume 1/1 pass.
+- [x] 2026-08-23: Added NestJS workflow command/query endpoints and feature
+  flag. Recreated `apps/api` as a minimal NestJS application exposing exactly
+  the five required endpoints under `/v1`, plus `GET /v1/openapi.json`. Writes
+  enforce `Idempotency-Key` (>=16 chars) with transactional first-response
+  storage in `idempotency_keys`; ownership is enforced per row via
+  `user_id + project_id` (403) or run/user match; errors are RFC-style
+  problem+json. The API never imports a compiled graph: it writes
+  `workflow_runs` rows and Outbox envelopes (`START_WORKFLOW`,
+  `CANCEL_WORKFLOW`, `HUMAN_TASK_COMPLETED`) in one transaction, and a new
+  Outbox dispatcher (poll + `FOR UPDATE SKIP LOCKED`, visibility timeout,
+  BullMQ `jobId` = outbox event id) relays them to the graph command/signal
+  queues. Verified: 16/16 contract+unit tests pass covering duplicate replay,
+  key-reuse conflict, unauthorized access, task state machine, feature-flag
+  off switch, malformed identifiers and openapi surface; repository-wide
+  build/check/test green; migrations idempotent on real PostgreSQL 16.
+  Remaining for later milestones: live Redis/PostgreSQL dispatcher recovery
+  integration test (planned with Milestone 3 crash-window suite).
+  - [x] 2026-08-23: `packages/database` recreated (pool, transaction helper,
+    SQL migration runner ignoring AppleDouble dotfiles) with additive
+    `0000_product_baseline.sql` (projects, asset_roles minimal registry,
+    outbox_events, idempotency_keys) that applies before the shipped
+    `0001_graph_workflow_runtime.sql`; root `pnpm db:migrate` verified against
+    local PostgreSQL 16 (applied 0000+0001, re-run skips both).
+- [x] 2026-08-23: Orchestrator durability and projections. Added migration
+  `0002_signal_visibility_timeout.sql` (`workflow_signals.updated_at`,
+  `last_error_code`, stale-processing index). Extended `WorkflowRepository`
+  with signal status lookup, stale claim (`updated_at` compare), stale listing,
+  node step-run start/finish and workflow event append methods.
+  `GraphEngine.handleSignal` now distinguishes fresh delivery, consumed
+  duplicates, fresh PROCESSING (other worker owns it) and stale PROCESSING
+  (re-drive exactly once under the per-run advisory lock); resume-time schema
+  or correlation mismatches mark the row `FAILED/SIGNAL_NOT_APPLICABLE`
+  instead of crashing recovery, while transient errors stay PROCESSING for
+  visibility-timeout retry. Added `recoverStuckSignals()` plus a periodic
+  recovery loop in `main.ts`. `createProductionCheckpointer` now returns a
+  `DurableCheckpointer` handle whose pool is closed on shutdown.
+  Integration suite `graph-engine.integration.test.ts` (operator-gated via
+  `RUN_PG_TESTS=1` against real PostgreSQL 16) passes 6/6 scenarios: restart
+  at every interrupt across fresh engine processes, duplicate completion
+  delivery no-op, signal-persisted-before-crash recovered exactly once,
+  resume-crashed-before-consumed-marker replayed without duplicate effects/
+  tasks/outbox rows, concurrent duplicate signals producing one transition,
+  and old-version runs resolvable after v2 registration. Repository-wide
+  build/check/test green (22 unit tests + 6 integration).
 - [ ] Connect workflow generation requests to the existing generation service and
   AI Worker; make workers emit correlated completion/failure signals.
+  - Blocked in this snapshot: the legacy `apps/worker-ai` and its generation
+    use case are absent from the working copy. Next actions when present:
+    implement a `WorkflowGenerationEffectPort` adapter replacing the
+    transitional `workflow.generation.requested.v1` bridge, emit
+    `GENERATION_BATCH_*` signals from the AI Worker transactionally, remove
+    worker-owned phase writes behind `GRAPH_WORKFLOW_ENABLED`.
 - [ ] Connect human task completion to Graph resume with authorization and
   idempotency.
+  - Core path already proven end-to-end by the API decision endpoint plus the
+    integration suite (SELECT resumes the correct run; duplicates replay).
+    Remaining when legacy surface lands: expose only task-payload actions in
+    the web review UI and bind REGENERATE to a bounded revision loop.
 - [ ] Connect workflow render requests to the existing render service and Media
   Worker; emit correlated export signals.
 - [ ] Remove worker-owned project phase transitions on the Graph path.
@@ -39,6 +106,19 @@ migration.
 
 ## Surprises and discoveries
 
+- 2026-08-23: This working copy is a Graph-only subset of the product. The
+  legacy `apps/web`, `apps/api`, `apps/worker-ai`, `apps/worker-media`,
+  `packages/contracts|queue|storage|logger|prompt-kit` directories described in
+  the root README do not exist here. Milestones that reference those services
+  must first recreate the minimum application surface they integrate with.
+- 2026-08-23: The root `package.json` and `pnpm-workspace.yaml` were absent, so
+  none of `pnpm install|check|test|graph:check|graph:test|graph:demo` could run.
+  They must be recreated with `pnpm -r` delegation scripts before Milestone 1
+  acceptance can be observed.
+- 2026-08-23: Local environment provides Node.js v22.19.0 while README and the
+  orchestrator Dockerfile target Node.js 24 LTS. Baseline verification runs on
+  Node 22; production images stay on Node 24. Recorded as an environment gap,
+  not a code change.
 - The delivered baseline intentionally had no `pnpm-lock.yaml` because the prior
   build environment could not reach the npm registry. The first successful
   install must create and commit the lockfile before production CI uses
@@ -50,6 +130,24 @@ migration.
 
 ## Decision log
 
+- 2026-08-23: tsx/esbuild does not emit decorator metadata, so every Nest
+  injection in `apps/api` uses explicit `@Inject(token)`; provider visibility
+  is modeled with a shared `ApiDatabaseModule` instead of parent-module
+  providers (Nest does not expose importer providers to imported modules).
+- 2026-08-23: Ownership violations return 403 PROJECT_ACCESS_DENIED and missing
+  resources 404, keeping authorization explicit for contract tests; problem+json
+  content type is set explicitly because Express `res.json()` always emits
+  application/json.
+- 2026-08-23: The migration runner ignores dotfiles so macOS AppleDouble
+  (`._*.sql`) artifacts can never be applied as migrations.
+- 2026-08-23: Recreated root scripts as `check`/`test` = `pnpm -r build && pnpm
+  -r check|test`, because library packages publish their public API from
+  `./dist`. Building first removes stale-dist drift for every consumer. Until
+  the legacy apps are recreated in this snapshot, `graph:check`/`graph:test`
+  intentionally alias the full gates; narrow them when non-graph packages land.
+- 2026-08-23: Use `import { Redis } from "ioredis"` in the orchestrator entry.
+  Under `NodeNext` module resolution the ioredis default export is not
+  constructable in ESM; the named export is the documented ESM form.
 - 2026-08-23: Keep BullMQ for task execution and use LangGraph only as the control
   plane. This avoids two competing task schedulers.
 - 2026-08-23: Use `workflowRunId` as `thread_id`; a project can have multiple runs.
@@ -60,6 +158,21 @@ migration.
   not arbitrary next-node names.
 
 ## Outcomes and retrospective
+
+2026-08-23 (Milestones 1-3):
+
+- Commands observed passing: `pnpm install`, `pnpm check`, `pnpm test`
+  (contracts 2, runtime 2, api 16, orchestrator 2 = 22 pass),
+  `pnpm graph:check`, `pnpm graph:test`, `pnpm graph:demo` (four phases ending
+  `COMPLETED`), `RUN_PG_TESTS=1 tsx --test src/graph-engine.integration.test.ts`
+  (6/6), `pnpm db:migrate` twice (apply then skip). `git diff --check` clean.
+- Environment gap: local Node is v22.19.0 while the documented target is
+  Node 24 LTS; all checks currently pass on 22 with engine warnings. Production
+  images remain on Node 24.
+- Remaining risks: dispatcher-to-BullMQ delivery is design-verified but not yet
+  exercised against live Redis in CI (local Redis requires auth); milestones
+  4-10 require the legacy product surface that this working copy does not
+  contain and are recorded as blocked with next actions.
 
 Not complete. Update this section after every production-like acceptance run.
 
