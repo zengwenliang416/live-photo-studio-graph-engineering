@@ -303,12 +303,14 @@ migration.
   real API test files and runs them with `--test-concurrency=1`; the
   aggregation harness remains available only for ad-hoc runs. The fixed
   package command observed `31/31` passing without deleting or skipping tests.
-- [~] 2026-08-23: Starting the post-`70ebe55` stable-snapshot closure. Commit
-  the living plan together with the current validation log and six task
-  acceptance artifacts, exclude CodeGraph state files, then rerun current-head
-  receipts, task acceptance and the development handoff contract. Finish with
-  the repository, Graph, migration and strict OpenSpec gates; keep A3
-  external/provider/media/browser/device gaps explicitly failing.
+- [x] 2026-08-23: Completed the post-`70ebe55` stable-snapshot closure on
+  checkpoint `48c2ccb`. The new HEAD evidence replay returned
+  `replayed=29 failed=0 overturned=0`; six task acceptance artifacts were
+  regenerated for the new HEAD and the development handoff returned
+  `ok=true` with no blockers or repair incidents. The final repository,
+  Graph, migration and strict OpenSpec gates also passed; A3 remains
+  explicitly failing only for the documented external/provider/media/browser/
+  device gaps.
 
 ## Surprises and discoveries
 
@@ -789,10 +791,31 @@ state is recorded below.
   PhotoKit/device acceptance. The credentialed RustFS canary only proves the
   observed shared bucket's adapter path, private access and 60-second signed
   download behavior.
-- The next command boundary is a local checkpoint commit followed by a fresh
-  current-head evidence refresh. The repository must not claim final handoff
-  until the refreshed `development-contract.js --mode handoff --json` returns
-  `ok=true`.
+- The command boundary was a local checkpoint commit followed by a fresh
+  current-head evidence refresh. That handoff returned `ok=true`; subsequent
+  documentation-only changes must preserve the same evidence procedure.
+
+2026-08-23 (Final repository and PostgreSQL validation):
+
+- `pnpm check` passed all workspace builds and TypeScript checks.
+- `pnpm test` passed the ordinary package suites: Graph contracts `6/6`,
+  storage `3/3`, graph runtime `3/3`, API `31/31`, Web `13/13`, AI Worker
+  `3/3`, Media Worker `4/4` and Orchestrator `4/4`.
+- `pnpm graph:check`, `pnpm graph:test` and `pnpm graph:demo` passed. The
+  demo reached `WAITING_GENERATION -> REVIEW_ANCHOR -> WAITING_RENDER ->
+  COMPLETED`.
+- `DATABASE_URL=postgresql://postgres@localhost:5432/postgres pnpm db:migrate`
+  passed with `applied=[]` and `skipped=6`.
+- `openspec validate --all --strict --no-interactive --json` passed one valid
+  change with zero issues; `git diff --check` passed with no output.
+- PostgreSQL suites passed API `34/34`, AI Worker `9/9`, Media Worker
+  `13/13` and Orchestrator `11/11`. The Orchestrator suite included restart
+  at every interrupt, duplicate completion/START/signal delivery, crash
+  recovery, concurrent duplicate signals, old-version resolution and bounded
+  regeneration.
+- The only local runtime warnings remained Node `v22.19.0` below the declared
+  `>=24` engine and pnpm's ignored `sharp` build script. Neither was promoted
+  to a passing production or codec acceptance claim.
 
 ## Repository context and orientation
 
