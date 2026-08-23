@@ -14,6 +14,7 @@
   "dependencies": {
     "@langchain/langgraph": "^1.0.0",
     "@langchain/langgraph-checkpoint-postgres": "^1.0.0",
+    "@live-photo-studio/database": "workspace:*",
     "@live-photo-studio/graph-contracts": "workspace:*",
     "@live-photo-studio/graph-runtime": "workspace:*",
     "bullmq": "^6.0.0",

@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { Worker } from "bullmq";
-import IORedis from "ioredis";
+import { Redis as IORedis } from "ioredis";
 import { Pool } from "pg";
 import {
   workflowCommandSchema,
@@ -19,17 +19,33 @@ async function main(): Promise<void> {
   const config = loadOrchestratorConfig();
   const pool = new Pool({ connectionString: config.DATABASE_URL });
   const redis = new IORedis(config.REDIS_URL, { maxRetriesPerRequest: null });
-  const checkpointer = await createProductionCheckpointer({
+  const durableCheckpointer = await createProductionCheckpointer({
     connectionString: config.DATABASE_URL,
     setup: config.GRAPH_CHECKPOINT_SETUP === "true",
   });
+  const checkpointer = durableCheckpointer.saver;
 
   const registry = createGraphRegistry({
     projects: new PostgresProjectReadAdapter(pool),
     effects: new PostgresWorkflowEffectAdapter(pool),
     checkpointer,
   });
-  const engine = new GraphEngine(pool, registry);
+  const engine = new GraphEngine(pool, registry, {
+    signalVisibilityTimeoutMs: config.GRAPH_SIGNAL_VISIBILITY_TIMEOUT_MS,
+  });
+  const recoveryTimer = setInterval(() => {
+    void engine
+      .recoverStuckSignals()
+      .catch((error: unknown) => {
+        console.error(
+          JSON.stringify({
+            event: "orchestrator.signal_recovery_failed",
+            message: error instanceof Error ? error.name : "UnknownError",
+          }),
+        );
+      });
+  }, config.GRAPH_SIGNAL_RECOVERY_INTERVAL_MS);
+  recoveryTimer.unref();
 
   const commandWorker = new Worker(
     config.GRAPH_COMMAND_QUEUE,
@@ -54,10 +70,12 @@ async function main(): Promise<void> {
   );
 
   const shutdown = async (): Promise<void> => {
+    clearInterval(recoveryTimer);
     await Promise.allSettled([
       commandWorker.close(),
       signalWorker.close(),
       redis.quit(),
+      durableCheckpointer.end().catch(() => undefined),
       pool.end(),
     ]);
   };

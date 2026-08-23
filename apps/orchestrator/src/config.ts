@@ -8,6 +8,16 @@ const environmentSchema = z.object({
   ORCHESTRATOR_CONCURRENCY: z.coerce.number().int().positive().default(4),
   GRAPH_CHECKPOINT_SETUP: z.enum(["true", "false"]).default("false"),
   GRAPH_MAX_REPAIR_ATTEMPTS: z.coerce.number().int().min(0).max(10).default(2),
+  GRAPH_SIGNAL_VISIBILITY_TIMEOUT_MS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(60_000),
+  GRAPH_SIGNAL_RECOVERY_INTERVAL_MS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(30_000),
 });
 
 export type OrchestratorConfig = z.infer<typeof environmentSchema>;

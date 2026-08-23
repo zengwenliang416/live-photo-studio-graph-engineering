@@ -13,6 +13,8 @@ export const workflowEventNameSchema = z.enum([
   "workflow.node.failed.v1",
 ]);
 
+export type WorkflowEventName = z.infer<typeof workflowEventNameSchema>;
+
 export const workflowEventSchema = z.object({
   eventId: z.string().uuid(),
   eventName: workflowEventNameSchema,
