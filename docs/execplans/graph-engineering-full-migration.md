@@ -291,6 +291,13 @@ migration.
   deleted the object. No credential, signed URL or object bytes were logged.
   The existing bucket is shared with the camera-rental deployment; a dedicated
   production bucket/policy remains an operator decision.
+- [~] 2026-08-23T23:55:00+08:00: Starting the SpecNav validation-log
+  adjudication closure. The current committed HEAD has later system-executed
+  PASS receipts for the same task/command/assertion sets, while two preserved
+  historical failures (`006-canary-validation` and
+  `002-durable-orchestration`) still block handoff. This pass will append only
+  runner-generated `specnav.validationAdjudication.v1` successor records, then
+  rerun task acceptance and the development handoff contract.
 
 ## Surprises and discoveries
 
@@ -403,6 +410,12 @@ migration.
   server-side app credential, a random `live-photo-studio/canary/` key and
   explicit deletion; production must either provision a dedicated bucket and
   policy or document the shared-bucket prefix/ownership controls.
+- 2026-08-23: The installed SpecNav development handoff contract evaluates
+  every trusted `system-executed` failure in the append-only validation log.
+  A later current-HEAD PASS alone is insufficient; the verification evidence
+  runner must append an exact task/command/assertion-set adjudication that
+  names both the preserved failed evidence log and its later successful
+  successor.
 
 ## Decision log
 
@@ -508,6 +521,12 @@ migration.
   and evidence logs. Current-head passes supersede stale command-time claims
   for the reviewed snapshot, but no failed external check may be rewritten as
   a pass.
+- 2026-08-23: Use the managed evidence runner's
+  `adjudicate-current-head` mode for historical validation failures. Do not
+  hand-author signatures, delete failed lines, or use task-level adjudication:
+  these failures are same-command retest failures with matching current-head
+  PASS receipts, so the narrower `retest_pass` adjudication is the applicable
+  contract.
 
 ## Outcomes and retrospective
 
