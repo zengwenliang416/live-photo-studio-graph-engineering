@@ -10,12 +10,13 @@ import {
 } from "./infrastructure/outbox-dispatcher.js";
 import { WorkflowService } from "./application/workflow-service.js";
 import { WorkflowsController } from "./workflows.controller.js";
+import { WorkflowEventsController } from "./workflow-events.controller.js";
 import { WORKFLOW_TOKENS } from "./workflow-tokens.js";
 import { ApiDatabaseModule } from "../database/api-database.module.js";
 
 @Module({
   imports: [ApiDatabaseModule],
-  controllers: [WorkflowsController],
+  controllers: [WorkflowsController, WorkflowEventsController],
   providers: [
     {
       provide: WORKFLOW_TOKENS.workflowUnit,

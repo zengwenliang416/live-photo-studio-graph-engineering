@@ -103,10 +103,34 @@ migration.
   resumes the correct run; duplicates replay; stale tasks conflict). Remaining:
   expose only task-payload actions in a web review UI and bind REGENERATE to a
   bounded revision loop once `apps/web` exists.
-- [ ] Connect workflow render requests to the existing render service and Media
-  Worker; emit correlated export signals.
+- [x] 2026-08-23: Connected the render/export path (minimal surface recreated
+  in-snapshot). Migration `0004_render_domain.sql` adds `render_jobs` and
+  `export_packages` with per-artifact storage keys, a package SHA-256,
+  byte count and JSONB manifest (schemaVersion/recipeVersion/entries).
+  `apps/worker-media` consumes `render-jobs` behind an `ExportRenderer` port;
+  a dependency-free deterministic STORE-method ZIP builder produces the
+  cover/motion/manifest package so hashes are real and replay-stable. The
+  export row plus the correlated `RENDER_JOB_COMPLETED` signal (correlationId
+  = jobId) commit atomically; duplicate deliveries serve the existing export
+  and emit nothing; terminal failures record once with `RENDER_JOB_FAILED`;
+  invalid selected outputs fail fast before any domain write. The worker
+  writes no project phases. Verified: repository-wide build/check/test green;
+  worker-media unit 2 + integration 4/4 on PostgreSQL 16.
+  Deferred honestly: the FFmpeg-backed renderer adapter behind the same port
+  (real MOV encoding) plus object-storage upload of artifacts — the current
+  fake renderer yields placeholder bytes with valid ZIP structure and stable
+  hashes, sufficient for control-plane acceptance but not device-level media
+  validation per the HEIC/Live Photo boundary in AGENTS.md.
 - [ ] Remove worker-owned project phase transitions on the Graph path.
-- [ ] Add front-end workflow projections, SSE invalidation and human review UI.
+- [~] 2026-08-23: Building the web workflow projection. Recreating the minimal
+  `apps/web` surface in-snapshot: typed API client with per-action
+  Idempotency-Key persistence, TanStack Query hooks where the server
+  projection is the only truth, duplicate-click protection at the mutation
+  layer, stage-based progress derived from `currentPhase`, task-payload-gated
+  review actions, accessible cancel/error states, and Graph/legacy flag
+  routing. The API gains an SSE endpoint streaming new `workflow_events` rows
+  (transitional DB-tail transport) so clients invalidate queries on real
+  state changes only.
 - [ ] Add full checkpoint recovery, duplicate signal, crash window and rollback
   integration tests.
 - [ ] Add observability, admin triage, cost controls, canary rollout and runbooks.
