@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import type { Pool } from "pg";
 import { createAppPool, runMigrations } from "@live-photo-studio/database";
 import { workflowSignalSchema } from "@live-photo-studio/graph-contracts";
+import { InMemoryObjectStorage } from "@live-photo-studio/storage";
 import { RenderService } from "./export-service.js";
 import {
   FakeExportRenderer,
@@ -21,7 +22,8 @@ const TEST_URL = `postgresql://postgres@localhost:5432/${TEST_DB}`;
 const USER_ID = "worker-media-test";
 
 let pool: Pool | null = null;
-let shared: { service: RenderService } | null = null;
+let shared: { service: RenderService; storage: InMemoryObjectStorage } | null =
+  null;
 
 after(async () => {
   if (pool) await pool.end().catch(() => undefined);
@@ -100,7 +102,8 @@ async function harness(): Promise<RenderService> {
     await bootstrap.end();
   }
   pool = createAppPool(TEST_URL);
-  shared = { service: new RenderService(pool) };
+  const storage = new InMemoryObjectStorage();
+  shared = { service: new RenderService(pool, undefined, 1500, storage), storage };
   return shared.service;
 }
 
@@ -166,6 +169,7 @@ if (!RUN_PG_TESTS) {
     const seeded = await seedOutput(pool!);
     const job = payload(seeded);
     const phaseBefore = await workflowPhase(job.workflowRunId);
+    const objectCountBefore = shared?.storage.objects.size ?? 0;
 
     const result = await service.process(job);
     assert.equal(result.status, "SUCCEEDED");
@@ -184,6 +188,11 @@ if (!RUN_PG_TESTS) {
     const record = row.rows[0];
     assert.ok(record && record.bytes > 0);
     assert.equal(String(record.manifest["schemaVersion"]), "1");
+    assert.equal(shared?.storage.objects.size, objectCountBefore + 4);
+    const packageKey = `projects/${seeded.projectId}/exports/${job.jobId}/package.zip`;
+    const storedPackage = shared?.storage.objects.get(packageKey);
+    assert.ok(storedPackage);
+    assert.equal(sha256Hex(storedPackage), record.sha256);
 
     // Deterministic renderer: a fresh job over the same input yields the
     // identical package hash.
@@ -224,9 +233,11 @@ if (!RUN_PG_TESTS) {
     const job = payload(seeded);
 
     const first = await service.process(job);
+    const objectCountAfterFirst = shared?.storage.objects.size;
     const duplicate = await service.process(job);
     assert.equal(duplicate.status, "ALREADY_DONE");
     assert.equal(duplicate.exportId, first.exportId);
+    assert.equal(shared?.storage.objects.size, objectCountAfterFirst);
 
     const counts = await pool!.query<{
       jobs: string;

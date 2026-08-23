@@ -25,7 +25,7 @@ under a uniqueness constraint and resumes the exact `thread_id` once.
 | Workflow query status | `workflow_runs` projection |
 | Node resume state | LangGraph checkpoint tables |
 | External job delivery | Outbox + BullMQ |
-| Binary media | S3/MinIO |
+| Binary media | RustFS S3-compatible object storage |
 | User review request | `human_tasks` |
 
 Do not query LangGraph checkpoint tables from the web application. They are an

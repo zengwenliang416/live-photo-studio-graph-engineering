@@ -256,6 +256,27 @@ migration.
   `{"ok":true,"mode":"handoff","blockers":[]}` for all six tasks. This is a
   lifecycle handoff of the locally verified slices, not production or device
   acceptance.
+- [~] 2026-08-23: Starting the RustFS object-storage completion slice after the
+  user confirmed that a RustFS service exists on the 80 server. This slice
+  replaces the fail-closed export signer and metadata-only media path with a
+  generic S3-compatible storage port, a RustFS-compatible AWS SDK adapter,
+  deterministic export-object uploads and short-lived private download grants.
+  The default `mock` backend remains for ordinary CI. The server endpoint,
+  private bucket, credentials, TLS mode and live object verification remain
+  external inputs until a read-only probe and an explicitly authorized
+  canary upload are run.
+- [x] 2026-08-23: Completed the locally verifiable RustFS storage slice. Added
+  `packages/storage` with a generic `ObjectStoragePort`, mock/in-memory
+  implementation and AWS SDK S3-compatible adapter supporting explicit
+  endpoints, path-style addressing, private uploads, object SHA-256 metadata
+  and presigned GET grants capped at 900 seconds. API export downloads now use
+  the adapter when `OBJECT_STORAGE_BACKEND=s3`; Media Worker uploads cover,
+  motion, manifest and ZIP objects before committing export metadata and
+  validates returned object keys, byte counts and hashes. Verified with storage
+  3/3, API 34/34, Media Worker 13/13 PostgreSQL integration tests, full
+  repository checks, Graph checks, migration replay and `git diff --check`.
+  Remaining external work is limited to a credentialed RustFS endpoint/bucket
+  probe, private-access check, signed-URL TTL check and production canary.
 
 ## Surprises and discoveries
 
@@ -352,6 +373,17 @@ migration.
   implementation checkpoint, signed receipts and independent review artifacts
   agree on the same namespaced task assertions. The task-level approvals do
   not override the parent `acceptance.json` status of A3=`failing`.
+- 2026-08-23: RustFS is S3-compatible, so the application must not introduce
+  RustFS-specific business ports or a second storage abstraction. The adapter
+  will use the AWS SDK S3 client with an explicit endpoint and path-style
+  addressing, while application code depends only on the repository's
+  `ObjectStoragePort`. This keeps local fake tests and a future S3-compatible
+  provider on the same boundary.
+- 2026-08-23: The RustFS adapter is selected independently in API and Media
+  Worker startup from `OBJECT_STORAGE_*` settings. This avoids putting storage
+  credentials into Graph contracts or worker job payloads, and keeps the mock
+  provider available for ordinary CI. A real RustFS run must configure the same
+  private bucket and endpoint in both processes.
 
 ## Decision log
 
@@ -379,6 +411,13 @@ migration.
   correlated domain jobs, not LangGraph checkpoint rows. Repair/replay will be a
   versioned, audited Outbox command with deterministic effect keys and explicit
   ownership checks.
+- 2026-08-23: Implement object storage as a shared `packages/storage` adapter
+  rather than embedding AWS SDK calls in API or Media Worker. `OBJECT_STORAGE_*`
+  settings select `mock` or `s3`; `s3` requires an explicit endpoint, bucket and
+  server-side credentials. Media uploads deterministic package objects before
+  committing the export row; retries reuse the same keys and bytes. API signs
+  only persisted object keys and enforces the configured short TTL. No signed
+  URL or binary enters PostgreSQL, Graph state or logs.
 - 2026-08-23: Use `workflowRunId` as `thread_id`; a project can have multiple runs.
 - 2026-08-23: Store workflow query projections separately from checkpoint tables.
 - 2026-08-23: Begin with `generation -> human review -> render -> export`; migrate
@@ -595,6 +634,27 @@ state is recorded below.
 - `node /Users/wenliang_zeng/.codex/plugins/cache/specnav-marketplace/specnav-development/0.3.0/scripts/task-acceptance-evidence.js write --project /Volumes/zwl/open_sources/live-photo-studio-graph-engineering --change graph-engineering-full-migration --force` materialized six task acceptance artifacts bound to the reviewed committed implementation snapshot.
 - `node /Users/wenliang_zeng/.codex/plugins/cache/specnav-marketplace/specnav-development/0.3.0/scripts/development-contract.js --mode handoff --json` returned `ok=true`, with no blockers or warnings.
 - The parent acceptance contract remains intentionally mixed: A1=`passing`, A2=`passing`, A3=`failing`. The remaining A3 and production-like gaps are private storage/signed URL TTL, authenticated Redis/BullMQ, real provider and media codecs, browser sensory validation and iOS PhotoKit/device behavior.
+
+2026-08-23 (RustFS storage slice):
+
+- `pnpm install` and the subsequent frozen-lockfile install completed with the
+  repository's existing Node `v22.19.0` engine warning and ignored `sharp`
+  build-script warning; no credentials were used or persisted.
+- `pnpm check`, `pnpm test`, `pnpm graph:check`, `pnpm graph:test`,
+  `pnpm graph:demo`, `DATABASE_URL=postgresql://postgres@localhost:5432/postgres
+  pnpm db:migrate` and `git diff --check` passed. Migration replay reported
+  `applied:[]` and `skipped:6`; the Graph demo ended
+  `WAITING_GENERATION -> REVIEW_ANCHOR -> WAITING_RENDER -> COMPLETED`.
+- PostgreSQL integration commands observed passing on this HEAD:
+  `RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/api test` (34/34),
+  `RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/worker-ai test` (9/9),
+  `RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/worker-media test`
+  (13/13), and `RUN_PG_TESTS=1 pnpm --filter
+  @live-photo-studio/orchestrator test` (11/11).
+- The private RustFS server was not contacted in this pass because its exact
+  endpoint, bucket and credential source were not supplied to the repository
+  process. A3 remains failing for live private-object, signed-URL and canary
+  acceptance; local fake and PostgreSQL evidence is not substituted for it.
 
 ## Repository context and orientation
 

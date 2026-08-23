@@ -21,10 +21,27 @@ production credentials, object storage, or Photos-library assets.
    separately approved budget and server-side credentials.
 5. Set a non-empty `GRAPH_ADMIN_USER_IDS` allowlist before exposing the admin
    endpoints. Values are comma-separated authenticated user IDs.
-6. Deploy the API and workers with Graph command/signal publication enabled, but
+6. For RustFS, configure the shared S3-compatible adapter on both API and Media
+   Worker. Keep the bucket private and never place the access key or secret in
+   Web/Next.js variables:
+
+   ```dotenv
+   OBJECT_STORAGE_BACKEND=s3
+   OBJECT_STORAGE_ENDPOINT=https://rustfs.example.internal
+   OBJECT_STORAGE_REGION=us-east-1
+   OBJECT_STORAGE_BUCKET=live-photo-studio
+   OBJECT_STORAGE_ACCESS_KEY_ID=<server-side-access-key>
+   OBJECT_STORAGE_SECRET_ACCESS_KEY=<server-side-secret-key>
+   OBJECT_STORAGE_FORCE_PATH_STYLE=true
+   OBJECT_STORAGE_SIGNED_URL_TTL_SECONDS=300
+   ```
+
+   The endpoint, bucket and credential values are deployment-specific. Do not
+   guess them from an undocumented default port or commit them to the repository.
+7. Deploy the API and workers with Graph command/signal publication enabled, but
    keep orchestrator consumption disabled or at zero replicas until the canary
    checks are ready.
-7. Enable orchestrator consumption and verify one canary workflow from start
+8. Enable orchestrator consumption and verify one canary workflow from start
    through export using the API projection.
 
 ## Operator Triage
@@ -174,7 +191,12 @@ CI and must remain explicitly blocked when unavailable:
 
 - Real OpenAI/provider regression. Use a separate budget-limited job; never put
   the key in browser variables or logs.
-- Real S3/MinIO private-bucket and signed-URL TTL verification.
+- Real RustFS private-bucket, object upload and signed-URL TTL verification.
+  Use a credentialed operator shell to run `aws s3api head-bucket` against
+  `OBJECT_STORAGE_ENDPOINT`, then execute one approved canary workflow and
+  verify the package key exists privately, the recorded SHA-256 matches the
+  object bytes, and the signed URL expires within the configured TTL. Do not
+  paste credentials or signed URLs into logs or chat.
 - Real FFmpeg/ImageMagick/libheif capability, HEIC input validation and device
   playback. The current media renderer uses deterministic fake bytes for
   control-plane tests.

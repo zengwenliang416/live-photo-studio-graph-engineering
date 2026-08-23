@@ -2,6 +2,10 @@ import { createHash } from "node:crypto";
 import type { Pool, PoolClient } from "pg";
 import type { WorkflowSignal } from "@live-photo-studio/graph-contracts";
 import {
+  InMemoryObjectStorage,
+  type ObjectStoragePort,
+} from "@live-photo-studio/storage";
+import {
   FakeExportRenderer,
   type ExportRenderer,
 } from "./renderer.js";
@@ -31,6 +35,7 @@ export class RenderService {
     private readonly pool: Pool,
     private readonly renderer: ExportRenderer = new FakeExportRenderer(),
     private readonly durationMs = 1500,
+    private readonly storage: ObjectStoragePort = new InMemoryObjectStorage(),
   ) {}
 
   /**
@@ -78,6 +83,18 @@ export class RenderService {
       ]);
       const sha256 = sha256Hex(zip);
       const exportId = deterministicUuid(`${payload.jobId}:export`);
+      const objectKeys = {
+        package: `${base}/package.zip`,
+        cover: `${base}/cover.jpg`,
+        motion: `${base}/motion.mov`,
+        manifest: `${base}/manifest.json`,
+      };
+      await this.uploadArtifacts({
+        objectKeys,
+        artifacts,
+        manifestBytes,
+        zip,
+      });
       const manifest = {
         ...(artifacts.manifest as Record<string, unknown>),
         schemaVersion: MANIFEST_SCHEMA_VERSION,
@@ -100,10 +117,10 @@ export class RenderService {
             exportId,
             payload.jobId,
             payload.projectId,
-            `${base}/package.zip`,
-            `${base}/cover.jpg`,
-            `${base}/motion.mov`,
-            `${base}/manifest.json`,
+            objectKeys.package,
+            objectKeys.cover,
+            objectKeys.motion,
+            objectKeys.manifest,
             JSON.stringify(manifest),
             sha256,
             this.durationMs,
@@ -149,6 +166,66 @@ export class RenderService {
       // BullMQ retry. A committed export protects its claim from deletion.
       await this.releaseRenderClaim(payload).catch(() => undefined);
       throw error;
+    }
+  }
+
+  private async uploadArtifacts(input: {
+    readonly objectKeys: {
+      readonly package: string;
+      readonly cover: string;
+      readonly motion: string;
+      readonly manifest: string;
+    };
+    readonly artifacts: {
+      readonly cover: Uint8Array;
+      readonly motion: Uint8Array;
+    };
+    readonly manifestBytes: Uint8Array;
+    readonly zip: Uint8Array;
+  }): Promise<void> {
+    const objects = [
+      {
+        objectKey: input.objectKeys.cover,
+        body: input.artifacts.cover,
+        contentType: "image/jpeg",
+        sha256: sha256Hex(input.artifacts.cover),
+      },
+      {
+        objectKey: input.objectKeys.motion,
+        body: input.artifacts.motion,
+        contentType: "video/quicktime",
+        sha256: sha256Hex(input.artifacts.motion),
+      },
+      {
+        objectKey: input.objectKeys.manifest,
+        body: input.manifestBytes,
+        contentType: "application/json",
+        sha256: sha256Hex(input.manifestBytes),
+      },
+      {
+        objectKey: input.objectKeys.package,
+        body: input.zip,
+        contentType: "application/zip",
+        contentDisposition: "attachment; filename=\"live-photo-package.zip\"",
+        sha256: sha256Hex(input.zip),
+      },
+    ] as const;
+
+    const stored = await Promise.all(
+      objects.map((object) => this.storage.putObject(object)),
+    );
+    for (let index = 0; index < objects.length; index += 1) {
+      const expected = objects[index];
+      const actual = stored[index];
+      if (
+        !expected ||
+        !actual ||
+        actual.objectKey !== expected.objectKey ||
+        actual.bytes !== expected.body.byteLength ||
+        actual.sha256 !== expected.sha256
+      ) {
+        throw new Error("OBJECT_STORAGE_INTEGRITY_MISMATCH");
+      }
     }
   }
 

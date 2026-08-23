@@ -4,6 +4,7 @@ import { Redis } from "ioredis";
 import type { Pool } from "pg";
 import { createAppPool } from "@live-photo-studio/database";
 import { safeLogEvent } from "@live-photo-studio/graph-contracts";
+import { createObjectStorageFromEnvironment } from "@live-photo-studio/storage";
 import { RenderService } from "./export-service.js";
 import {
   renderRequestedPayloadSchema,
@@ -16,7 +17,12 @@ async function main(): Promise<void> {
   const connection = new Redis(config.REDIS_URL, {
     maxRetriesPerRequest: null,
   });
-  const service = new RenderService(pool, undefined, config.EXPORT_DURATION_MS);
+  const service = new RenderService(
+    pool,
+    undefined,
+    config.EXPORT_DURATION_MS,
+    createObjectStorageFromEnvironment(),
+  );
 
   const worker = new Worker(
     config.RENDER_JOB_QUEUE,

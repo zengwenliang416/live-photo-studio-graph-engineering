@@ -13,7 +13,7 @@ media-worker execution plane.
 - **Media Worker** reports render facts; it does not route the workflow.
 - **PostgreSQL** stores business facts, workflow projections and durable signals.
 - **LangGraph checkpointer** stores resumable internal graph state.
-- **S3/MinIO** stores all binary assets.
+- **RustFS (S3-compatible API)** stores all binary assets.
 
 ## Included v1 graph
 
@@ -52,8 +52,14 @@ Its browser-side mock orchestrator, localStorage/IndexedDB domain stores,
 custom router and browser ZIP builder are not production integrations. The
 current Next.js page keeps the API projection as the only workflow truth.
 
+The runtime selects the object-storage adapter with `OBJECT_STORAGE_BACKEND`.
+`mock` is used by ordinary CI; `s3` uses the shared `packages/storage` adapter
+with an explicit RustFS endpoint, private bucket and server-side credentials.
+The API signs only persisted object keys and the Media Worker uploads
+deterministic package objects before committing export metadata.
+
 Remaining external verification is deliberately explicit in
-`docs/execplans/graph-engineering-full-migration.md`: private S3/MinIO and
+`docs/execplans/graph-engineering-full-migration.md`: private RustFS bucket and
 signed URL TTLs, live Redis/BullMQ publication, real provider calls,
 FFmpeg/ImageMagick/libheif/HEIC capability and iOS device/PhotoKit behavior.
 

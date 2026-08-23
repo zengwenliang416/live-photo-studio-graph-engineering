@@ -8,7 +8,7 @@
 - NestJS 模块化单体 API。
 - PostgreSQL 数据模型与 SQL Migration。
 - Redis + BullMQ 异步任务。
-- S3/MinIO 预签名直传。
+- RustFS S3-compatible 预签名直传。
 - HEIC/JPEG/PNG/WebP 素材接入管道。
 - `mock` 与 OpenAI GPT Image Provider。
 - 低质量多候选生成、结果选择和风格策略。
@@ -45,7 +45,7 @@ docker compose -f docker-compose.yml -f docker-compose.apps.yml up --build
 
 - Web：`http://localhost:3000`
 - API：`http://localhost:4000`
-- MinIO Console：`http://localhost:9001`
+- RustFS Console：使用部署环境提供的管理地址，不在应用配置中公开。
 
 本地默认 `AI_PROVIDER=mock`，无需 OpenAI Key。要调用真实模型：
 
@@ -62,7 +62,7 @@ OPENAI_IMAGE_MODEL=gpt-image-2-2026-04-21
 ```text
 创建项目
 → 获取预签名 URL
-→ 浏览器直传原图到 MinIO/S3
+→ 浏览器直传原图到 RustFS S3-compatible endpoint
 → API 完成上传并写 Outbox
 → Media Worker 标准化素材
 → 创建批量生成任务并写 Outbox
@@ -110,7 +110,7 @@ docs                 架构与 ADR
 
 - 接入真实鉴权与租户权限，不再使用演示 `x-user-id`。
 - 使用固定版本容器镜像，避免 `latest`。
-- 为 MinIO/S3、Redis、PostgreSQL 配置 TLS、备份与密钥管理。
+- 为 RustFS S3-compatible API、Redis、PostgreSQL 配置 TLS、备份与密钥管理。
 - 添加病毒扫描、内容安全、配额和积分账本。
 - 增加 iOS Importer，写入 Live Photo 配对元数据并调用 PhotoKit。
 - 为 OpenAI Provider 增加组织验证、限流、成本预算和评估集。

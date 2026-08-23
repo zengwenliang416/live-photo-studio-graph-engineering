@@ -13,6 +13,7 @@
   "dependencies": {
     "@live-photo-studio/database": "workspace:*",
     "@live-photo-studio/graph-contracts": "workspace:*",
+    "@live-photo-studio/storage": "workspace:*",
     "bullmq": "^6.0.0",
     "dotenv": "^17.0.0",
     "ioredis": "^5.7.0",

@@ -13,6 +13,7 @@
   "dependencies": {
     "@live-photo-studio/database": "workspace:*",
     "@live-photo-studio/graph-contracts": "workspace:*",
+    "@live-photo-studio/storage": "workspace:*",
     "@nestjs/common": "^11.0.0",
     "@nestjs/core": "^11.0.0",
     "@nestjs/platform-express": "^11.0.0",
