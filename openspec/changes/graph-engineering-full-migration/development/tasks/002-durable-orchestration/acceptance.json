@@ -2,11 +2,11 @@
   "schema": "specnav.task-acceptance-evidence.v2",
   "generated_by": "specnav-development/task-acceptance-evidence",
   "task_id": "002-durable-orchestration",
-  "generated_at": "2026-08-23T12:44:44.038Z",
-  "recorded_at": "2026-08-23T12:35:22.772Z",
+  "generated_at": "2026-08-23T12:53:52.411Z",
+  "recorded_at": "2026-08-23T12:52:38.103Z",
   "status": "approved",
-  "reviewed_git_head": "c363e661a1f16b6f65b7529ddebbae354eaea0f3",
-  "reviewed_git_tree": "5bf97f4903e98487f2cd38b2d72713cd0d55dc47",
+  "reviewed_git_head": "12abbdede1a3e31618c3944f2d1b57c868a32353",
+  "reviewed_git_tree": "8b272308e129056c4bc4a8e70b6517ab41911146",
   "implementation_scope": {
     "included_patterns": [
       "apps/api/**",
@@ -367,7 +367,7 @@
         "path": "docs/execplans/graph-engineering-full-migration.md",
         "mode": "100644",
         "type": "blob",
-        "object_id": "e35957f61c77a21aa85eb2051919dd97b7ac9f71"
+        "object_id": "74ee374b2723771766473f16e6709ac3623456a2"
       },
       {
         "path": "docs/graph-engineering/evidence/canary-rollback.json",
@@ -508,7 +508,7 @@
         "object_id": "a72a807d5f98f2017dd06cb5b651e2ea2bef07f9"
       }
     ],
-    "sha256": "e772e17244b25bd651baa5d3281a40af7c2b3b3a55b01d37cff15c3eb6ccb871"
+    "sha256": "7f95200205932621e7a9ed7a9d54a5b44feaf12c7a9fb900bd6e4afd05efc2ac"
   },
   "artifacts": {
     "context": {
@@ -517,75 +517,75 @@
     },
     "report": {
       "path": "development/tasks/002-durable-orchestration/report.md",
-      "sha256": "73c18aeaff08604a7ec2755342859dbc886ccec15ad4c1aadd5f9cddda79e6e8",
+      "sha256": "2799eee2c1a987d02e7a4cb4191cc8dfad2bc7430ed9244458aff178727a8b12",
       "status": "DONE"
     },
     "spec_review": {
       "path": "development/tasks/002-durable-orchestration/spec-review.md",
-      "sha256": "06f45706c0451396951b056c2e1ae2821248e4cfc2a00a272f9a98493c7a6a9b",
+      "sha256": "a0adcd0ff7c776fc14004421cd1eeb378e6ffbbf55b15e62b81098918a3feb78",
       "verdict": "approved"
     },
     "quality_review": {
       "path": "development/tasks/002-durable-orchestration/quality-review.md",
-      "sha256": "72cdbabd719bb447c70beae4f35b3b0d5f9a202c9e3d69bb0be5790d2319bded",
+      "sha256": "209ed62d5caee2923c10ab169ee28f855ed5ae9188a0d1297605832008c0409e",
       "verdict": "approved"
     }
   },
   "test_runs": [
     {
-      "id": "receipt-0a1f647a1a96c7061dfdfc9612853fb573536f870c5b3613798988724a46317b",
+      "id": "receipt-3891c3be6e630a54a5c5505d4f122ae3eace879518e48bc496c36429ddfd32c5",
       "command": "pnpm graph:demo",
       "assertion_ids": [
         "A1:durable-orchestration"
       ],
-      "recorded_at": "2026-08-23T12:35:22.772Z",
-      "validation_receipt_sha256": "94d00f2ac31d755ad511a8929d0fdb2677295ba2a4af26388d613177a626d533",
+      "recorded_at": "2026-08-23T12:52:38.103Z",
+      "validation_receipt_sha256": "d9b16fd992fbf6c710d8389423ac765913a31925140a4ca66c42a5f56059e207",
       "evidence_log": {
-        "path": "development/evidence/038-002-durable-orchestration.log",
-        "sha256": "8a53cedc6c890fee295b07afd5ada410e78054c540ce4defbbb9eb8f4403f346",
+        "path": "development/evidence/096-002-durable-orchestration.log",
+        "sha256": "0a8acd78a8c0df9fc8eaa0390a24395659fef60b8130e96888cd1c7ec20088b6",
         "size": 1623
       }
     },
     {
-      "id": "receipt-86a8aca00481290aa7eeeb939ef4b6bf3797ef7bb7db530b1b66673ff970b32f",
-      "command": "pnpm --filter @live-photo-studio/orchestrator test",
-      "assertion_ids": [
-        "A1:durable-orchestration"
-      ],
-      "recorded_at": "2026-08-23T12:35:15.388Z",
-      "validation_receipt_sha256": "4f090a5a3ed0463fdfb520fde38f0ed4ba1d5685bf39cc8d97494fe3f6cee426",
-      "evidence_log": {
-        "path": "development/evidence/035-002-durable-orchestration.log",
-        "sha256": "9d8073344edae30b55b4582a6408081620528bb2a05b6d92cdc5c97018f1f52f",
-        "size": 1304
-      }
-    },
-    {
-      "id": "receipt-90c55fd1cd3c4550cc9442864942f680224b165f56762666c1d5e6d9861b96b0",
-      "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/orchestrator test",
-      "assertion_ids": [
-        "A1:durable-orchestration"
-      ],
-      "recorded_at": "2026-08-23T12:35:16.660Z",
-      "validation_receipt_sha256": "68bd775cc6992b01eded450301b7895f442efcb5a8051e28b51e046c156bc61d",
-      "evidence_log": {
-        "path": "development/evidence/036-002-durable-orchestration.log",
-        "sha256": "2b848bf58d78048e02ebb2f6fae95544fc5eeabd9c0b199af7f44c7a467d4139",
-        "size": 2701
-      }
-    },
-    {
-      "id": "receipt-cc937f6fbf51d676d5864a50eb1c8452c3e52fcc714dbc5b84a2ef053eec6dbc",
+      "id": "receipt-3d688f9e4175f99771eca6da93e3bfaaf4df13bc88facce10a5bab852f3485e9",
       "command": "pnpm --filter @live-photo-studio/api test",
       "assertion_ids": [
         "A1:durable-orchestration"
       ],
-      "recorded_at": "2026-08-23T12:35:17.971Z",
-      "validation_receipt_sha256": "43f7c259064d8df3af3d0ef735b9159b575b4df599302362be217416d55961cd",
+      "recorded_at": "2026-08-23T12:52:31.694Z",
+      "validation_receipt_sha256": "17a7d6025f4ed19822957886a4048b740e08c87a9cf3b15eed931e97898b7149",
       "evidence_log": {
-        "path": "development/evidence/037-002-durable-orchestration.log",
-        "sha256": "8144fe4280c4ce09267145ea899ec17bbe5ae3a3e010fe543cfb18384fe12e15",
-        "size": 6327
+        "path": "development/evidence/095-002-durable-orchestration.log",
+        "sha256": "68a3cbcf6e0ef5dd4a221759ca45d6aebe83a32014a919d5e02e34977827b037",
+        "size": 6333
+      }
+    },
+    {
+      "id": "receipt-59d44cd12c7620df5be20dd480a4bc8bf5f8dd85e0a26ca36f1d5ad9e39921bf",
+      "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/orchestrator test",
+      "assertion_ids": [
+        "A1:durable-orchestration"
+      ],
+      "recorded_at": "2026-08-23T12:52:29.346Z",
+      "validation_receipt_sha256": "4a4d644f22c520b1dd0cbfd9d70f45d0986f248debb7e5311c9797671221160d",
+      "evidence_log": {
+        "path": "development/evidence/094-002-durable-orchestration.log",
+        "sha256": "1ab910a92e3c83975bade3a893668c826199a2b8bf476c1ef11159e592f1c06a",
+        "size": 2711
+      }
+    },
+    {
+      "id": "receipt-682d1469c9e439351fddedd0c37e38d60bd47f347983c60901f50c2bcbfd8872",
+      "command": "pnpm --filter @live-photo-studio/orchestrator test",
+      "assertion_ids": [
+        "A1:durable-orchestration"
+      ],
+      "recorded_at": "2026-08-23T12:52:11.246Z",
+      "validation_receipt_sha256": "d47675c706d1e4a12f718390afaab40703c5f1d95e64b65c7c12a8985cd78a43",
+      "evidence_log": {
+        "path": "development/evidence/093-002-durable-orchestration.log",
+        "sha256": "04e2652ee9bc8abb9621a3bc2ecdbee43d29f80e93a586a7c44400b401a851c0",
+        "size": 1311
       }
     }
   ],
@@ -595,10 +595,10 @@
       "parent_id": "A1",
       "status": "passing",
       "test_run_ids": [
-        "receipt-0a1f647a1a96c7061dfdfc9612853fb573536f870c5b3613798988724a46317b",
-        "receipt-86a8aca00481290aa7eeeb939ef4b6bf3797ef7bb7db530b1b66673ff970b32f",
-        "receipt-90c55fd1cd3c4550cc9442864942f680224b165f56762666c1d5e6d9861b96b0",
-        "receipt-cc937f6fbf51d676d5864a50eb1c8452c3e52fcc714dbc5b84a2ef053eec6dbc"
+        "receipt-3891c3be6e630a54a5c5505d4f122ae3eace879518e48bc496c36429ddfd32c5",
+        "receipt-3d688f9e4175f99771eca6da93e3bfaaf4df13bc88facce10a5bab852f3485e9",
+        "receipt-59d44cd12c7620df5be20dd480a4bc8bf5f8dd85e0a26ca36f1d5ad9e39921bf",
+        "receipt-682d1469c9e439351fddedd0c37e38d60bd47f347983c60901f50c2bcbfd8872"
       ],
       "direct_evidence": [],
       "reused_evidence": [],

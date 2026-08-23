@@ -2,11 +2,11 @@
   "schema": "specnav.task-acceptance-evidence.v2",
   "generated_by": "specnav-development/task-acceptance-evidence",
   "task_id": "006-canary-validation",
-  "generated_at": "2026-08-23T12:44:44.206Z",
-  "recorded_at": "2026-08-23T12:36:17.612Z",
+  "generated_at": "2026-08-23T12:53:52.523Z",
+  "recorded_at": "2026-08-23T12:53:36.272Z",
   "status": "approved",
-  "reviewed_git_head": "c363e661a1f16b6f65b7529ddebbae354eaea0f3",
-  "reviewed_git_tree": "5bf97f4903e98487f2cd38b2d72713cd0d55dc47",
+  "reviewed_git_head": "12abbdede1a3e31618c3944f2d1b57c868a32353",
+  "reviewed_git_tree": "8b272308e129056c4bc4a8e70b6517ab41911146",
   "implementation_scope": {
     "included_patterns": [
       "apps/**",
@@ -554,7 +554,7 @@
         "path": "docs/execplans/graph-engineering-full-migration.md",
         "mode": "100644",
         "type": "blob",
-        "object_id": "e35957f61c77a21aa85eb2051919dd97b7ac9f71"
+        "object_id": "74ee374b2723771766473f16e6709ac3623456a2"
       },
       {
         "path": "docs/graph-engineering/evidence/canary-rollback.json",
@@ -833,7 +833,7 @@
         "object_id": "db6e1523f5a0832e1e8ee201c7c69d84be8e00ae"
       }
     ],
-    "sha256": "6684ad37548531fc2dffabd28c1de42517a58a29c47344a0e9658701fef3f59e"
+    "sha256": "85e43e300476299c78e857a4c6c19a75158325f2489880a1de5f75018fa8c152"
   },
   "artifacts": {
     "context": {
@@ -842,139 +842,139 @@
     },
     "report": {
       "path": "development/tasks/006-canary-validation/report.md",
-      "sha256": "77b678119371596053be6805127e490c6a27114ab6129ec9f20089dd3082ca58",
+      "sha256": "4164b08845d0e9ac075076b648c83f44ec538c0a52b10041e80533f883183921",
       "status": "DONE"
     },
     "spec_review": {
       "path": "development/tasks/006-canary-validation/spec-review.md",
-      "sha256": "4c4717ab4ae27695317c5087de9e7e2d5b9fbf8c0c59b485e1c298971e6387df",
+      "sha256": "50e832e2a74d8c3ea231718419ce4b6a4de84a6dce069ea682e2cc27fbf980af",
       "verdict": "approved"
     },
     "quality_review": {
       "path": "development/tasks/006-canary-validation/quality-review.md",
-      "sha256": "ee88c0ae1450135b4bc2943d01a347974c08fb270eea1dd3e149ade676a54755",
+      "sha256": "2bc343ad6dc4b53329a17c833e7aabf5a632b7b61fba278d70d948cef603df46",
       "verdict": "approved"
     }
   },
   "test_runs": [
     {
-      "id": "receipt-114752ecbfca09292ddbd9070a9822eef0ec4f59915d49e14ce708bf72b51ee5",
-      "command": "pnpm check",
-      "assertion_ids": [
-        "A1:canary-validation",
-        "A2:canary-validation"
-      ],
-      "recorded_at": "2026-08-23T12:35:44.036Z",
-      "validation_receipt_sha256": "ecacd44019d2b9b6edfea81748c1adffae8c7447e5ff0f4c7097883861880d95",
-      "evidence_log": {
-        "path": "development/evidence/052-006-canary-validation.log",
-        "sha256": "bb4b3a32f4471854fd946c693a26f852407e0820c8afd6c68086c4b9862d1d91",
-        "size": 1941
-      }
-    },
-    {
-      "id": "receipt-2ef205b3c3b2242c327334ece643ebfbc59d632a1cf4b9c7eacb21c1fd562c3b",
-      "command": "DATABASE_URL=postgresql://postgres@localhost:5432/postgres pnpm db:migrate",
-      "assertion_ids": [
-        "A1:canary-validation",
-        "A2:canary-validation"
-      ],
-      "recorded_at": "2026-08-23T12:36:17.581Z",
-      "validation_receipt_sha256": "ec5e03c9a927ba701e79c82c655b12c9edfefc0a4b2644b83a4a2748e8b0693a",
-      "evidence_log": {
-        "path": "development/evidence/057-006-canary-validation.log",
-        "sha256": "fea41479087c48020ba479a3185d616183d284c16cd34a1efd4501de59c2171b",
-        "size": 1560
-      }
-    },
-    {
-      "id": "receipt-5dce6b8002c16e275242554f2ae9aa3e31255b976c61640d923b8b4d60f45827",
-      "command": "pnpm test",
-      "assertion_ids": [
-        "A1:canary-validation",
-        "A2:canary-validation"
-      ],
-      "recorded_at": "2026-08-23T12:35:50.910Z",
-      "validation_receipt_sha256": "43cad3587a904b2af44eaf67b448384b6c4698e09d04bcdaba73f6e3a56ee935",
-      "evidence_log": {
-        "path": "development/evidence/053-006-canary-validation.log",
-        "sha256": "6dd2e7555de2d90ae6e7dc47070015922a42c97d171fdf8a1bb10939b6431579",
-        "size": 23014
-      }
-    },
-    {
-      "id": "receipt-5f4817c608829f80e08981a573d26f94e729fb090e990d4609472532879ab41f",
-      "command": "pnpm graph:test",
-      "assertion_ids": [
-        "A1:canary-validation",
-        "A2:canary-validation"
-      ],
-      "recorded_at": "2026-08-23T12:36:06.685Z",
-      "validation_receipt_sha256": "f71e1791c46c13c2908385a18030e911c5419de7f31bd3fa126fe0d47d84bf71",
-      "evidence_log": {
-        "path": "development/evidence/055-006-canary-validation.log",
-        "sha256": "23c8b2769130e7e6ddc9bd18f0ad97f6a887f19982b46112af66b375614a1250",
-        "size": 23351
-      }
-    },
-    {
-      "id": "receipt-756ce77bb0050f33f05af7f861a0e02f0ab8bdfeeb01647a4e3d90d4eaa3c594",
-      "command": "pnpm install --frozen-lockfile",
-      "assertion_ids": [
-        "A1:canary-validation",
-        "A2:canary-validation"
-      ],
-      "recorded_at": "2026-08-23T12:35:36.419Z",
-      "validation_receipt_sha256": "195749696c8732b220f708f9b2235d16aa5a5ae3b403d2d8dde3c58f36425d55",
-      "evidence_log": {
-        "path": "development/evidence/051-006-canary-validation.log",
-        "sha256": "05e181394e1d82c8efd9ab35367c1a5fa7a4421abecfa6e3226ae0d4ea6925a8",
-        "size": 1239
-      }
-    },
-    {
-      "id": "receipt-837ba03713e4d24e4938d0c7b40a2ab8ac251ef620fbae082bfdc26c8e8c470f",
+      "id": "receipt-042871ddec4ab81c443c5dcf283f2199695c276e925966afba9c45eed8b60330",
       "command": "git diff --check",
       "assertion_ids": [
         "A1:canary-validation",
         "A2:canary-validation"
       ],
-      "recorded_at": "2026-08-23T12:36:17.612Z",
-      "validation_receipt_sha256": "e56dcfb037563c93b110dfe127ed34fe908636cc478b932c48f0e59268e64135",
+      "recorded_at": "2026-08-23T12:53:36.272Z",
+      "validation_receipt_sha256": "09d70083e854033e6f87b26857dcb44372be720ff3aa28ed59d29b3733e9736f",
       "evidence_log": {
-        "path": "development/evidence/058-006-canary-validation.log",
-        "sha256": "be2f19b7d3404aac60cc1cdd2ec70c07fd7132f3788b44abb437c12deb6ea16d",
+        "path": "development/evidence/116-006-canary-validation.log",
+        "sha256": "2b4bad1c7e3a2bb93724458d5d87381eac33b2f55a9b9ca78d31ec19a5a2e4d1",
         "size": 101
       }
     },
     {
-      "id": "receipt-917e99eb0a67f95be1aacd81db4601d27bacbeb9ed4bd4e47a8259e66f7c6a0c",
-      "command": "pnpm graph:check",
+      "id": "receipt-0ea4283e4ef33620557509084e68df5c2d299ea1757681612cd6e88c05ec74e3",
+      "command": "pnpm check",
       "assertion_ids": [
         "A1:canary-validation",
         "A2:canary-validation"
       ],
-      "recorded_at": "2026-08-23T12:35:58.763Z",
-      "validation_receipt_sha256": "68b0dc75f26682452329ad195f2a0cf26b26465d0efde52a3c5a7925d7237121",
+      "recorded_at": "2026-08-23T12:53:02.319Z",
+      "validation_receipt_sha256": "18eb2f40928be15064b858906393ab986d13786a5f52971735b113972159e749",
       "evidence_log": {
-        "path": "development/evidence/054-006-canary-validation.log",
-        "sha256": "e2583d6b69a7e166d15ca7c6006c26dab4d5d1f714a391e518b24adea3079222",
-        "size": 2272
+        "path": "development/evidence/110-006-canary-validation.log",
+        "sha256": "32c6c3be718a27c0fff9ad09cf966391a8fdd09b25b2a9b4888c05095c5c48ef",
+        "size": 1941
       }
     },
     {
-      "id": "receipt-d3cf358e1b9b02dc21e004fd1c9ed163437424cba6a2a12b37c3213b1bd2baeb",
+      "id": "receipt-10cf12695b5519809e9e8bb55a829f70ffbac081855f5fac44a2e47a996c8818",
+      "command": "pnpm test",
+      "assertion_ids": [
+        "A1:canary-validation",
+        "A2:canary-validation"
+      ],
+      "recorded_at": "2026-08-23T12:53:09.354Z",
+      "validation_receipt_sha256": "9c89d3f1c97254e2b25f42d563e24992791d45da79fe1452aa3324c6a1228ee2",
+      "evidence_log": {
+        "path": "development/evidence/111-006-canary-validation.log",
+        "sha256": "278ef0643cf4912c4f4a14e3dad8afdcc724856372f6fd5fb58887b0d8d1c489",
+        "size": 23025
+      }
+    },
+    {
+      "id": "receipt-3fcc0524e44799a954a643144f5ebe4d20240e3696e7469e9f9e51e6a2187c04",
       "command": "pnpm graph:demo",
       "assertion_ids": [
         "A1:canary-validation",
         "A2:canary-validation"
       ],
-      "recorded_at": "2026-08-23T12:36:12.263Z",
-      "validation_receipt_sha256": "bf16f08cef235c7fb257c536a15bef136742b8863aabcc6fc5f2ba67fed1b5fc",
+      "recorded_at": "2026-08-23T12:53:30.040Z",
+      "validation_receipt_sha256": "415b1ac989b614b8a8e2cba34c132f3da92f325c3b9de25dd04620906884316e",
       "evidence_log": {
-        "path": "development/evidence/056-006-canary-validation.log",
-        "sha256": "6e5cb624752412ba03e7e8c4d0d21ec4d33c0f29f7856fa1b8c1c710aed548c6",
+        "path": "development/evidence/114-006-canary-validation.log",
+        "sha256": "862a2937eadf301610cbccdbe63ebd86e0d0c151bb4d841507a86a7c39737481",
         "size": 1623
+      }
+    },
+    {
+      "id": "receipt-518b9b0fc15653d338b3852e7df1702997c0cfe005f1d2141aac6c0cbb849ee3",
+      "command": "pnpm install --frozen-lockfile",
+      "assertion_ids": [
+        "A1:canary-validation",
+        "A2:canary-validation"
+      ],
+      "recorded_at": "2026-08-23T12:52:53.829Z",
+      "validation_receipt_sha256": "d105cf4413eb75755db3bbeee9846cb7bd0e9d417c607aead0b1223a25a836b8",
+      "evidence_log": {
+        "path": "development/evidence/109-006-canary-validation.log",
+        "sha256": "519b4d970cc2fed1e1f4dd4889b3a62a9270353488b863ffb01f5dbf39da18d4",
+        "size": 1239
+      }
+    },
+    {
+      "id": "receipt-89d3019d438cd3f3c494b2da466c6e33c9b35028825dc89a6d29ebd303b120ff",
+      "command": "pnpm graph:check",
+      "assertion_ids": [
+        "A1:canary-validation",
+        "A2:canary-validation"
+      ],
+      "recorded_at": "2026-08-23T12:53:17.785Z",
+      "validation_receipt_sha256": "6f9a7121eb4a6b6fac60d6626f8421b830dd1dd4ee25bdcdac799cfab09029fe",
+      "evidence_log": {
+        "path": "development/evidence/112-006-canary-validation.log",
+        "sha256": "d52ec6d6730003e4304d7614fbbe8692892cefc904b9a67f638160a02c317f7f",
+        "size": 2272
+      }
+    },
+    {
+      "id": "receipt-ec8fe6fa2baf4e96de0431ae3fcc9ddca2d02b85e828d018dac41d107d909792",
+      "command": "pnpm graph:test",
+      "assertion_ids": [
+        "A1:canary-validation",
+        "A2:canary-validation"
+      ],
+      "recorded_at": "2026-08-23T12:53:24.913Z",
+      "validation_receipt_sha256": "3d8b44a983c15edb70bc66b5525aa4ee0dd095f17656da825e7320edaf5ba00f",
+      "evidence_log": {
+        "path": "development/evidence/113-006-canary-validation.log",
+        "sha256": "e65a37dbe17a15bb7424adcf69c43efe67d02796f4be20e1a6d1a81ef6198a28",
+        "size": 23356
+      }
+    },
+    {
+      "id": "receipt-fb11084c24054a45e75b642643eee411f940143e07416aa11058cee047276263",
+      "command": "DATABASE_URL=postgresql://postgres@localhost:5432/postgres pnpm db:migrate",
+      "assertion_ids": [
+        "A1:canary-validation",
+        "A2:canary-validation"
+      ],
+      "recorded_at": "2026-08-23T12:53:36.216Z",
+      "validation_receipt_sha256": "7e65b4b6483dde54ab534bc08f47b48fa0ccd08de5e55ac9f7ad85a041923c21",
+      "evidence_log": {
+        "path": "development/evidence/115-006-canary-validation.log",
+        "sha256": "aa46b60179b1c0b00eadcc59365d576c819d44c786615fce3d469d681c3639d9",
+        "size": 1560
       }
     }
   ],
@@ -984,14 +984,14 @@
       "parent_id": "A1",
       "status": "passing",
       "test_run_ids": [
-        "receipt-114752ecbfca09292ddbd9070a9822eef0ec4f59915d49e14ce708bf72b51ee5",
-        "receipt-2ef205b3c3b2242c327334ece643ebfbc59d632a1cf4b9c7eacb21c1fd562c3b",
-        "receipt-5dce6b8002c16e275242554f2ae9aa3e31255b976c61640d923b8b4d60f45827",
-        "receipt-5f4817c608829f80e08981a573d26f94e729fb090e990d4609472532879ab41f",
-        "receipt-756ce77bb0050f33f05af7f861a0e02f0ab8bdfeeb01647a4e3d90d4eaa3c594",
-        "receipt-837ba03713e4d24e4938d0c7b40a2ab8ac251ef620fbae082bfdc26c8e8c470f",
-        "receipt-917e99eb0a67f95be1aacd81db4601d27bacbeb9ed4bd4e47a8259e66f7c6a0c",
-        "receipt-d3cf358e1b9b02dc21e004fd1c9ed163437424cba6a2a12b37c3213b1bd2baeb"
+        "receipt-042871ddec4ab81c443c5dcf283f2199695c276e925966afba9c45eed8b60330",
+        "receipt-0ea4283e4ef33620557509084e68df5c2d299ea1757681612cd6e88c05ec74e3",
+        "receipt-10cf12695b5519809e9e8bb55a829f70ffbac081855f5fac44a2e47a996c8818",
+        "receipt-3fcc0524e44799a954a643144f5ebe4d20240e3696e7469e9f9e51e6a2187c04",
+        "receipt-518b9b0fc15653d338b3852e7df1702997c0cfe005f1d2141aac6c0cbb849ee3",
+        "receipt-89d3019d438cd3f3c494b2da466c6e33c9b35028825dc89a6d29ebd303b120ff",
+        "receipt-ec8fe6fa2baf4e96de0431ae3fcc9ddca2d02b85e828d018dac41d107d909792",
+        "receipt-fb11084c24054a45e75b642643eee411f940143e07416aa11058cee047276263"
       ],
       "direct_evidence": [],
       "reused_evidence": [],
@@ -1002,14 +1002,14 @@
       "parent_id": "A2",
       "status": "passing",
       "test_run_ids": [
-        "receipt-114752ecbfca09292ddbd9070a9822eef0ec4f59915d49e14ce708bf72b51ee5",
-        "receipt-2ef205b3c3b2242c327334ece643ebfbc59d632a1cf4b9c7eacb21c1fd562c3b",
-        "receipt-5dce6b8002c16e275242554f2ae9aa3e31255b976c61640d923b8b4d60f45827",
-        "receipt-5f4817c608829f80e08981a573d26f94e729fb090e990d4609472532879ab41f",
-        "receipt-756ce77bb0050f33f05af7f861a0e02f0ab8bdfeeb01647a4e3d90d4eaa3c594",
-        "receipt-837ba03713e4d24e4938d0c7b40a2ab8ac251ef620fbae082bfdc26c8e8c470f",
-        "receipt-917e99eb0a67f95be1aacd81db4601d27bacbeb9ed4bd4e47a8259e66f7c6a0c",
-        "receipt-d3cf358e1b9b02dc21e004fd1c9ed163437424cba6a2a12b37c3213b1bd2baeb"
+        "receipt-042871ddec4ab81c443c5dcf283f2199695c276e925966afba9c45eed8b60330",
+        "receipt-0ea4283e4ef33620557509084e68df5c2d299ea1757681612cd6e88c05ec74e3",
+        "receipt-10cf12695b5519809e9e8bb55a829f70ffbac081855f5fac44a2e47a996c8818",
+        "receipt-3fcc0524e44799a954a643144f5ebe4d20240e3696e7469e9f9e51e6a2187c04",
+        "receipt-518b9b0fc15653d338b3852e7df1702997c0cfe005f1d2141aac6c0cbb849ee3",
+        "receipt-89d3019d438cd3f3c494b2da466c6e33c9b35028825dc89a6d29ebd303b120ff",
+        "receipt-ec8fe6fa2baf4e96de0431ae3fcc9ddca2d02b85e828d018dac41d107d909792",
+        "receipt-fb11084c24054a45e75b642643eee411f940143e07416aa11058cee047276263"
       ],
       "direct_evidence": [],
       "reused_evidence": [],

@@ -2,11 +2,11 @@
   "schema": "specnav.task-acceptance-evidence.v2",
   "generated_by": "specnav-development/task-acceptance-evidence",
   "task_id": "005-operations-security",
-  "generated_at": "2026-08-23T12:44:44.155Z",
-  "recorded_at": "2026-08-23T12:35:35.962Z",
+  "generated_at": "2026-08-23T12:53:52.494Z",
+  "recorded_at": "2026-08-23T12:52:53.376Z",
   "status": "approved",
-  "reviewed_git_head": "c363e661a1f16b6f65b7529ddebbae354eaea0f3",
-  "reviewed_git_tree": "5bf97f4903e98487f2cd38b2d72713cd0d55dc47",
+  "reviewed_git_head": "12abbdede1a3e31618c3944f2d1b57c868a32353",
+  "reviewed_git_tree": "8b272308e129056c4bc4a8e70b6517ab41911146",
   "implementation_scope": {
     "included_patterns": [
       "apps/api/**",
@@ -483,7 +483,7 @@
         "path": "docs/execplans/graph-engineering-full-migration.md",
         "mode": "100644",
         "type": "blob",
-        "object_id": "e35957f61c77a21aa85eb2051919dd97b7ac9f71"
+        "object_id": "74ee374b2723771766473f16e6709ac3623456a2"
       },
       {
         "path": "docs/graph-engineering/evidence/canary-rollback.json",
@@ -624,7 +624,7 @@
         "object_id": "a72a807d5f98f2017dd06cb5b651e2ea2bef07f9"
       }
     ],
-    "sha256": "fc935f6c1a439045df31c7a104cb9740aeb1820009f69d366ad5844ae09f7617"
+    "sha256": "28872256c45f639f9c5eab5c03bf6960a069296e51377e40ad9edbe390350617"
   },
   "artifacts": {
     "context": {
@@ -633,89 +633,89 @@
     },
     "report": {
       "path": "development/tasks/005-operations-security/report.md",
-      "sha256": "72a557dee0a8459e94048dc4b4c71cb2a690340f0d33c5f246276e0d0126685d",
+      "sha256": "7260da681102ac138a31ccc6fb4a3b484d657cc11cac652cb7881814b3ee6559",
       "status": "DONE"
     },
     "spec_review": {
       "path": "development/tasks/005-operations-security/spec-review.md",
-      "sha256": "d42193fd6d6b3c20b5baf426a5ccf89c1e473a6c5a0e19aed8df5c78af0fe2ef",
+      "sha256": "005e100f39cc17cae7fc1a4741b26fbf19ef843ddbb24e51361cd6521c209b1e",
       "verdict": "approved"
     },
     "quality_review": {
       "path": "development/tasks/005-operations-security/quality-review.md",
-      "sha256": "0eefb71684e0c12397bc442a97eb9d22be27f352bfeefa49290a8ce770774d24",
+      "sha256": "ccc8161c1c3afc3e7287331c59399f760b6bb5bb51a701f543cd085e44d74c00",
       "verdict": "approved"
     }
   },
   "test_runs": [
     {
-      "id": "receipt-621cab88568a68d39ec94a42faaee1ad5d7c0c301260d1c00d92f9ff40bcd3ae",
-      "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/worker-media test",
-      "assertion_ids": [
-        "A3:operations-security"
-      ],
-      "recorded_at": "2026-08-23T12:35:35.933Z",
-      "validation_receipt_sha256": "04f94dea95fbed5e07ba3bb3f7afe96394bf2134a7ed745104003de5b03cca32",
-      "evidence_log": {
-        "path": "development/evidence/049-005-operations-security.log",
-        "sha256": "69bed982868780e1b823ea657e5d02eb9802a1db393145f32fd41d0248df6374",
-        "size": 2947
-      }
-    },
-    {
-      "id": "receipt-7ac72da3cc6e647d7d61d6ff5b4d2dd7da0327675f04cedf0a9c8b87284dd3d3",
-      "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/orchestrator test",
-      "assertion_ids": [
-        "A3:operations-security"
-      ],
-      "recorded_at": "2026-08-23T12:35:34.602Z",
-      "validation_receipt_sha256": "63aa7c4a5d940bb8e20c9fcfef6a94e28ae26926a494e50f4fd4943fa43be08e",
-      "evidence_log": {
-        "path": "development/evidence/047-005-operations-security.log",
-        "sha256": "77517ed1a4043250c2f7dbe3a9530c2fd91460ae91d4f320a7c310b3572c1bcd",
-        "size": 2703
-      }
-    },
-    {
-      "id": "receipt-b096b007b85243fbfea4db414b2f82222beed117d271c6b37a2bc0ae0530c49c",
+      "id": "receipt-09b1c57da9e5addf787ab0b8531631edca92bac9902694b215b70d0102ced814",
       "command": "pnpm test",
       "assertion_ids": [
         "A3:operations-security"
       ],
-      "recorded_at": "2026-08-23T12:35:33.281Z",
-      "validation_receipt_sha256": "9a9edba2b21b7be5a3f192dffcf95e00d98c70060c394bfb418b18782c4dbebe",
+      "recorded_at": "2026-08-23T12:52:50.373Z",
+      "validation_receipt_sha256": "0af361d7ffa6dc4a8d2339a4a3695d647cb5cbbb03fcbb0b4a9a7a49a1bc6213",
       "evidence_log": {
-        "path": "development/evidence/046-005-operations-security.log",
-        "sha256": "94554c36ce5191dd9b1a0a69321bdba144822ec26816abb38dbdf002ea8580c5",
-        "size": 23029
+        "path": "development/evidence/104-005-operations-security.log",
+        "sha256": "1abb2a6bcfb73835f23893331959079e9f0eca2ba291b454392e859cb2c42f87",
+        "size": 23018
       }
     },
     {
-      "id": "receipt-f3be1e5d74702fd3f2c4d1185e926986b6fb0fc17ae185106510f5178d60084a",
-      "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/worker-ai test",
+      "id": "receipt-97299b21746a45927e5cda3b0832f0818993b622f952b8b23bf288d3a6785290",
+      "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/worker-media test",
       "assertion_ids": [
         "A3:operations-security"
       ],
-      "recorded_at": "2026-08-23T12:35:35.247Z",
-      "validation_receipt_sha256": "892634056f5f705ed76736062b7f168d9006c8b89b3847ebb8cf99c5b9ccbabf",
+      "recorded_at": "2026-08-23T12:52:53.343Z",
+      "validation_receipt_sha256": "0f7e17f8d6a8ea9c226798de3dc0803b329bd16cbfe93ca49dbdb273a375e50a",
       "evidence_log": {
-        "path": "development/evidence/048-005-operations-security.log",
-        "sha256": "3ce95094ed537ad3783be85af0c92a2b9c09da84ea923e5461e2f7bcc661ef0a",
-        "size": 2233
+        "path": "development/evidence/107-005-operations-security.log",
+        "sha256": "0ef834a6bb057b075ca0c031628b147cc9b6c577726c8ebc29d97f21e37e5705",
+        "size": 2952
       }
     },
     {
-      "id": "receipt-f8930fc6b9078ed7a98bf1e70717afbdb5502087cc706a536c8b7009a8bb7b19",
+      "id": "receipt-b4c0f297b9c4c5b5455a1870ce27ec1e5609e13b91ba0b8f4ff27bca13dae0fb",
+      "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/orchestrator test",
+      "assertion_ids": [
+        "A3:operations-security"
+      ],
+      "recorded_at": "2026-08-23T12:52:51.946Z",
+      "validation_receipt_sha256": "b809f530c47de8d5f756610c6540186e93544ee3fcf25413f199d40e8070c957",
+      "evidence_log": {
+        "path": "development/evidence/105-005-operations-security.log",
+        "sha256": "2167025efc611a2dd2d144cadaeff6e28bb1878ea9948c784b43987349cd9534",
+        "size": 2700
+      }
+    },
+    {
+      "id": "receipt-dfb6a1b3ba77b09f0b03230b483177ed1067a9bbd1d26fb42393698d74dda0d0",
       "command": "git diff --check",
       "assertion_ids": [
         "A3:operations-security"
       ],
-      "recorded_at": "2026-08-23T12:35:35.962Z",
-      "validation_receipt_sha256": "323d090e2359f02324315d284e417dcd647025247801727edb580f4a756e5b2f",
+      "recorded_at": "2026-08-23T12:52:53.376Z",
+      "validation_receipt_sha256": "af6c835cbbf719e783f03f618a8acba6352667560f1831957e6ed9f40f8c511c",
       "evidence_log": {
-        "path": "development/evidence/050-005-operations-security.log",
-        "sha256": "06b1c9fb5a338e8f1f3e8e4c1667bb7dd790ba441c20a812888be6a1ec89acb0",
+        "path": "development/evidence/108-005-operations-security.log",
+        "sha256": "8268c5d00b870497f7bc03ff848f3a1165eadfe138566c8b6d5e89ed0e6ed5ff",
         "size": 101
+      }
+    },
+    {
+      "id": "receipt-e8f3df894d0236c79355c2f1c159043079f58d0f2a2047acdd1fceaf35909379",
+      "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/worker-ai test",
+      "assertion_ids": [
+        "A3:operations-security"
+      ],
+      "recorded_at": "2026-08-23T12:52:52.628Z",
+      "validation_receipt_sha256": "8df379f80fa189d051dc7136089bb04704f78235ca4cd1f2d5ae31ed7144b462",
+      "evidence_log": {
+        "path": "development/evidence/106-005-operations-security.log",
+        "sha256": "6ed3b69baa67232cbad272f301b6be755a2a2872bc18345b904005bf8a3f4d83",
+        "size": 2236
       }
     }
   ],
@@ -725,11 +725,11 @@
       "parent_id": "A3",
       "status": "passing",
       "test_run_ids": [
-        "receipt-621cab88568a68d39ec94a42faaee1ad5d7c0c301260d1c00d92f9ff40bcd3ae",
-        "receipt-7ac72da3cc6e647d7d61d6ff5b4d2dd7da0327675f04cedf0a9c8b87284dd3d3",
-        "receipt-b096b007b85243fbfea4db414b2f82222beed117d271c6b37a2bc0ae0530c49c",
-        "receipt-f3be1e5d74702fd3f2c4d1185e926986b6fb0fc17ae185106510f5178d60084a",
-        "receipt-f8930fc6b9078ed7a98bf1e70717afbdb5502087cc706a536c8b7009a8bb7b19"
+        "receipt-09b1c57da9e5addf787ab0b8531631edca92bac9902694b215b70d0102ced814",
+        "receipt-97299b21746a45927e5cda3b0832f0818993b622f952b8b23bf288d3a6785290",
+        "receipt-b4c0f297b9c4c5b5455a1870ce27ec1e5609e13b91ba0b8f4ff27bca13dae0fb",
+        "receipt-dfb6a1b3ba77b09f0b03230b483177ed1067a9bbd1d26fb42393698d74dda0d0",
+        "receipt-e8f3df894d0236c79355c2f1c159043079f58d0f2a2047acdd1fceaf35909379"
       ],
       "direct_evidence": [],
       "reused_evidence": [],

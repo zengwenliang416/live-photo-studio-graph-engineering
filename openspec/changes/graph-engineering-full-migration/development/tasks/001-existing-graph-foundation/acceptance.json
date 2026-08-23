@@ -2,11 +2,11 @@
   "schema": "specnav.task-acceptance-evidence.v2",
   "generated_by": "specnav-development/task-acceptance-evidence",
   "task_id": "001-existing-graph-foundation",
-  "generated_at": "2026-08-23T12:44:44.004Z",
-  "recorded_at": "2026-08-23T12:35:14.476Z",
+  "generated_at": "2026-08-23T12:53:52.382Z",
+  "recorded_at": "2026-08-23T12:52:08.616Z",
   "status": "approved",
-  "reviewed_git_head": "c363e661a1f16b6f65b7529ddebbae354eaea0f3",
-  "reviewed_git_tree": "5bf97f4903e98487f2cd38b2d72713cd0d55dc47",
+  "reviewed_git_head": "12abbdede1a3e31618c3944f2d1b57c868a32353",
+  "reviewed_git_tree": "8b272308e129056c4bc4a8e70b6517ab41911146",
   "implementation_scope": {
     "included_patterns": [
       "apps/api/**",
@@ -369,7 +369,7 @@
         "path": "docs/execplans/graph-engineering-full-migration.md",
         "mode": "100644",
         "type": "blob",
-        "object_id": "e35957f61c77a21aa85eb2051919dd97b7ac9f71"
+        "object_id": "74ee374b2723771766473f16e6709ac3623456a2"
       },
       {
         "path": "docs/graph-engineering/evidence/canary-rollback.json",
@@ -636,7 +636,7 @@
         "object_id": "a72a807d5f98f2017dd06cb5b651e2ea2bef07f9"
       }
     ],
-    "sha256": "b7a3b8b5eca5fbab1ff2113154b39064145c564837e6fad720dea5bc1bd439b6"
+    "sha256": "ed56d0cee232a5e5dfc935c92c7baa53d49b67dbd31fd20ee30fd41df1099c2a"
   },
   "artifacts": {
     "context": {
@@ -645,89 +645,89 @@
     },
     "report": {
       "path": "development/tasks/001-existing-graph-foundation/report.md",
-      "sha256": "48d69cf6c35e690564bd0d1a30c8641013fe575c7fba8722382504793554406a",
+      "sha256": "ce98ae12bed81619577bf8e778f61bed4942372ebfeaafc184ed673c49f773e7",
       "status": "DONE"
     },
     "spec_review": {
       "path": "development/tasks/001-existing-graph-foundation/spec-review.md",
-      "sha256": "524e77e1749dfa6db0effdeb376afb94e1fab88a75a734c841ea15c3233e1663",
+      "sha256": "cebebbca3f473f2c2e13475069ac6f5ecf91cb50c62fdddb48f977a75662b704",
       "verdict": "approved"
     },
     "quality_review": {
       "path": "development/tasks/001-existing-graph-foundation/quality-review.md",
-      "sha256": "1cd2dc0151433f90e44a2b1abdfe3f5f2c294425f7173f88c4765152e465fa62",
+      "sha256": "814f5daeb35c9a2e623631f944baddc6f3b4bffc70b97777387dc6395f9a1796",
       "verdict": "approved"
     }
   },
   "test_runs": [
     {
-      "id": "receipt-3fc6902947b6d6e040382ad6f957b261a9502b42e07dff05f2899a603d4fbd11",
+      "id": "receipt-10b004a2a03596cbb6e84656fa4b25648ace1c2bf68c20a20041ee9d2288bfd3",
       "command": "DATABASE_URL=postgresql://postgres@localhost:5432/postgres pnpm db:migrate",
       "assertion_ids": [
         "A1:foundation"
       ],
-      "recorded_at": "2026-08-23T12:35:14.476Z",
-      "validation_receipt_sha256": "d173ab6f4a4e518194596ea9f2c528ee41061dc6d47d0629a1ab5bdcd9a277f7",
+      "recorded_at": "2026-08-23T12:52:08.616Z",
+      "validation_receipt_sha256": "2cbb0a389b8bd9af56bf0a35ab92ea0d6c95fcd369c91514eae4f4593448a098",
       "evidence_log": {
-        "path": "development/evidence/034-001-existing-graph-foundation.log",
-        "sha256": "ffe4ea52c1ffb8badf1ee7e531d6a38c49689ae70a7c2282ee836e195b72dc95",
+        "path": "development/evidence/092-001-existing-graph-foundation.log",
+        "sha256": "9136f6ee67d013ab1286da113be77635c00d94978a5d4e19b5b87ae059102c4f",
         "size": 1560
       }
     },
     {
-      "id": "receipt-4a288662fbe02de0664e0b49b217277fc65dabf4b1746d731d8c81e935795630",
-      "command": "pnpm check",
-      "assertion_ids": [
-        "A1:foundation"
-      ],
-      "recorded_at": "2026-08-23T12:35:10.071Z",
-      "validation_receipt_sha256": "a991bc7d2f1a430fd17f2d99117dda2dec4434b7ed8e74f1fdf5db28312756e7",
-      "evidence_log": {
-        "path": "development/evidence/033-001-existing-graph-foundation.log",
-        "sha256": "3a7e50571c1d74f07bc96d52fbf65f9dfeb2e4cc041665d504a789f92bb33f8e",
-        "size": 1941
-      }
-    },
-    {
-      "id": "receipt-6c05ec6998b712758f3ef0c5bba9d5bc04afd00644582df15812c7ddcfb4875f",
+      "id": "receipt-49e924ca5022e6339d801e0b1f612ccd726937933010d67418899d62c5462900",
       "command": "pnpm --filter @live-photo-studio/graph-runtime test",
       "assertion_ids": [
         "A1:foundation"
       ],
-      "recorded_at": "2026-08-23T12:34:59.105Z",
-      "validation_receipt_sha256": "cac473185be4a28b139ee14ffad91927f07a14e1bc35f2e892bc14725d63c43c",
+      "recorded_at": "2026-08-23T12:51:50.103Z",
+      "validation_receipt_sha256": "c574d6cafddcb04a2fe4308443fd87679baee500f244b8e47b4e27c685d39135",
       "evidence_log": {
-        "path": "development/evidence/031-001-existing-graph-foundation.log",
-        "sha256": "388bcb70f3cac8e9a134389b813740c8fb32b9b21ff3dcb1fa5bdb67966213fa",
+        "path": "development/evidence/089-001-existing-graph-foundation.log",
+        "sha256": "e2ffa3effdf9e44946debb6969b6c34abe895a2ef3f16d2f69212dfa517bae72",
         "size": 1032
       }
     },
     {
-      "id": "receipt-7f88deccb9389b9eb835b889040a8d0810bd33c25dbe4c03a0e0f0d30acd0f1a",
-      "command": "pnpm --filter @live-photo-studio/graph-contracts test",
-      "assertion_ids": [
-        "A1:foundation"
-      ],
-      "recorded_at": "2026-08-23T12:34:58.634Z",
-      "validation_receipt_sha256": "30de323ee7e2b12dd7e662f062f7d289e59494a8712fafa754743519095efb39",
-      "evidence_log": {
-        "path": "development/evidence/030-001-existing-graph-foundation.log",
-        "sha256": "69c5e2f6e9b0860ed31b6842845f75ea67e33e14192e23080dd7a043f244aa39",
-        "size": 1634
-      }
-    },
-    {
-      "id": "receipt-c6c1a97bf1fb7b35cae2aef30a1ac6bd9cbb661fbed2a356e31ce66a76407858",
+      "id": "receipt-4b88fce306e3b00c765aba4c827b392d0243a547cacca1fc45d53a783399f221",
       "command": "pnpm --filter @live-photo-studio/api test",
       "assertion_ids": [
         "A1:foundation"
       ],
-      "recorded_at": "2026-08-23T12:35:01.139Z",
-      "validation_receipt_sha256": "b73ada79250a0dd5accd6ca3e61df68fea0cff997f764e13507e216e06ec404c",
+      "recorded_at": "2026-08-23T12:51:51.932Z",
+      "validation_receipt_sha256": "ef29ac35fdedf6bd8496ff96c978a3fad4fa0d3ae385f2142f77ad0bb4407cf8",
       "evidence_log": {
-        "path": "development/evidence/032-001-existing-graph-foundation.log",
-        "sha256": "e01ba7b06cd35760bb883ed9ee7a7e5422eeb0c195c20c6581cebb4ed91a994d",
-        "size": 6333
+        "path": "development/evidence/090-001-existing-graph-foundation.log",
+        "sha256": "01581b02e1525a1a8d876021b8e4743942538cd4c185f7f36c2ab5d7fd6505b5",
+        "size": 6330
+      }
+    },
+    {
+      "id": "receipt-6883855483fc4ee01bea23beaf40595698c05d8773e3f40c421e681adbdd37e9",
+      "command": "pnpm check",
+      "assertion_ids": [
+        "A1:foundation"
+      ],
+      "recorded_at": "2026-08-23T12:52:01.571Z",
+      "validation_receipt_sha256": "cb32c525c95c4385be9892c4591f3ebf4cdce8358a5f31d9e9421d726fa4c33f",
+      "evidence_log": {
+        "path": "development/evidence/091-001-existing-graph-foundation.log",
+        "sha256": "f15225a64787edfcc4501bce6620802c5f0fcb4ff51081585ad0004403a8b034",
+        "size": 1941
+      }
+    },
+    {
+      "id": "receipt-9e96dbad02b870f84e5e0efef39758ceb09c28654f583129628f883bf8ca7865",
+      "command": "pnpm --filter @live-photo-studio/graph-contracts test",
+      "assertion_ids": [
+        "A1:foundation"
+      ],
+      "recorded_at": "2026-08-23T12:51:49.590Z",
+      "validation_receipt_sha256": "a358b81ef9597d208ddb6e4214575a0b58f790aedb6dba0586a51f38afec3aa7",
+      "evidence_log": {
+        "path": "development/evidence/088-001-existing-graph-foundation.log",
+        "sha256": "9724587b12996c19be47cda8f66bed1971b40bdef54a20ac58b556a4c09c438c",
+        "size": 1636
       }
     }
   ],
@@ -737,11 +737,11 @@
       "parent_id": "A1",
       "status": "passing",
       "test_run_ids": [
-        "receipt-3fc6902947b6d6e040382ad6f957b261a9502b42e07dff05f2899a603d4fbd11",
-        "receipt-4a288662fbe02de0664e0b49b217277fc65dabf4b1746d731d8c81e935795630",
-        "receipt-6c05ec6998b712758f3ef0c5bba9d5bc04afd00644582df15812c7ddcfb4875f",
-        "receipt-7f88deccb9389b9eb835b889040a8d0810bd33c25dbe4c03a0e0f0d30acd0f1a",
-        "receipt-c6c1a97bf1fb7b35cae2aef30a1ac6bd9cbb661fbed2a356e31ce66a76407858"
+        "receipt-10b004a2a03596cbb6e84656fa4b25648ace1c2bf68c20a20041ee9d2288bfd3",
+        "receipt-49e924ca5022e6339d801e0b1f612ccd726937933010d67418899d62c5462900",
+        "receipt-4b88fce306e3b00c765aba4c827b392d0243a547cacca1fc45d53a783399f221",
+        "receipt-6883855483fc4ee01bea23beaf40595698c05d8773e3f40c421e681adbdd37e9",
+        "receipt-9e96dbad02b870f84e5e0efef39758ceb09c28654f583129628f883bf8ca7865"
       ],
       "direct_evidence": [],
       "reused_evidence": [],

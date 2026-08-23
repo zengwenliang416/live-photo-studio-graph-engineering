@@ -2,11 +2,11 @@
   "schema": "specnav.task-acceptance-evidence.v2",
   "generated_by": "specnav-development/task-acceptance-evidence",
   "task_id": "003-worker-facts",
-  "generated_at": "2026-08-23T12:44:44.071Z",
-  "recorded_at": "2026-08-23T12:35:25.117Z",
+  "generated_at": "2026-08-23T12:53:52.441Z",
+  "recorded_at": "2026-08-23T12:52:41.448Z",
   "status": "approved",
-  "reviewed_git_head": "c363e661a1f16b6f65b7529ddebbae354eaea0f3",
-  "reviewed_git_tree": "5bf97f4903e98487f2cd38b2d72713cd0d55dc47",
+  "reviewed_git_head": "12abbdede1a3e31618c3944f2d1b57c868a32353",
+  "reviewed_git_tree": "8b272308e129056c4bc4a8e70b6517ab41911146",
   "implementation_scope": {
     "included_patterns": [
       "apps/worker-ai/**",
@@ -140,7 +140,7 @@
         "path": "docs/execplans/graph-engineering-full-migration.md",
         "mode": "100644",
         "type": "blob",
-        "object_id": "e35957f61c77a21aa85eb2051919dd97b7ac9f71"
+        "object_id": "74ee374b2723771766473f16e6709ac3623456a2"
       },
       {
         "path": "docs/graph-engineering/evidence/canary-rollback.json",
@@ -353,7 +353,7 @@
         "object_id": "a72a807d5f98f2017dd06cb5b651e2ea2bef07f9"
       }
     ],
-    "sha256": "2878e49b18ef3f8be6d90789b28629d747b6a883d4d07ab55c2497d843a50d0f"
+    "sha256": "3f7e24e0da5a8b5d5a902a55b7a437122651a713a2446c5737ab16105c32151e"
   },
   "artifacts": {
     "context": {
@@ -362,75 +362,75 @@
     },
     "report": {
       "path": "development/tasks/003-worker-facts/report.md",
-      "sha256": "d7b1552508a3e00958be55a633523b6ca8a6f2cc1ba439a28bc12dbe91ddbb7b",
+      "sha256": "fa42eac2108034658c412ff8f0e55bcb4cd6a5f3f8c0b3317ed7de84eac102da",
       "status": "DONE"
     },
     "spec_review": {
       "path": "development/tasks/003-worker-facts/spec-review.md",
-      "sha256": "c74e3ea8368da9a65a5aeec50d3220a4154437a0929aeb92a0f4b4f1b47459f0",
+      "sha256": "8800941ceb5bd7c89ef91b7a7ab5cf50caccebd48f8b3a60d839ea88c2377eb3",
       "verdict": "approved"
     },
     "quality_review": {
       "path": "development/tasks/003-worker-facts/quality-review.md",
-      "sha256": "7423901d80288347a23703337f232d5271167486fdbfbbe35f291dbb20b953c7",
+      "sha256": "ea68b87cbc441b96a493bfef381ad574bfb3f006935845b315aab49e883b39d3",
       "verdict": "approved"
     }
   },
   "test_runs": [
     {
-      "id": "receipt-13d4f42de70d7a2c1967800a9e2a8099a354f079bf9459d0deb04e3112d59db1",
-      "command": "pnpm --filter @live-photo-studio/worker-ai test",
-      "assertion_ids": [
-        "A2:worker-facts"
-      ],
-      "recorded_at": "2026-08-23T12:35:24.643Z",
-      "validation_receipt_sha256": "1a0a8069cfe7ffb67db0bc95a6e1a67c07059770e943cdbba2bf7c73dc0f22ba",
-      "evidence_log": {
-        "path": "development/evidence/041-003-worker-facts.log",
-        "sha256": "e656dc91ae40bc0e079bc920e1a5a0d5439bfd8355e689e7a05fc0fd96d4078f",
-        "size": 1111
-      }
-    },
-    {
-      "id": "receipt-d238b36d6166682150bd5952d0ceed857e7c10fd1053786a57db6a6bf5cef5f7",
-      "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/worker-media test",
-      "assertion_ids": [
-        "A2:worker-facts"
-      ],
-      "recorded_at": "2026-08-23T12:35:24.157Z",
-      "validation_receipt_sha256": "1c2412f66468545ed3ae5dbc5c42f0ee1e8ceabf1702d1e27a498937e9911568",
-      "evidence_log": {
-        "path": "development/evidence/040-003-worker-facts.log",
-        "sha256": "7300db521b305af9f005403743083147f5eab3cbd65c32c80f9c80387ed4badb",
-        "size": 2953
-      }
-    },
-    {
-      "id": "receipt-dd60483ac97a9a7724e51a9d9550dccad46ddedc8dfa0469e12a34af7ff0f9f6",
+      "id": "receipt-b30c5f8b8f73d680e855a3e91dbbb7fb5148a3e7b96b92e42074134962a31254",
       "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/worker-ai test",
       "assertion_ids": [
         "A2:worker-facts"
       ],
-      "recorded_at": "2026-08-23T12:35:23.480Z",
-      "validation_receipt_sha256": "4c413b12b83054622cc668e3035c1c9a8eccce0ba26af4224dfd79d83372f59d",
+      "recorded_at": "2026-08-23T12:52:38.804Z",
+      "validation_receipt_sha256": "262a1b53954505f4e02c895e81455f458a6736ed7a7f272351b95204690bc5a5",
       "evidence_log": {
-        "path": "development/evidence/039-003-worker-facts.log",
-        "sha256": "7b63918ddf0aaa87592c13070cf757fedf4a3063db0d801a5ec0a8b106f6ab47",
-        "size": 2237
+        "path": "development/evidence/097-003-worker-facts.log",
+        "sha256": "5a6d103454485eec57acd5ee67be5d2ea3aab800cdffe5199f565132e9163e28",
+        "size": 2233
       }
     },
     {
-      "id": "receipt-f4a22347c08f28a29f2704a3ae5b6ec1076c009d3ea364dceff05fb6ac1f99f8",
+      "id": "receipt-b4ced08a992110fc72a361d7d48a4930b7520251891dbb83b4abd6075b7283b3",
+      "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/worker-media test",
+      "assertion_ids": [
+        "A2:worker-facts"
+      ],
+      "recorded_at": "2026-08-23T12:52:40.201Z",
+      "validation_receipt_sha256": "3ecc6d33bce4152457764ce6c54a674d6c82e0909cf9ccff79dba272cbbb8dc7",
+      "evidence_log": {
+        "path": "development/evidence/098-003-worker-facts.log",
+        "sha256": "d2691c3ff92dd1d62987408e2182dd2562ad9dc7494b902bf36e785b3623a49d",
+        "size": 2961
+      }
+    },
+    {
+      "id": "receipt-c57851b06f9bbe16cfa97ebe72375257072f06201bb488af64fd7669d13d46ec",
       "command": "pnpm --filter @live-photo-studio/worker-media test",
       "assertion_ids": [
         "A2:worker-facts"
       ],
-      "recorded_at": "2026-08-23T12:35:25.117Z",
-      "validation_receipt_sha256": "c65c14edfe54f2afd123334f5da72f80f8b4fc29761d51e92d4555b19a8ae080",
+      "recorded_at": "2026-08-23T12:52:41.448Z",
+      "validation_receipt_sha256": "2e3eb6a5bef78d298342d6af262eabcb8427a73ecbf80c8c1b7efd33c2d3c915",
       "evidence_log": {
-        "path": "development/evidence/042-003-worker-facts.log",
-        "sha256": "4c7e45664ab3e2a288b3378afdd1d5946c5a9bf85cf9de7362afbc3c4454f4a9",
-        "size": 1283
+        "path": "development/evidence/100-003-worker-facts.log",
+        "sha256": "41af30dfb98b6e3838dfdd8fffb0e0df09b1dfe9c8c0626c5399ad03bc83bca3",
+        "size": 1291
+      }
+    },
+    {
+      "id": "receipt-ead7d860580c68d70bf9b0044e66d282f45b1d365dd572fed1f75b6bfb0948d6",
+      "command": "pnpm --filter @live-photo-studio/worker-ai test",
+      "assertion_ids": [
+        "A2:worker-facts"
+      ],
+      "recorded_at": "2026-08-23T12:52:40.908Z",
+      "validation_receipt_sha256": "3baec1ab7a6e8e9bfeaf871fdab4bcf87b16165c095378cefe5ea7de065e3992",
+      "evidence_log": {
+        "path": "development/evidence/099-003-worker-facts.log",
+        "sha256": "497fab388fc45f69cc7b606aab17089a598b4fe3e4470e5dcd4e20d126e47e11",
+        "size": 1108
       }
     }
   ],
@@ -440,10 +440,10 @@
       "parent_id": "A2",
       "status": "passing",
       "test_run_ids": [
-        "receipt-13d4f42de70d7a2c1967800a9e2a8099a354f079bf9459d0deb04e3112d59db1",
-        "receipt-d238b36d6166682150bd5952d0ceed857e7c10fd1053786a57db6a6bf5cef5f7",
-        "receipt-dd60483ac97a9a7724e51a9d9550dccad46ddedc8dfa0469e12a34af7ff0f9f6",
-        "receipt-f4a22347c08f28a29f2704a3ae5b6ec1076c009d3ea364dceff05fb6ac1f99f8"
+        "receipt-b30c5f8b8f73d680e855a3e91dbbb7fb5148a3e7b96b92e42074134962a31254",
+        "receipt-b4ced08a992110fc72a361d7d48a4930b7520251891dbb83b4abd6075b7283b3",
+        "receipt-c57851b06f9bbe16cfa97ebe72375257072f06201bb488af64fd7669d13d46ec",
+        "receipt-ead7d860580c68d70bf9b0044e66d282f45b1d365dd572fed1f75b6bfb0948d6"
       ],
       "direct_evidence": [],
       "reused_evidence": [],
