@@ -2,7 +2,7 @@
   "schema_version": 1,
   "assertion_id": "A3",
   "status": "blocked",
-  "captured_at": "2026-08-23T18:44:13+08:00",
+  "captured_at": "2026-08-23T23:29:27+08:00",
   "commands": [
     {
       "command": "pnpm --filter @live-photo-studio/graph-contracts test",
@@ -38,6 +38,11 @@
       "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/worker-media exec tsx --test src/worker-media.integration.test.ts",
       "result": "passed",
       "observed": "5 PostgreSQL-backed tests passed, including cross-project/correlation rejection, MIME and pixel controls, GPS stripping and deterministic export behavior."
+    },
+    {
+      "command": "credentialed RustFS adapter canary from packages/storage using the 80-server app credential",
+      "result": "passed",
+      "observed": "storage.motion-cover.com / camera-rental-return accepted a 68-byte upload with SHA-256 verification; unsigned GET returned 403; a 60-second signed GET returned 200 with matching bytes; DeleteObject cleanup completed."
     }
   ],
   "verified_controls": [
@@ -46,10 +51,11 @@
     "Cross-project workflow and worker access is rejected by current tests.",
     "Redaction tests cover credentials, signed URLs, prompts, provider responses, Base64-like values, binary values and EXIF/GPS-like keys.",
     "Malformed signal variants are rejected before queue or graph use.",
-    "Cross-project workflow and worker access paths are covered by API and PostgreSQL worker tests."
+    "Cross-project workflow and worker access paths are covered by API and PostgreSQL worker tests.",
+    "The credentialed RustFS endpoint enforces private object access and serves a bounded signed download."
   ],
   "blockers": [
-    "Private bucket policy and signed-URL TTL cannot be verified because the storage adapter is not present in this snapshot.",
+    "The canary reused the existing camera-rental-return bucket under a deleted live-photo-studio/canary prefix; a dedicated production bucket and policy for this application is not provisioned.",
     "Real provider, FFmpeg/ImageMagick/libheif and device checks were not run.",
     "The local Redis probe returned NOAUTH Authentication required.",
     "A Web ZIP is not a PhotoKit-saved Live Photo; iOS Importer verification is not part of this repository."

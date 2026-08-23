@@ -28,6 +28,6 @@
   ],
   "limitations": [
     "The audit covers the current source snapshot; it is not a production deployment proof.",
-    "Real object storage, FFmpeg, HEIC and device playback remain unverified."
+    "Credentialed RustFS object access is verified for the current server canary; real FFmpeg, HEIC and device playback remain unverified."
   ]
 }

@@ -191,12 +191,18 @@ CI and must remain explicitly blocked when unavailable:
 
 - Real OpenAI/provider regression. Use a separate budget-limited job; never put
   the key in browser variables or logs.
-- Real RustFS private-bucket, object upload and signed-URL TTL verification.
-  Use a credentialed operator shell to run `aws s3api head-bucket` against
-  `OBJECT_STORAGE_ENDPOINT`, then execute one approved canary workflow and
-  verify the package key exists privately, the recorded SHA-256 matches the
-  object bytes, and the signed URL expires within the configured TTL. Do not
-  paste credentials or signed URLs into logs or chat.
+- Credentialed RustFS adapter verification for the current 80-server endpoint
+  passed on 2026-08-23: `storage.motion-cover.com`, region `us-east-1` and the
+  existing `camera-rental-return` bucket accepted a 68-byte canary upload,
+  returned 403 for unsigned object access, returned 200 for a 60-second signed
+  download, and cleaned the canary object. The test used the server-side app
+  credential and did not print it or the signed URL.
+- A production deployment still needs an approved application bucket/policy
+  decision. If the existing bucket is reused, keep the project object-key
+  prefix and ownership checks; otherwise provision a dedicated bucket and
+  app-scoped credential. For either choice, execute one approved canary
+  workflow and verify the package key, recorded SHA-256 and signed-URL TTL.
+  Do not paste credentials or signed URLs into logs or chat.
 - Real FFmpeg/ImageMagick/libheif capability, HEIC input validation and device
   playback. The current media renderer uses deterministic fake bytes for
   control-plane tests.

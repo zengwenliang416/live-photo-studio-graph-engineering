@@ -13,8 +13,9 @@ git commit -m "chore: graph engineering baseline"
 git checkout -b feat/graph-engineering
 ```
 
-保持 `.env` 使用本地 PostgreSQL、Redis、MinIO 和 `AI_PROVIDER=mock`。不要把生产
-OpenAI Key、数据库凭据或云存储凭据交给自动执行会话。
+保持 `.env` 使用本地 PostgreSQL、Redis、`OBJECT_STORAGE_BACKEND=mock` 和
+`AI_PROVIDER=mock`。不要把生产 OpenAI Key、数据库凭据或 RustFS 凭据交给自动
+执行会话。
 
 ## 2. 建立依赖基线
 

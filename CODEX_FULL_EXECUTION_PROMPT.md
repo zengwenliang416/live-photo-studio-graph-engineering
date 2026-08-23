@@ -19,9 +19,10 @@ Operating rules:
 
 - Do not stop after summarizing or proposing changes. Inspect the repository,
   edit files, run commands, test the result and update the ExecPlan as you work.
-- Preserve the existing Next.js, NestJS, PostgreSQL, Redis/BullMQ, S3/MinIO, AI
-  Worker and Media Worker architecture. LangGraph is the control plane; BullMQ
-  remains the long-task execution plane.
+- Preserve the existing Next.js, NestJS, PostgreSQL, Redis/BullMQ,
+  S3-compatible object storage (RustFS in deployment), AI Worker and Media
+  Worker architecture. LangGraph is the control plane; BullMQ remains the
+  long-task execution plane.
 - Do not create a second top-level orchestrator. Do not replace BullMQ with
   LangGraph scheduling. Do not let workers choose project phases.
 - Make the smallest reversible end-to-end change for each milestone. Keep the

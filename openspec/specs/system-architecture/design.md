@@ -19,7 +19,8 @@ BullMQ owns long-running execution.
   for normalization, rendering and export. `apps/orchestrator` is the only
   Graph routing process.
 - External services: OpenAI-compatible image provider behind an adapter,
-  FFmpeg/ImageMagick behind media ports, Redis/BullMQ, and private S3/MinIO.
+  FFmpeg/ImageMagick behind media ports, Redis/BullMQ, and private RustFS
+  through its S3-compatible API.
 - Local development entrypoints: `pnpm install`, `pnpm db:migrate`,
   `pnpm graph:check`, `pnpm graph:test`, `pnpm graph:demo`, and package tests.
 - Production deployment shape: independently deployable web, API,
@@ -103,8 +104,8 @@ importing another module's private infrastructure.
   routes phases, workers execute jobs and report facts.
 - Background jobs: BullMQ queues receive IDs, versions and small configuration
   only. Outbox event IDs are BullMQ job IDs.
-- File/object storage: binaries stay in private S3/MinIO; PostgreSQL stores
-  keys, hashes and metadata only.
+- File/object storage: binaries stay in private RustFS through its
+  S3-compatible API; PostgreSQL stores keys, hashes and metadata only.
 - Observability: logs include service, event, timestamps, IDs and durations,
   while excluding secrets, signed URLs, Base64, GPS EXIF, full prompts and raw
   provider responses.

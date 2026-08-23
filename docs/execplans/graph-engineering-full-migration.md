@@ -256,15 +256,16 @@ migration.
   `{"ok":true,"mode":"handoff","blockers":[]}` for all six tasks. This is a
   lifecycle handoff of the locally verified slices, not production or device
   acceptance.
-- [~] 2026-08-23: Starting the RustFS object-storage completion slice after the
+- [x] 2026-08-23: Started and completed the RustFS object-storage completion
+  slice after the
   user confirmed that a RustFS service exists on the 80 server. This slice
   replaces the fail-closed export signer and metadata-only media path with a
   generic S3-compatible storage port, a RustFS-compatible AWS SDK adapter,
   deterministic export-object uploads and short-lived private download grants.
   The default `mock` backend remains for ordinary CI. The server endpoint,
-  private bucket, credentials, TLS mode and live object verification remain
-  external inputs until a read-only probe and an explicitly authorized
-  canary upload are run.
+  private bucket, credentials and TLS mode remain deployment inputs; the
+  current endpoint and bucket were verified in the credentialed canary recorded
+  below.
 - [x] 2026-08-23: Completed the locally verifiable RustFS storage slice. Added
   `packages/storage` with a generic `ObjectStoragePort`, mock/in-memory
   implementation and AWS SDK S3-compatible adapter supporting explicit
@@ -275,8 +276,21 @@ migration.
   validates returned object keys, byte counts and hashes. Verified with storage
   3/3, API 34/34, Media Worker 13/13 PostgreSQL integration tests, full
   repository checks, Graph checks, migration replay and `git diff --check`.
-  Remaining external work is limited to a credentialed RustFS endpoint/bucket
-  probe, private-access check, signed-URL TTL check and production canary.
+  At that point, the remaining external work was the credentialed RustFS
+  endpoint/bucket probe, private-access check, signed-URL TTL check and
+  production canary, which are recorded in the later RustFS verification entry.
+- [x] 2026-08-23T23:29:27+08:00: Completed the credentialed RustFS adapter
+  verification against the 80 server without modifying its deployment. The
+  read-only probe found `storage.motion-cover.com` behind Nginx, backed by
+  `camera-rental-rustfs`; the configured region is `us-east-1` and the current
+  bucket is `camera-rental-return`. The canary ran from `packages/storage` with
+  the server-side app credential injected transiently from the remote secret
+  file. It uploaded a random object under
+  `live-photo-studio/canary/`, verified the adapter-reported 68-byte SHA-256,
+  observed unsigned GET `403`, signed GET `200` with `X-Amz-Expires=60`, and
+  deleted the object. No credential, signed URL or object bytes were logged.
+  The existing bucket is shared with the camera-rental deployment; a dedicated
+  production bucket/policy remains an operator decision.
 
 ## Surprises and discoveries
 
@@ -384,6 +398,11 @@ migration.
   credentials into Graph contracts or worker job payloads, and keeps the mock
   provider available for ordinary CI. A real RustFS run must configure the same
   private bucket and endpoint in both processes.
+- 2026-08-23: Use the existing 80-server RustFS only for an ephemeral canary
+  until the application bucket boundary is approved. The canary uses the
+  server-side app credential, a random `live-photo-studio/canary/` key and
+  explicit deletion; production must either provision a dedicated bucket and
+  policy or document the shared-bucket prefix/ownership controls.
 
 ## Decision log
 
@@ -655,6 +674,43 @@ state is recorded below.
   endpoint, bucket and credential source were not supplied to the repository
   process. A3 remains failing for live private-object, signed-URL and canary
   acceptance; local fake and PostgreSQL evidence is not substituted for it.
+
+2026-08-23 (Credentialed RustFS verification):
+
+- Read-only server commands observed RustFS health `200` on the remote
+  `9000/9001` endpoints and identified Nginx `storage.motion-cover.com` as the
+  public S3-compatible entry. The application bucket and region were read as
+  `camera-rental-return` and `us-east-1`; credential values were not printed.
+- `curl -ksS -I --max-time 10 https://storage.motion-cover.com/health` returned
+  HTTP `200`; an unsigned S3-root request returned HTTP `403`.
+- The first local canary invocation from the repository root failed before any
+  network request because Node could not resolve `@aws-sdk/client-s3` from the
+  root eval context (`ERR_MODULE_NOT_FOUND`). No object was created. Rerunning
+  the same adapter logic from `packages/storage` passed.
+- The passing canary result was: `uploadedBytes=68`,
+  `sha256Verified=true`, `unsignedStatus=403`, `signedStatus=200`,
+  `signedTtlSeconds=60`, `cleanup=true`. This clears the live adapter/private
+  access/signed-TTL check for the observed RustFS bucket, but A3 remains
+  failing for dedicated application bucket policy, live Redis/BullMQ,
+  real provider and media codec/HEIC checks, browser sensory validation and
+  iOS PhotoKit/device behavior.
+
+2026-08-23T23:35:14+08:00 (Post-RustFS documentation validation):
+
+- `openspec validate --all --strict --no-interactive --json` returned one valid
+  change with no issues. Evidence JSON parsing and `git diff --check` passed.
+- `pnpm check`, `pnpm test`, `pnpm graph:check`, `pnpm graph:test`,
+  `pnpm graph:demo`, and
+  `DATABASE_URL=postgresql://postgres@localhost:5432/postgres pnpm db:migrate`
+  passed. The migration replay reported `applied=[] skipped=6`; the demo
+  reached `WAITING_GENERATION -> REVIEW_ANCHOR -> WAITING_RENDER -> COMPLETED`.
+- Ordinary tests passed with storage `3/3`, Graph contracts `6/6`, Graph runtime
+  `3/3`, API `31/31`, Web `13/13`, AI Worker `3/3`, Media Worker `4/4` and
+  Orchestrator `4/4`. PostgreSQL suites passed API `34/34`, AI Worker `9/9`,
+  Media Worker `13/13` and Orchestrator `11/11`.
+- The repository still reports the known Node `v22.19.0` versus declared
+  `>=24` engine warning and pnpm's ignored `sharp` build-script warning. No
+  new test or implementation failure was observed.
 
 ## Repository context and orientation
 
