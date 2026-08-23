@@ -1,6 +1,9 @@
 {
   "task_id": "004-web-projection",
   "goal": "A user can refresh the project page, recover the server workflow projection, and submit only current task-payload actions.",
+  "acceptance_primary": [
+    "A1:web-projection"
+  ],
   "task_items": [
     "4.1",
     "4.2",
@@ -28,8 +31,9 @@
     "docs"
   ],
   "test_paths": [
-    "apps/web/src/**.test.ts",
-    "apps/api/src/**.test.ts"
+    "pnpm --filter @live-photo-studio/web test",
+    "pnpm --filter @live-photo-studio/api test",
+    "git diff --check"
   ],
   "non_goals": [
     "Do not expand scope beyond the active change.",

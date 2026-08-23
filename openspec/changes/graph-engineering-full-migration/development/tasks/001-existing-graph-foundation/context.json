@@ -1,6 +1,9 @@
 {
   "task_id": "001-existing-graph-foundation",
   "goal": "The existing Graph workflow, shared contracts, additive migrations and API command boundary remain the stable base for the remaining migration.",
+  "acceptance_primary": [
+    "A1:foundation"
+  ],
   "task_items": [
     "1.1",
     "1.2",
@@ -30,10 +33,11 @@
     "docs"
   ],
   "test_paths": [
-    "apps/api/src/**.test.ts",
-    "apps/orchestrator/src/**.test.ts",
-    "packages/graph-contracts/src/**.test.ts",
-    "packages/graph-runtime/src/**.test.ts"
+    "pnpm --filter @live-photo-studio/graph-contracts test",
+    "pnpm --filter @live-photo-studio/graph-runtime test",
+    "pnpm --filter @live-photo-studio/api test",
+    "pnpm check",
+    "DATABASE_URL=postgresql://postgres@localhost:5432/postgres pnpm db:migrate"
   ],
   "non_goals": [
     "Do not expand scope beyond the active change.",

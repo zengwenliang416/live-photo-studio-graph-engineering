@@ -358,6 +358,20 @@ migration.
   CodeGraph and SpecNav session-local state through repository ignore rules;
   retain `.specnav.json` as project-level configuration. Do not push, deploy or
   modify production infrastructure.
+- 2026-08-23: The installed SpecNav marketplace is under
+  `/Users/wenliang_zeng/.codex/plugins/cache/specnav-marketplace`; the paths
+  recorded in the generated workflow state omit that marketplace segment.
+  The first receipt attempt failed with `MODULE_NOT_FOUND`, then the actual
+  scripts were located and invoked. The receipt runner also expects executable
+  commands in task `context.json.test_paths`, while the generated contexts
+  contained file globs; those contexts are being corrected without changing
+  product code.
+- 2026-08-23: Task acceptance mappings use namespaced subclaims whose parent
+  IDs are the frozen A1/A2/A3 assertions: foundation, durable orchestration,
+  Web projection and canary validation contribute A1; worker facts contribute
+  A2; operations/security contributes A3. The A3 parent remains failing until
+  private storage, live Redis, real provider/codec and device checks are
+  available.
 
 ## Outcomes and retrospective
 

@@ -1,6 +1,9 @@
 {
   "task_id": "002-durable-orchestration",
   "goal": "A workflow run resumes once after crashes or duplicate signals, rejects wrong correlations, and stops bounded repair safely.",
+  "acceptance_primary": [
+    "A1:durable-orchestration"
+  ],
   "task_items": [
     "2.1",
     "2.2",
@@ -29,8 +32,10 @@
     "docs"
   ],
   "test_paths": [
-    "apps/orchestrator/src/**.test.ts",
-    "apps/api/src/**.test.ts"
+    "pnpm --filter @live-photo-studio/orchestrator test",
+    "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/orchestrator test",
+    "pnpm --filter @live-photo-studio/api test",
+    "pnpm graph:demo"
   ],
   "non_goals": [
     "Do not expand scope beyond the active change.",

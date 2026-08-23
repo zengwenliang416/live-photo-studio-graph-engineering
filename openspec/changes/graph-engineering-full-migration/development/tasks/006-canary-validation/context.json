@@ -1,6 +1,10 @@
 {
   "task_id": "006-canary-validation",
   "goal": "The Graph path has an operator-verifiable canary, rollback procedure and honest final validation record.",
+  "acceptance_primary": [
+    "A1:canary-validation",
+    "A2:canary-validation"
+  ],
   "task_items": [
     "6.1",
     "6.2",
@@ -29,8 +33,14 @@
     "packages"
   ],
   "test_paths": [
-    "apps/**.test.ts",
-    "packages/**.test.ts"
+    "pnpm install --frozen-lockfile",
+    "pnpm check",
+    "pnpm test",
+    "pnpm graph:check",
+    "pnpm graph:test",
+    "pnpm graph:demo",
+    "DATABASE_URL=postgresql://postgres@localhost:5432/postgres pnpm db:migrate",
+    "git diff --check"
   ],
   "non_goals": [
     "Do not expand scope beyond the active change.",

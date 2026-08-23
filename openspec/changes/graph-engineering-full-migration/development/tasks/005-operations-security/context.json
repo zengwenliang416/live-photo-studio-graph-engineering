@@ -1,6 +1,9 @@
 {
   "task_id": "005-operations-security",
   "goal": "Operators can trace and triage a stuck run while security and cost tests prevent cross-project access and sensitive leakage.",
+  "acceptance_primary": [
+    "A3:operations-security"
+  ],
   "task_items": [
     "5.1",
     "5.2",
@@ -30,10 +33,11 @@
     "docs"
   ],
   "test_paths": [
-    "apps/api/src/**.test.ts",
-    "apps/orchestrator/src/**.test.ts",
-    "apps/worker-ai/src/**.test.ts",
-    "apps/worker-media/src/**.test.ts"
+    "pnpm test",
+    "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/orchestrator test",
+    "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/worker-ai test",
+    "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/worker-media test",
+    "git diff --check"
   ],
   "non_goals": [
     "Do not expand scope beyond the active change.",
