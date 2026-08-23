@@ -286,20 +286,115 @@ if (!RUN_PG_TESTS) {
     const workflowRunId = randomUUID();
     await h.engineA.handleCommand(startCommand(workflowRunId));
     const jobId = await effectJobId(h.pool, workflowRunId, "dispatch_generation_v1");
+    const firstOutputId = randomUUID();
     const delivery = externalSignal({
       workflowRunId,
       correlationId: jobId,
-      payload: { type: "GENERATION_BATCH_COMPLETED", outputIds: [randomUUID()] },
+      payload: { type: "GENERATION_BATCH_COMPLETED", outputIds: [firstOutputId] },
     });
     await h.engineA.handleSignal(delivery);
-    await h.engineA.handleSignal(delivery);
+    await h.engineA.handleSignal({
+      ...delivery,
+      signalId: randomUUID(),
+      payload: {
+        type: "GENERATION_BATCH_COMPLETED",
+        outputIds: [randomUUID()],
+      },
+    });
 
     assert.match(await runStateLabel(h.pool, workflowRunId), /^INTERRUPTED:REVIEW_ANCHOR$/);
+    const duplicate = await h.pool.query<{ duplicate_count: number }>(
+      `SELECT duplicate_count
+         FROM workflow_signals
+        WHERE workflow_run_id = $1 AND correlation_id = $2`,
+      [workflowRunId, jobId],
+    );
+    assert.equal(duplicate.rows[0]?.duplicate_count, 1);
     const outbox = await h.pool.query<{ count: string }>(
       "SELECT COUNT(*)::text AS count FROM outbox_events WHERE aggregate_id = $1 AND event_type = 'workflow.generation.requested.v1'",
       [workflowRunId],
     );
     assert.equal(outbox.rows[0]?.count, "1");
+    const task = await h.pool.query<{ candidate_output_ids: string[] }>(
+      "SELECT payload->'candidateOutputIds' AS candidate_output_ids FROM human_tasks WHERE workflow_run_id = $1 AND status = 'PENDING'",
+      [workflowRunId],
+    );
+    assert.deepEqual(task.rows[0]?.candidate_output_ids, [firstOutputId]);
+  });
+
+  test("duplicate START commands create one run and one generation effect", async () => {
+    const h = await harness();
+    const workflowRunId = randomUUID();
+    const command = startCommand(workflowRunId);
+    await h.engineA.handleCommand(command);
+    await h.engineA.handleCommand(command);
+
+    const rows = await h.pool.query<{ runs: string; effects: string; outbox: string }>(
+      `SELECT
+         (SELECT COUNT(*)::text FROM workflow_runs WHERE id = $1) AS runs,
+         (SELECT COUNT(*)::text FROM workflow_node_effects WHERE workflow_run_id = $1) AS effects,
+         (SELECT COUNT(*)::text FROM outbox_events WHERE aggregate_id = $1::text
+            AND event_type = 'workflow.generation.requested.v1') AS outbox`,
+      [workflowRunId],
+    );
+    assert.deepEqual(rows.rows[0], { runs: "1", effects: "1", outbox: "1" });
+    assert.match(await runStateLabel(h.pool, workflowRunId), /^INTERRUPTED:WAITING_GENERATION$/);
+  });
+
+  test("wrong-correlation signals fail explicitly and late signals cannot reopen cancellation", async () => {
+    const h = await harness();
+    const workflowRunId = randomUUID();
+    await h.engineA.handleCommand(startCommand(workflowRunId));
+    const generationJobId = await effectJobId(h.pool, workflowRunId, "dispatch_generation_v1");
+
+    await h.engineA.handleSignal(externalSignal({
+      workflowRunId,
+      correlationId: randomUUID(),
+      payload: {
+        type: "GENERATION_BATCH_COMPLETED",
+        outputIds: [randomUUID()],
+      },
+    }));
+    assert.match(await runStateLabel(h.pool, workflowRunId), /^INTERRUPTED:WAITING_GENERATION$/);
+
+    const rejected = await h.pool.query<{ status: string; last_error_code: string | null }>(
+      `SELECT status, last_error_code
+         FROM workflow_signals
+        WHERE workflow_run_id = $1
+        ORDER BY created_at DESC
+        LIMIT 1`,
+      [workflowRunId],
+    );
+    assert.deepEqual(rejected.rows[0], {
+      status: "FAILED",
+      last_error_code: "SIGNAL_NOT_APPLICABLE",
+    });
+
+    await h.engineA.handleCommand({
+      type: "CANCEL_WORKFLOW",
+      commandId: randomUUID(),
+      workflowRunId,
+      reason: "TEST_CANCEL",
+      requestedAt: new Date().toISOString(),
+    });
+    assert.match(await runStateLabel(h.pool, workflowRunId), /^CANCELLED:CANCELLED$/);
+
+    await h.engineA.handleSignal(externalSignal({
+      workflowRunId,
+      correlationId: generationJobId,
+      payload: {
+        type: "GENERATION_BATCH_COMPLETED",
+        outputIds: [randomUUID()],
+      },
+    }));
+    assert.match(await runStateLabel(h.pool, workflowRunId), /^CANCELLED:CANCELLED$/);
+    const late = await h.pool.query<{ status: string }>(
+      `SELECT status
+         FROM workflow_signals
+        WHERE workflow_run_id = $1 AND correlation_id = $2`,
+      [workflowRunId, generationJobId],
+    );
+    assert.equal(late.rows[0]?.status, "CONSUMED");
   });
 
   test("a signal persisted before a crash is recovered exactly once", async () => {

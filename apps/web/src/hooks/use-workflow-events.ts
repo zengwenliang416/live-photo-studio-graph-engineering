@@ -16,7 +16,10 @@ export function useWorkflowEvents(
   onChanged: () => void,
   options: ApiClientOptions = {},
 ): void {
-  const client = useMemo(() => new WorkflowApiClient(options), [options]);
+  const client = useMemo(
+    () => new WorkflowApiClient(options),
+    [options.baseUrl, options.fetchImpl, options.keyStore, options.userId],
+  );
   const callbackRef = useRef(onChanged);
   callbackRef.current = onChanged;
 

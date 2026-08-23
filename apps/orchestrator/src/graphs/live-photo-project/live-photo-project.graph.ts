@@ -14,7 +14,10 @@ function routeAfterGeneration(
 
 function routeAfterReview(
   state: LivePhotoProjectStateValue,
-): "render" | "regenerate" | "cancelled" {
+): "render" | "regenerate" | "cancelled" | "failed" {
+  if (state.currentPhase === "FAILED") {
+    return "failed";
+  }
   if (state.reviewAction === "SELECT") {
     return "render";
   }
@@ -56,6 +59,7 @@ export function buildLivePhotoProjectGraphV1(
       render: NODE_NAMES.dispatchRender,
       regenerate: NODE_NAMES.dispatchGeneration,
       cancelled: NODE_NAMES.cancelled,
+      failed: NODE_NAMES.failed,
     })
     .addEdge(NODE_NAMES.dispatchRender, NODE_NAMES.awaitRender)
     .addConditionalEdges(NODE_NAMES.awaitRender, routeAfterRender, {

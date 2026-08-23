@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "change_id": "graph-engineering-full-migration",
+  "stage": "development",
+  "allowed_roots": [
+    "apps",
+    "packages",
+    "docs",
+    "README.md",
+    "DELIVERY_NOTES.md",
+    "GRAPH_EDITION_DELIVERY_NOTES.md",
+    "package.json",
+    "pnpm-lock.yaml",
+    "openspec"
+  ],
+  "denied_roots": [
+    ".git",
+    "node_modules",
+    "dist",
+    "coverage"
+  ],
+  "requires_review_on": [
+    "package.json",
+    "database",
+    "migrations"
+  ],
+  "allowed_operations": {
+    "create": true,
+    "modify": true,
+    "delete": false,
+    "rename": false
+  },
+  "prototype_sources": [
+    "openspec/changes/graph-engineering-full-migration/prototype/logic/harness.js"
+  ],
+  "expires_when": "verification_started"
+}

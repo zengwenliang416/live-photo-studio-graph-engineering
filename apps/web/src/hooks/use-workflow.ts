@@ -6,7 +6,9 @@ import {
 import {
   WorkflowApiClient,
   type ApiClientOptions,
+  type WorkflowAction,
 } from "../lib/api-client.js";
+import { useMemo } from "react";
 
 export const WORKFLOW_STAGES = [
   "STARTING",
@@ -37,19 +39,24 @@ export interface UseWorkflowOptions extends ApiClientOptions {
  * duplicate clicks replay the first response instead of creating commands.
  */
 export function useWorkflow(options: UseWorkflowOptions) {
-  const client = new WorkflowApiClient(options);
+  const client = useMemo(
+    () => new WorkflowApiClient(options),
+    [options.baseUrl, options.fetchImpl, options.keyStore, options.userId],
+  );
   const queryClient = useQueryClient();
 
   const runQuery = useQuery({
     queryKey: ["workflow-run", options.workflowRunId],
     queryFn: () => client.getWorkflowRun(options.workflowRunId),
+    enabled: options.workflowRunId.length > 0,
     refetchInterval: 5000,
   });
 
+  const pendingHumanTaskId = runQuery.data?.data.pendingHumanTaskId ?? null;
   const tasksQuery = useQuery({
     queryKey: ["human-tasks", options.workflowRunId],
     queryFn: () => client.listHumanTasks(options.workflowRunId),
-    enabled: runQuery.data?.data.pendingHumanTaskId != null,
+    enabled: pendingHumanTaskId != null,
   });
 
   const invalidate = (): void => {
@@ -62,8 +69,11 @@ export function useWorkflow(options: UseWorkflowOptions) {
   };
 
   const decideMutation = useMutation({
-    mutationFn: (input: { action: string; selectedOutputId?: string }) =>
-      client.decide(runQuery.data?.data.pendingHumanTaskId ?? "", input),
+    mutationFn: (input: {
+      action: WorkflowAction;
+      selectedOutputId?: string;
+    }) =>
+      client.decide(pendingHumanTaskId ?? "", input),
     onSuccess: invalidate,
   });
 
@@ -72,9 +82,9 @@ export function useWorkflow(options: UseWorkflowOptions) {
     onSuccess: invalidate,
   });
 
-  const pendingTaskId = runQuery.data?.data.pendingHumanTaskId ?? null;
   const pendingTask = tasksQuery.data?.data.find(
-    (task) => task.humanTaskId === pendingTaskId && task.status === "PENDING",
+    (task) =>
+      task.humanTaskId === pendingHumanTaskId && task.status === "PENDING",
   );
 
   return {
@@ -85,6 +95,7 @@ export function useWorkflow(options: UseWorkflowOptions) {
     stageIndex: stageIndex(runQuery.data?.data.currentPhase ?? null),
     stages: WORKFLOW_STAGES,
     allowedActions: pendingTask?.allowedActions ?? [],
+    candidateOutputIds: pendingTask?.candidateOutputIds ?? [],
     isMutating: decideMutation.isPending || cancelMutation.isPending,
     decide: decideMutation.mutate,
     cancel: cancelMutation.mutate,

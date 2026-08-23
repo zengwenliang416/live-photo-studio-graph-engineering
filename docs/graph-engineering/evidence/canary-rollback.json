@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "status": "partial",
+  "captured_at": "2026-08-23T18:15:46+08:00",
+  "commands": [
+    {
+      "command": "pnpm --filter @live-photo-studio/api test",
+      "result": "passed",
+      "observed": "The API suite includes the feature-flag-off behavior and passed 22 tests."
+    },
+    {
+      "command": "redis-cli -h 127.0.0.1 -p 6379 ping",
+      "result": "blocked",
+      "observed": "NOAUTH Authentication required."
+    }
+  ],
+  "documented_controls": [
+    "GRAPH_WORKFLOW_ENABLED gates Graph writes.",
+    "GRAPH_WORKFLOW_CANARY_USER_IDS restricts Graph writes to an explicit user cohort.",
+    "Non-canary requests return LEGACY_WORKFLOW_ROUTE_REQUIRED when a canary list is configured.",
+    "Rollback preserves old graph factories, checkpoint tables, domain facts and Outbox rows."
+  ],
+  "limitations": [
+    "This snapshot has no complete internal legacy workflow route; a 503 canary response or 404 disabled response is not a local legacy fallback.",
+    "No live Redis canary publication or production success-rate/latency/cost comparison was run.",
+    "Canary thresholds in the runbook are operator-set acceptance thresholds, not measured results."
+  ]
+}

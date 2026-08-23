@@ -3,6 +3,7 @@ import { Worker } from "bullmq";
 import { Redis as IORedis } from "ioredis";
 import { Pool } from "pg";
 import {
+  safeLogEvent,
   workflowCommandSchema,
   workflowSignalSchema,
 } from "@live-photo-studio/graph-contracts";
@@ -28,6 +29,7 @@ async function main(): Promise<void> {
   const registry = createGraphRegistry({
     projects: new PostgresProjectReadAdapter(pool),
     effects: new PostgresWorkflowEffectAdapter(pool),
+    maxRepairAttempts: config.GRAPH_MAX_REPAIR_ATTEMPTS,
     checkpointer,
   });
   const engine = new GraphEngine(pool, registry, {
@@ -37,12 +39,10 @@ async function main(): Promise<void> {
     void engine
       .recoverStuckSignals()
       .catch((error: unknown) => {
-        console.error(
-          JSON.stringify({
-            event: "orchestrator.signal_recovery_failed",
-            message: error instanceof Error ? error.name : "UnknownError",
-          }),
-        );
+        console.error(JSON.stringify(safeLogEvent(
+          "orchestrator.signal_recovery_failed",
+          { message: error instanceof Error ? error.name : "UnknownError" },
+        )));
       });
   }, config.GRAPH_SIGNAL_RECOVERY_INTERVAL_MS);
   recoveryTimer.unref();
@@ -82,22 +82,16 @@ async function main(): Promise<void> {
   process.once("SIGINT", () => void shutdown().finally(() => process.exit(0)));
   process.once("SIGTERM", () => void shutdown().finally(() => process.exit(0)));
 
-  console.info(
-    JSON.stringify({
-      event: "orchestrator.started",
-      graphCommandQueue: config.GRAPH_COMMAND_QUEUE,
-      graphSignalQueue: config.GRAPH_SIGNAL_QUEUE,
-      concurrency: config.ORCHESTRATOR_CONCURRENCY,
-    }),
-  );
+  console.info(JSON.stringify(safeLogEvent("orchestrator.started", {
+    graphCommandQueue: config.GRAPH_COMMAND_QUEUE,
+    graphSignalQueue: config.GRAPH_SIGNAL_QUEUE,
+    concurrency: config.ORCHESTRATOR_CONCURRENCY,
+  })));
 }
 
 main().catch((error: unknown) => {
-  console.error(
-    JSON.stringify({
-      event: "orchestrator.failed",
-      message: error instanceof Error ? error.message : "Unknown error",
-    }),
-  );
+  console.error(JSON.stringify(safeLogEvent("orchestrator.failed", {
+    message: error instanceof Error ? error.name : "UnknownError",
+  })));
   process.exitCode = 1;
 });

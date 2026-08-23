@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { workflowExecutionMetadataSchema } from "./observability.js";
 
 export const workflowRunStatusSchema = z.enum([
   "QUEUED",
@@ -24,16 +25,18 @@ export const startWorkflowCommandSchema = workflowIdentitySchema.extend({
   userId: z.string().min(1),
   input: z.record(z.unknown()),
   requestedAt: z.string().datetime(),
-});
+}).merge(workflowExecutionMetadataSchema);
 
 export const cancelWorkflowCommandSchema = workflowIdentitySchema.pick({
   workflowRunId: true,
 }).extend({
   type: z.literal("CANCEL_WORKFLOW"),
   commandId: z.string().uuid(),
+  projectId: z.string().uuid().optional(),
+  userId: z.string().min(1).optional(),
   reason: z.string().min(1).max(500).optional(),
   requestedAt: z.string().datetime(),
-});
+}).merge(workflowExecutionMetadataSchema);
 
 export const workflowCommandSchema = z.discriminatedUnion("type", [
   startWorkflowCommandSchema,
@@ -59,7 +62,7 @@ export const workflowSignalSchema = z.object({
   correlationId: z.string().min(1),
   payload: z.record(z.unknown()),
   emittedAt: z.string().datetime(),
-});
+}).merge(workflowExecutionMetadataSchema);
 
 export type WorkflowSignal = z.infer<typeof workflowSignalSchema>;
 

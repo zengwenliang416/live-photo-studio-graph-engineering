@@ -1,5 +1,12 @@
 import type { Queue } from "bullmq";
 import type { Pool } from "pg";
+import {
+  generationRequestedPayloadSchema,
+  renderRequestedPayloadSchema,
+  safeLogEvent,
+  workflowCommandSchema,
+  workflowSignalSchema,
+} from "@live-photo-studio/graph-contracts";
 import { withTransaction } from "@live-photo-studio/database";
 
 export interface OutboxQueuePair {
@@ -13,9 +20,30 @@ interface OutboxRow {
   readonly id: string;
   readonly eventType: string;
   readonly payload: unknown;
+  readonly traceId: string | null;
+  readonly nodeName: string | null;
+  readonly nodeVersion: number | null;
+  readonly externalJobId: string | null;
+  readonly providerRequestId: string | null;
 }
 
 const MAX_DELIVERY_ATTEMPTS = 50;
+
+const GRAPH_SIGNAL_EVENTS = new Set([
+  "HUMAN_TASK_COMPLETED",
+  "GENERATION_BATCH_COMPLETED",
+  "GENERATION_BATCH_FAILED",
+  "RENDER_JOB_COMPLETED",
+  "RENDER_JOB_FAILED",
+  "ASSET_INGEST_COMPLETED",
+  "ASSET_INGEST_FAILED",
+]);
+
+const EVENT_ONLY_EVENTS = new Set([
+  "workflow.completed.v1",
+  "workflow.cancelled.v1",
+  "workflow.failed.v1",
+]);
 
 /**
  * Relays committed Outbox rows to BullMQ. Publication failures after commit
@@ -25,6 +53,9 @@ const MAX_DELIVERY_ATTEMPTS = 50;
 export class OutboxDispatcher {
   private timer: NodeJS.Timeout | null = null;
   private ticking = false;
+  private deliveredCount = 0;
+  private invalidPayloadCount = 0;
+  private failedDeliveryCount = 0;
 
   constructor(
     private readonly pool: Pool,
@@ -52,6 +83,18 @@ export class OutboxDispatcher {
     while (this.ticking) {
       await new Promise((resolve) => setTimeout(resolve, 20));
     }
+  }
+
+  getMetrics(): {
+    readonly deliveredCount: number;
+    readonly invalidPayloadCount: number;
+    readonly failedDeliveryCount: number;
+  } {
+    return {
+      deliveredCount: this.deliveredCount,
+      invalidPayloadCount: this.invalidPayloadCount,
+      failedDeliveryCount: this.failedDeliveryCount,
+    };
   }
 
   async tick(): Promise<void> {
@@ -94,8 +137,14 @@ export class OutboxDispatcher {
         id: string;
         event_type: string;
         payload: unknown;
+        trace_id: string | null;
+        node_name: string | null;
+        node_version: number | null;
+        external_job_id: string | null;
+        provider_request_id: string | null;
       }>(
-        `SELECT id, event_type, payload
+          `SELECT id, event_type, payload, trace_id, node_name, node_version,
+                  external_job_id, provider_request_id
            FROM outbox_events
           WHERE status = 'PENDING'
           ORDER BY created_at ASC
@@ -115,35 +164,58 @@ export class OutboxDispatcher {
         id: row.id,
         eventType: row.event_type,
         payload: row.payload,
+        traceId: row.trace_id,
+        nodeName: row.node_name,
+        nodeVersion: row.node_version,
+        externalJobId: row.external_job_id,
+        providerRequestId: row.provider_request_id,
       }));
     });
   }
 
   private async deliver(row: OutboxRow): Promise<void> {
+    if (EVENT_ONLY_EVENTS.has(row.eventType)) {
+      await this.markSent(row.id);
+      this.deliveredCount += 1;
+      return;
+    }
     const queue = routeEvent(row.eventType, this.queues);
     if (!queue) {
       await this.markFailed(row.id, "UNKNOWN_EVENT_TYPE");
       return;
     }
     try {
-      await queue.add("outbox-event", row.payload, {
+      const payload = parseRoutedPayload(row.eventType, row.payload);
+      await queue.add("outbox-event", payload, {
         jobId: row.id,
         attempts: 3,
         backoff: { type: "exponential", delay: 1000 },
       });
       await this.markSent(row.id);
+      this.deliveredCount += 1;
     } catch (error) {
+      if (error instanceof OutboxPayloadError) {
+        this.invalidPayloadCount += 1;
+        await this.markFailed(row.id, "INVALID_OUTBOX_PAYLOAD");
+        return;
+      }
+      this.failedDeliveryCount += 1;
       const attempts = await this.incrementAttempts(row.id);
       if (attempts >= MAX_DELIVERY_ATTEMPTS) {
         await this.markFailed(row.id, "DELIVERY_ATTEMPTS_EXHAUSTED");
         return;
       }
-      console.error(
-        JSON.stringify({
-          event: "outbox.publish_failed",
-          message: error instanceof Error ? error.name : "UnknownError",
-        }),
-      );
+      console.error(JSON.stringify(safeLogEvent("outbox.publish_failed", {
+        traceId: row.traceId,
+        workflowRunId: row.payload instanceof Object
+          ? (row.payload as Record<string, unknown>)["workflowRunId"]
+          : undefined,
+        nodeName: row.nodeName,
+        nodeVersion: row.nodeVersion,
+        externalJobId: row.externalJobId,
+        providerRequestId: row.providerRequestId,
+        message: error instanceof Error ? error.name : "UnknownError",
+      })));
     }
   }
 
@@ -185,7 +257,7 @@ export function routeEvent(
   eventType: string,
   queues: OutboxQueuePair,
 ): Queue | null {
-  if (eventType === "HUMAN_TASK_COMPLETED") return queues.signals;
+  if (GRAPH_SIGNAL_EVENTS.has(eventType)) return queues.signals;
   if (eventType === "START_WORKFLOW" || eventType === "CANCEL_WORKFLOW") {
     return queues.commands;
   }
@@ -196,4 +268,26 @@ export function routeEvent(
     return queues.renderJobs;
   }
   return null;
+}
+
+export class OutboxPayloadError extends Error {
+  constructor() {
+    super("Outbox payload does not satisfy its published contract.");
+    this.name = "OutboxPayloadError";
+  }
+}
+
+export function parseRoutedPayload(eventType: string, payload: unknown): unknown {
+  const parsed =
+    eventType === "START_WORKFLOW" || eventType === "CANCEL_WORKFLOW"
+      ? workflowCommandSchema.safeParse(payload)
+      : GRAPH_SIGNAL_EVENTS.has(eventType)
+        ? workflowSignalSchema.safeParse(payload)
+        : eventType === "workflow.generation.requested.v1"
+          ? generationRequestedPayloadSchema.safeParse(payload)
+          : eventType === "workflow.render.requested.v1"
+            ? renderRequestedPayloadSchema.safeParse(payload)
+            : { success: true as const, data: payload };
+  if (!parsed.success) throw new OutboxPayloadError();
+  return parsed.data;
 }

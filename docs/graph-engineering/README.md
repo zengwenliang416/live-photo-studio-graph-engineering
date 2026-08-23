@@ -38,12 +38,24 @@ for resume signals and a fixed graph version per workflow run.
 
 ## Migration status
 
-The Graph contracts, runtime utilities, database schema, orchestrator process,
-PostgreSQL adapters, v1 graph, demo and tests are scaffolded. The transitional
-`PostgresWorkflowEffectAdapter` emits workflow Outbox events. The existing API,
-AI worker and media worker still need to consume/produce those contracts. That
-work is specified milestone-by-milestone in
-`docs/execplans/graph-engineering-full-migration.md`.
+The Graph contracts, runtime utilities, additive database schema, orchestrator
+process, PostgreSQL adapters, API command boundary, AI Worker, Media Worker,
+Web projection and operations triage are integrated for the v1 control-plane
+slice. The current local path is mock-provider and deterministic-renderer safe:
+it proves routing, persistence, restart recovery, duplicate delivery handling,
+ownership and redaction without requiring chargeable provider calls.
+
+The supplied high-fidelity Vite prototype is a visual and information
+architecture reference only. Its obsidian/gold/editorial tokens, shell,
+candidate review and export-boundary copy are compatible with the Web path.
+Its browser-side mock orchestrator, localStorage/IndexedDB domain stores,
+custom router and browser ZIP builder are not production integrations. The
+current Next.js page keeps the API projection as the only workflow truth.
+
+Remaining external verification is deliberately explicit in
+`docs/execplans/graph-engineering-full-migration.md`: private S3/MinIO and
+signed URL TTLs, live Redis/BullMQ publication, real provider calls,
+FFmpeg/ImageMagick/libheif/HEIC capability and iOS device/PhotoKit behavior.
 
 ## Local verification after dependency installation
 

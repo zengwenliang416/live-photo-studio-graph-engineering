@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { WorkflowApiClient } from "./api-client.js";
+import {
+  WorkflowApiClient,
+  type WorkflowAction,
+} from "./api-client.js";
 
 function jsonResponse(body: unknown, status = 200): Response {
   return {
@@ -27,12 +30,20 @@ function recordingClient() {
   const client = new WorkflowApiClient({
     fetchImpl: async (_input, init) => {
       const headers = (init?.headers ?? {}) as Record<string, string>;
+      const path = String(_input);
       calls.push({
         method: String(init?.method),
-        path: String(_input),
+        path,
         key: headers["idempotency-key"],
       });
-      return jsonResponse({ data: { ok: true } });
+      if (path.includes("/decisions")) {
+        return jsonResponse({
+          data: { humanTaskId: "00000000-0000-4000-8000-000000000001" },
+        });
+      }
+      return jsonResponse({
+        data: { workflowRunId: "00000000-0000-4000-8000-000000000002" },
+      });
     },
     baseUrl: "http://test",
     userId: "u",
@@ -53,7 +64,10 @@ test("duplicate start clicks reuse the same idempotency key", async () => {
 
 test("decide keys are scoped per task and action", async () => {
   const { client, calls } = recordingClient();
-  const body = { action: "SELECT", selectedOutputId: "o" };
+  const body: { action: WorkflowAction; selectedOutputId: string } = {
+    action: "SELECT",
+    selectedOutputId: "00000000-0000-4000-8000-000000000003",
+  };
   await Promise.all([
     client.decide("t1", body),
     client.decide("t1", body),
@@ -61,6 +75,16 @@ test("decide keys are scoped per task and action", async () => {
   ]);
   assert.equal(calls[0]?.key, calls[1]?.key);
   assert.notEqual(calls[0]?.key, calls[2]?.key);
+});
+
+test("SELECT decisions carry the task-selected output id", async () => {
+  const { client, calls } = recordingClient();
+  await client.decide("task-1", {
+    action: "SELECT",
+    selectedOutputId: "output-1",
+  });
+  assert.equal(calls.length, 1);
+  assert.match(String(calls[0]?.path), /\/v1\/human-tasks\/task-1\/decisions$/u);
 });
 
 test("problem+json responses raise typed errors", async () => {

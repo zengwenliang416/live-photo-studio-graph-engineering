@@ -1,0 +1,52 @@
+{
+  "task_id": "001-existing-graph-foundation",
+  "goal": "The existing Graph workflow, shared contracts, additive migrations and API command boundary remain the stable base for the remaining migration.",
+  "task_items": [
+    "1.1",
+    "1.2",
+    "1.3",
+    "1.4"
+  ],
+  "must_read": [
+    "openspec/changes/graph-engineering-full-migration/development/tasks/001-existing-graph-foundation/brief.md",
+    "openspec/changes/graph-engineering-full-migration/requirements.md",
+    "openspec/changes/graph-engineering-full-migration/acceptance.md",
+    "openspec/changes/graph-engineering-full-migration/spec-map.json",
+    "openspec/changes/graph-engineering-full-migration/component-impact-map.json",
+    "openspec/changes/graph-engineering-full-migration/prototype/handoff.md",
+    "openspec/changes/graph-engineering-full-migration/prototype/decision.json",
+    "openspec/specs/ui-design/design.md",
+    "openspec/specs/system-architecture/design.md",
+    "openspec/specs/frontend-backend-data-flow/design.md",
+    "openspec/specs/component-architecture/design.md",
+    "openspec/changes/graph-engineering-full-migration/prototype/logic/harness.js"
+  ],
+  "allowed_files": [
+    "apps/api",
+    "apps/orchestrator",
+    "packages/database",
+    "packages/graph-contracts",
+    "packages/graph-runtime",
+    "docs"
+  ],
+  "test_paths": [
+    "apps/api/src/**.test.ts",
+    "apps/orchestrator/src/**.test.ts",
+    "packages/graph-contracts/src/**.test.ts",
+    "packages/graph-runtime/src/**.test.ts"
+  ],
+  "non_goals": [
+    "Do not expand scope beyond the active change.",
+    "Do not bypass component extraction rules."
+  ],
+  "expected_evidence": [
+    "Focused tests or command output",
+    "Task report",
+    "Spec review",
+    "Quality review"
+  ],
+  "unsafe_assumptions": [
+    "Any missing requirement, API, database, or component decision blocks implementation."
+  ],
+  "stop_condition": "Stop if the task would edit outside scope or duplicate reusable component behavior."
+}

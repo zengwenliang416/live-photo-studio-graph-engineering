@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "captured_at": "2026-08-23T18:15:46+08:00",
+  "commands": [
+    {
+      "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/api exec tsx --test src/workflows/infrastructure/pg-workflow-operations.integration.test.ts",
+      "result": "passed",
+      "observed": "4 tests passed against a temporary PostgreSQL database after all 6 migrations were applied."
+    },
+    {
+      "command": "pnpm --filter @live-photo-studio/api test",
+      "result": "passed",
+      "observed": "22 tests passed, including operator triage/replay service behavior and denial auditing."
+    }
+  ],
+  "verified_controls": [
+    "Triage aggregates workflow, signal, effect, node-run, generation, render and Outbox projections.",
+    "Every triage collection is bounded to 100 rows.",
+    "Replay accepts only persisted PROCESSING or FAILED signals and revalidates the stored payload.",
+    "Replay writes an ALLOWED audit row before the deterministic replay Outbox row in one transaction.",
+    "Consumed, pending and invalid signals are rejected with stable conflict codes.",
+    "Non-operator triage is denied and audited."
+  ],
+  "limitations": [
+    "oldestQueueAgeMs is pending/processing Outbox age, not a live Redis queue-age metric.",
+    "Live BullMQ publication and Redis queue metrics require authenticated Redis access."
+  ]
+}

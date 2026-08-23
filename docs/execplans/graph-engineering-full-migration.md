@@ -122,6 +122,18 @@ migration.
   hashes, sufficient for control-plane acceptance but not device-level media
   validation per the HEIC/Live Photo boundary in AGENTS.md.
 - [ ] Remove worker-owned project phase transitions on the Graph path.
+- [x] 2026-08-23: Audited the remaining Graph-path phase ownership boundary.
+  AI and Media Workers write domain results and correlated signals only; no
+  direct `workflow_runs.current_phase` write is present in the current
+  snapshot. Verified with `pnpm --filter @live-photo-studio/orchestrator check`,
+  `pnpm --filter @live-photo-studio/orchestrator test`,
+  `RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/orchestrator test`,
+  `pnpm --filter @live-photo-studio/worker-ai check`,
+  `pnpm --filter @live-photo-studio/worker-media check`,
+  `RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/worker-ai exec tsx --test
+  src/worker-ai.integration.test.ts` and the corresponding Media Worker
+  command. Observed results: Orchestrator 11/11 PG tests, AI 5/5 PG tests and
+  Media 5/5 PG tests passed; worker tests assert `current_phase` is unchanged.
 - [~] 2026-08-23: Building the web workflow projection. Recreating the minimal
   `apps/web` surface in-snapshot: typed API client with per-action
   Idempotency-Key persistence, TanStack Query hooks where the server
@@ -131,10 +143,81 @@ migration.
   routing. The API gains an SSE endpoint streaming new `workflow_events` rows
   (transitional DB-tail transport) so clients invalidate queries on real
   state changes only.
-- [ ] Add full checkpoint recovery, duplicate signal, crash window and rollback
-  integration tests.
-- [ ] Add observability, admin triage, cost controls, canary rollout and runbooks.
-- [ ] Complete final validation and retrospective.
+- [x] 2026-08-23: Completed the phase-ownership regression milestone. SpecNav
+  development entry artifacts were repaired, worker/orchestrator tests prove
+  workers preserve `workflow_runs.current_phase`, bounded `REGENERATE`
+  exhaustion reaches the failed terminal state, and late or incorrectly
+  correlated signals cannot reopen a terminal run. The full Orchestrator PG
+  suite now covers duplicate START, duplicate signals, crash-window recovery,
+  concurrent delivery and rollback-safe old graph versions.
+- [x] 2026-08-23: Added `docs/graph-engineering/evidence/` records for restart,
+  duplicate-signal, phase-ownership, security/cost, triage and canary/rollback
+  observations. A1 and A2 have direct passing evidence; A3 remains blocked by
+  unavailable private-storage and production media/provider verification.
+- [~] 2026-08-23: Starting the observability, operations, security and cost
+  controls milestone. The current snapshot has no shared logger, storage
+  package, admin read model or repair command; implementation will add only
+  bounded projection queries and audited commands over existing workflow/domain
+  tables, with no second orchestrator and no checkpoint-row business reads.
+- [~] 2026-08-23T18:03:58+08:00: Resuming the observability/operations
+  milestone from the current dirty snapshot. Shared context fields, redaction,
+  operator endpoints and the PostgreSQL operations adapter are present, but
+  `PgWorkflowOperations` still lacks a real PostgreSQL integration test. This
+  pass will validate triage aggregation, stale/failed signal replay, audit
+  ordering before replay Outbox publication, and denial auditing; then update
+  the runbook and retain only evidence that was actually observed.
+- [x] 2026-08-23T18:15:46+08:00: Completed the locally verifiable portion of
+  the observability/operations milestone. Added the bounded authenticated
+  triage/replay boundary, deterministic replay Outbox command, denial/audit
+  path, context propagation and redaction/cost controls. The new PostgreSQL
+  operations suite passed 4/4 against a temporary database after all six
+  migrations applied. The runbook now documents curl operations, canary
+  thresholds, rollback and the exact external blockers. Remaining: browser
+  sensory evidence, private object-storage verification, live Redis/provider/
+  codec checks and SpecNav-owned receipts.
+- [~] 2026-08-23T18:32:26+08:00: Started the remaining Web and security
+  acceptance work after inspecting the supplied prototype ZIP
+  (`sha256=922a4c229193d90ca56cdc55653c760fea0a256584bb633998d69b6b605aa0ac`).
+  The prototype is a Vite/local-mock implementation, not a production
+  Next.js/Graph integration. This pass retains its obsidian/gold/editorial
+  visual direction and review/export information architecture, while adding
+  only server-projection-backed Web behavior and evidence; no browser-owned
+  workflow repository, binary store or ZIP builder is promoted.
+- [~] 2026-08-23T18:37:00+08:00: Starting the security-matrix completion pass.
+  Existing ownership, worker cross-project and basic redaction tests will be
+  retained. This pass adds explicit malformed-signal and sensitive-field
+  matrix cases, then records the remaining real storage/provider/media/device
+  blockers without weakening A3.
+- [x] 2026-08-23T18:44:13+08:00: Completed the locally verifiable Web and
+  security work. The Web now revalidates stored workflow runs before reuse,
+  shares concurrent start requests, parses successful responses with Zod,
+  keeps server projection authority, and uses scoped obsidian/gold/editorial
+  styles with explicit 390px/focus/touch-target evidence. Web tests passed
+  11/11. The security matrix now rejects malformed signals and redacts
+  credentials, signed URLs, Base64, prompts, EXIF/GPS, provider responses and
+  binary values. Graph contracts passed 6/6; PostgreSQL orchestrator, AI,
+  Media and operations suites passed 11/11, 5/5, 5/5 and 4/4.
+- [x] 2026-08-23T18:44:13+08:00: Completed the package/repository/Graph/
+  migration/diff validation pass. `pnpm install --frozen-lockfile`,
+  `pnpm check`, `pnpm test`, `pnpm graph:check`, `pnpm graph:test`,
+  `pnpm graph:demo`, `DATABASE_URL=postgresql://postgres@localhost:5432/postgres
+  pnpm db:migrate` and `git diff --check` all passed in this continuation.
+  The migration command observed `applied:[] skipped:6`; the demo ended
+  `COMPLETED`. The final retrospective and SpecNav receipts remain.
+- [x] 2026-08-23T19:06:16+08:00: Completed the final validation and
+  retrospective pass. Repaired the managed SpecNav Verification Runtime
+  `2.0.0-alpha.2` in the explicitly selected user scope, generated
+  `verify/v2/runtime-status.json` from the doctor command, initialized
+  CodeGraph, and generated evidence for all six development claims. The
+  repository, Graph, migration, PostgreSQL integration and diff checks were
+  rerun successfully. SpecNav handoff remains blocked by its clean-snapshot
+  and independent-review requirements; those blockers are recorded below.
+- [~] 2026-08-23: Starting the stable-snapshot and SpecNav evidence pass after
+  the user authorized a local checkpoint commit. The commit will include
+  implementation, tests, migrations, documentation and OpenSpec delivery
+  artifacts, while excluding CodeGraph and SpecNav session-local state. After
+  the snapshot is stable, refresh system-executed receipts and regenerate task
+  acceptance evidence; unsupported A3 capabilities remain blocked.
 
 ## Surprises and discoveries
 
@@ -159,6 +242,58 @@ migration.
   not assume the exact existing generation/render service schema. Integrate it
   through application ports rather than duplicating domain writes in the
   orchestrator.
+- 2026-08-23: The current snapshot already contains the minimal Web, API, AI
+  Worker and Media Worker surfaces described as absent in the earlier plan
+  entries. The first remaining checkbox is therefore a verification and
+  boundary-hardening task, not a wholesale service recreation.
+- 2026-08-23: The repository map does not currently contain the documented
+  `packages/logger` or `packages/storage` packages. Redaction and storage
+  boundary checks must therefore be introduced at the existing application
+  seams without inventing a parallel package architecture.
+- 2026-08-23: The first SpecNav handoff contract run after resuming the work
+  reports missing runtime-status receipt authority, incomplete task-ledger
+  statuses, scaffold placeholders and no executed validation evidence. These
+  are delivery-control-plane blockers; they must be repaired from real command
+  output and cannot be resolved by marking source milestones complete.
+- 2026-08-23: `PgWorkflowOperations` already restricts every triage collection
+  to 100 rows and revalidates persisted signal payloads before replay, but
+  those SQL paths were only covered by port-level tests. A real PostgreSQL
+  fixture is required before the operations milestone can be accepted.
+- 2026-08-23: The operations integration fixture confirmed that all six current
+  migrations apply to a temporary PostgreSQL 16.11 database, and the replay
+  trigger observed the audit insert before the replay Outbox insert in the
+  same transaction.
+- 2026-08-23: The Graph demo failure was a real strict-schema mismatch in the
+  human-task resume payload. The demo now supplies the deterministic
+  `humanTaskId` correlation and reaches `COMPLETED`; the signal schema was not
+  weakened.
+- 2026-08-23: A direct unauthenticated local Redis probe returned
+  `NOAUTH Authentication required`. The runbook records the credentialed
+  operator command without retaining credentials or claiming a live smoke pass.
+- 2026-08-23: The supplied prototype ZIP is a standalone Vite + React
+  high-fidelity mock. It imports a browser-side workflow orchestrator,
+  persists project/domain state in localStorage/IndexedDB and creates a demo ZIP
+  in the browser. Its UI stages also exceed the currently published
+  `live-photo-project:v1` graph. Only its visual tokens, shell structure,
+  candidate-review layout and export-boundary copy are compatible with this
+  repository.
+- 2026-08-23: SpecNav Verification Runtime scope selection was required before
+  a trusted runtime status could be produced. The project selected the existing
+  user scope explicitly and repaired the locked `2.0.0-alpha.2` runtime. The
+  repair verified five locked packages, Chromium and headless Chromium
+  revision `1234`, and FFmpeg revision `1011`; the doctor passed on local Node
+  `v22.19.0` with only the expected unconfigured Midscene-provider warning.
+- 2026-08-23: CodeGraph CLI `1.3.1` initialized a 91-file index with 948 nodes
+  and 2,316 edges. Evidence queries matched all six development claims and the
+  claims report returned `verified_claims=6`, `unverified_claims=0`. The index
+  is local tooling state and is not a substitute for the signed Verification
+  2.0 task receipts.
+- 2026-08-23: The SpecNav task-acceptance generator rejects the current
+  implementation snapshot because the worktree contains uncommitted production
+  changes. The user initially prohibited committing or pushing this work, so no
+  task `acceptance.json`, review approval, or green handoff was fabricated at
+  that time. The user later authorized a local checkpoint commit; push,
+  deployment and production infrastructure changes remain prohibited.
 
 ## Decision log
 
@@ -182,12 +317,47 @@ migration.
   constructable in ESM; the named export is the documented ESM form.
 - 2026-08-23: Keep BullMQ for task execution and use LangGraph only as the control
   plane. This avoids two competing task schedulers.
+- 2026-08-23: Operations triage will query bounded workflow projections and
+  correlated domain jobs, not LangGraph checkpoint rows. Repair/replay will be a
+  versioned, audited Outbox command with deterministic effect keys and explicit
+  ownership checks.
 - 2026-08-23: Use `workflowRunId` as `thread_id`; a project can have multiple runs.
 - 2026-08-23: Store workflow query projections separately from checkpoint tables.
 - 2026-08-23: Begin with `generation -> human review -> render -> export`; migrate
   upload/style subgraphs after the first slice is proven.
 - 2026-08-23: Keep routing deterministic. Models may return typed recommendations,
   not arbitrary next-node names.
+- 2026-08-23: Administrative signal replay is limited to persisted
+  `PROCESSING`/`FAILED` signals and reuses the original validated payload. The
+  audit row and the deterministic replay Outbox event are written in the same
+  transaction, with the audit insert preceding the Outbox insert; consumed or
+  otherwise non-replayable signals are rejected and audited.
+- 2026-08-23: The operations projection names the current Outbox backlog age
+  `oldestQueueAgeMs` for API compatibility, but documentation explicitly
+  qualifies it as pending/processing Outbox age rather than Redis queue age.
+- 2026-08-23: Keep workflow-run resumption as a Web session concern only:
+  localStorage may retain a workflow run UUID and per-action idempotency keys,
+  but server projections remain authoritative and all workflow writes continue
+  through the centralized API client. A stored run is revalidated before a new
+  run is started; only a confirmed 404 is eligible for replacement.
+- 2026-08-23: Port the prototype's visual language through a scoped CSS module
+  and semantic page structure rather than importing its Vite router, mock
+  repositories, client-side phase transitions or browser ZIP generation.
+- 2026-08-23: Use the explicitly selected user-scoped Verification Runtime
+  rather than silently choosing the project scope, because the project runtime
+  candidate was absent and the user scope was already available. Keep the
+  runtime status as generated command output and do not hand-author a signed
+  receipt.
+- 2026-08-23: Preserve the dirty-worktree boundary for this no-commit task.
+  SpecNav task acceptance and independent review approvals require a clean
+  implementation snapshot; the correct outcome is an explicit delivery
+  blocker, not a temporary stash, synthetic commit, or manually approved
+  receipt.
+- 2026-08-23: Use a local checkpoint commit as the stable implementation
+  snapshot now that the user has explicitly authorized commits. Exclude
+  CodeGraph and SpecNav session-local state through repository ignore rules;
+  retain `.specnav.json` as project-level configuration. Do not push, deploy or
+  modify production infrastructure.
 
 ## Outcomes and retrospective
 
@@ -206,7 +376,96 @@ migration.
   4-10 require the legacy product surface that this working copy does not
   contain and are recorded as blocked with next actions.
 
-Not complete. Update this section after every production-like acceptance run.
+This section is updated after each production-like acceptance run; the final
+state is recorded below.
+
+2026-08-23 (Milestone 8/9 continuation):
+
+- At `2026-08-23T18:03:58+08:00`, the next acceptance pass was started from
+  the existing dirty worktree. The final rerun below supersedes the earlier
+  command-time counts and records the current source state.
+- Live Redis publication is still externally blocked by local `NOAUTH
+  Authentication required`; real FFmpeg/object-storage/HEIC/device validation
+  remains outside the fake renderer and ordinary CI boundary.
+- SpecNav handoff is not yet accepted: after runtime repair and CodeGraph
+  evidence generation, its remaining blockers are incomplete task-ledger
+  lifecycle statuses, missing task acceptance artifacts, non-approved
+  independent review verdicts, and the dirty implementation snapshot required
+  by the no-commit constraint.
+
+2026-08-23 (Operations and control-plane continuation):
+
+- Observed passing commands in this continuation: API `22/22`, Web `5/5`
+  after the export-boundary regression test, Graph contracts `4/4`, Graph
+  runtime `3/3`, AI worker `3/3`, Media worker `4/4`, orchestrator local `4/4`,
+  orchestrator PostgreSQL `11/11`, AI worker PostgreSQL `5/5`, Media worker
+  PostgreSQL `5/5`, and PostgreSQL operations `4/4`.
+- `pnpm --filter @live-photo-studio/orchestrator demo` now prints
+  `WAITING_GENERATION`, `REVIEW_ANCHOR`, `WAITING_RENDER`, `COMPLETED` after
+  the deterministic human-task correlation fix.
+- The operations integration suite verified bounded 100-row projections,
+  replay schema/state rejection, audit-before-Outbox insertion order and
+  non-operator denial auditing. Evidence is under
+  `docs/graph-engineering/evidence/`.
+- At that point, the remaining acceptance gaps were explicit: browser
+  refresh/reopen and 390px sensory evidence, complete signed-URL/private-
+  bucket checks, live Redis/BullMQ publication, real provider/FFmpeg/HEIC/
+  device validation, and SpecNav verification receipts/task acceptance
+  artifacts. The final repository gates were rerun successfully below.
+
+2026-08-23 (Prototype and Web continuation):
+
+- The supplied prototype was inspected read-only and was not copied into the
+  production Web path. Its SHA-256 and file-level findings are recorded above.
+- The current Web snapshot has no project browser test renderer or approved
+  Verification 2.0 browser case plan. The managed Verification Runtime is
+  installed, but no project browser/sensory case was executed; the framework-
+  neutral session/idempotency tests and static 390px/focus/export evidence
+  therefore remain the honest local boundary.
+
+2026-08-23 (Final validation and retrospective):
+
+- Observed passing commands: `pnpm install --frozen-lockfile`, `pnpm check`,
+  `pnpm test`, `pnpm graph:check`, `pnpm graph:test`, `pnpm graph:demo`,
+  `DATABASE_URL=postgresql://postgres@localhost:5432/postgres pnpm db:migrate`,
+  and `git diff --check`. The migration command reported `applied:[]` and
+  `skipped:6`; the demo reported
+  `WAITING_GENERATION -> REVIEW_ANCHOR -> WAITING_RENDER -> COMPLETED`.
+- Current PostgreSQL integration results: Orchestrator `11/11`, AI Worker
+  `7/7`, Media Worker `8/8`, and API operations `26/26`. The tests cover
+  restart, duplicate START and signals, wrong correlation, late cancellation
+  signals, stale recovery, consumed-marker crash replay, old graph versions,
+  bounded regeneration, worker ownership, deterministic exports, refresh and
+  duplicate-click session behavior, operations replay/audit ordering, and
+  redaction/cost controls.
+- The managed Verification Runtime doctor returned `ok:true`, `readiness=ready`,
+  `runtime_version=2.0.0-alpha.2`, `runtime_scope=user`, and
+  `fallback_used=false`. It emitted only the unconfigured Midscene-provider
+  warning; no Midscene-backed sensory case was executed.
+- CodeGraph `1.3.1` indexed 91 files, 948 nodes and 2,316 edges. The claims
+  report returned all six development claims verified with no unverified claims
+  or CodeGraph blockers.
+- The repository remains intentionally uncommitted and dirty because the user
+  prohibited commit/push/deploy. SpecNav's task-acceptance generator therefore
+  rejects the implementation snapshot before it can create signed task
+  acceptance artifacts. The six task review files remain `needs-fix`, the task
+  ledger has no `spec_review_passed`, `quality_review_passed` or `complete`
+  entries, and the Verification 2.0 case plan/receipts were not fabricated.
+- Acceptance A1 and A2 are locally passing. A3 remains `failing` because live
+  private object storage, signed-URL TTL, Redis/BullMQ publication, real
+  provider, production codec/HEIC and iOS device/PhotoKit behavior were not
+  available for this run. Local Node `v22.19.0` is also below the declared
+  `>=24` engine and pnpm reported an ignored `sharp` build script.
+
+2026-08-23 (Stable snapshot pass):
+
+- The user authorized a local checkpoint commit after the final validation
+  rerun. Local CodeGraph, root SpecNav runtime state and
+  `openspec/.specnav/` session state remain excluded from the repository
+  snapshot by `.gitignore`; `.specnav.json` remains project configuration.
+- The checkpoint commit and the subsequent system-executed receipts are still
+  pending in this pass. Handoff is not claimed until the owning SpecNav
+  contract returns `ok:true`.
 
 ## Repository context and orientation
 

@@ -1,0 +1,6 @@
+{"task_id":"001-existing-graph-foundation","task_items":["1.1","1.2","1.3","1.4"],"status":"task-ready","source":"specnav-vertical-slices","note":"Preserve the existing graph, contract, migration and API boundary evidence."}
+{"task_id":"002-durable-orchestration","task_items":["2.1","2.2","2.3","2.4","2.5"],"status":"task-ready","source":"specnav-vertical-slices","note":"Complete restart, signal, repair and Outbox duplicate behavior."}
+{"task_id":"003-worker-facts","task_items":["3.1","3.2","3.3","3.4","3.5"],"status":"task-ready","source":"specnav-vertical-slices","note":"Prove workers produce facts and signals without owning Graph phases."}
+{"task_id":"004-web-projection","task_items":["4.1","4.2","4.3","4.4"],"status":"task-ready","source":"specnav-vertical-slices","note":"Verify refresh-safe workflow projection and task-gated web actions."}
+{"task_id":"005-operations-security","task_items":["5.1","5.2","5.3","5.4"],"status":"task-ready","source":"specnav-vertical-slices","note":"Add safe tracing, triage, redaction and cost controls."}
+{"task_id":"006-canary-validation","task_items":["6.1","6.2","6.3","6.4"],"status":"task-ready","source":"specnav-vertical-slices","note":"Document rollout and capture final validation evidence."}

@@ -12,6 +12,8 @@ export const apiConfigSchema = z.object({
   OUTBOX_DISPATCH_BATCH_SIZE: z.coerce.number().int().positive().max(200).default(20),
   OUTBOX_VISIBILITY_TIMEOUT_MS: z.coerce.number().int().positive().default(60_000),
   GRAPH_WORKFLOW_ENABLED: z.enum(["true", "false"]).default("true"),
+  GRAPH_WORKFLOW_CANARY_USER_IDS: z.string().default(""),
+  GRAPH_ADMIN_USER_IDS: z.string().default(""),
 });
 
 export type ApiConfig = z.infer<typeof apiConfigSchema>;

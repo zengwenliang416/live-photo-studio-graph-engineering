@@ -32,6 +32,7 @@ export interface UseCaseResult {
 }
 
 const TERMINAL_RUN_STATUSES = new Set(["SUCCEEDED", "FAILED", "CANCELLED"]);
+const PUBLISHED_GRAPHS = new Set(["live-photo-project:v1"]);
 
 function notFound(code: string, detail: string): ApplicationProblemError {
   return new ApplicationProblemError(404, code, "Resource not found.", detail);
@@ -70,6 +71,7 @@ export class WorkflowService {
   async startWorkflowRun(params: {
     projectId: string;
     userId: string;
+    traceId?: string | undefined;
     idempotencyKey: string;
     body: StartWorkflowRunBody;
   }): Promise<UseCaseResult> {
@@ -82,8 +84,14 @@ export class WorkflowService {
       work: async (tx) => {
         await tx.assertProjectOwner(params.projectId, params.userId);
         const workflowRunId = randomUUID();
+        const traceId = params.traceId ?? randomUUID();
         const graphKey = params.body.graphKey ?? "live-photo-project";
         const graphVersion = params.body.graphVersion ?? "v1";
+        if (!PUBLISHED_GRAPHS.has(`${graphKey}:${graphVersion}`)) {
+          throw validationFailed(
+            `Graph ${graphKey}:${graphVersion} is not published for new runs.`,
+          );
+        }
         const envelope: WorkflowCommand = {
           type: "START_WORKFLOW",
           commandId: randomUUID(),
@@ -92,6 +100,7 @@ export class WorkflowService {
           userId: params.userId,
           graphKey,
           graphVersion,
+          traceId,
           input: {
             ...(params.body.input ?? {}),
             workflowRunId,
@@ -106,6 +115,7 @@ export class WorkflowService {
           id: workflowRunId,
           projectId: params.projectId,
           userId: params.userId,
+          traceId,
           graphKey,
           graphVersion,
         });
@@ -192,6 +202,7 @@ export class WorkflowService {
           nodeName: task.nodeName,
           status: task.status,
           allowedActions: task.allowedActions,
+          candidateOutputIds: task.candidateOutputIds,
           createdAt: task.createdAt,
         })),
       },
@@ -271,6 +282,8 @@ export class WorkflowService {
           correlationId: task.id,
           payload,
           emittedAt: new Date().toISOString(),
+          traceId: found.traceId ?? task.workflowRunId,
+          nodeName: task.nodeName,
         };
         await tx.insertOutboxEvent({
           aggregateType: "workflow",
@@ -320,6 +333,9 @@ export class WorkflowService {
             type: "CANCEL_WORKFLOW",
             commandId: randomUUID(),
             workflowRunId: run.id,
+            projectId: run.projectId,
+            userId: run.userId,
+            traceId: run.traceId ?? run.id,
             ...(params.body.reason !== undefined
               ? { reason: params.body.reason }
               : {}),
@@ -339,7 +355,7 @@ export class WorkflowService {
     });
   }
 
-  private executeIdempotently(params: {
+  private async executeIdempotently(params: {
     scope: string;
     idempotencyKey: string;
     userId: string;
@@ -379,10 +395,10 @@ export class WorkflowService {
     // A concurrent identical request may win the unique insert; retry once so
     // the loser serves the stored first response instead of a 500.
     try {
-      return attempt();
+      return await attempt();
     } catch (error) {
       if (error instanceof IdempotencyConflictError) {
-        return attempt();
+        return await attempt();
       }
       throw error;
     }

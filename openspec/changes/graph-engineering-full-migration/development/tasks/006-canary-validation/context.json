@@ -1,0 +1,49 @@
+{
+  "task_id": "006-canary-validation",
+  "goal": "The Graph path has an operator-verifiable canary, rollback procedure and honest final validation record.",
+  "task_items": [
+    "6.1",
+    "6.2",
+    "6.3",
+    "6.4"
+  ],
+  "must_read": [
+    "openspec/changes/graph-engineering-full-migration/development/tasks/006-canary-validation/brief.md",
+    "openspec/changes/graph-engineering-full-migration/requirements.md",
+    "openspec/changes/graph-engineering-full-migration/acceptance.md",
+    "openspec/changes/graph-engineering-full-migration/spec-map.json",
+    "openspec/changes/graph-engineering-full-migration/component-impact-map.json",
+    "openspec/changes/graph-engineering-full-migration/prototype/handoff.md",
+    "openspec/changes/graph-engineering-full-migration/prototype/decision.json",
+    "openspec/specs/ui-design/design.md",
+    "openspec/specs/system-architecture/design.md",
+    "openspec/specs/frontend-backend-data-flow/design.md",
+    "openspec/specs/component-architecture/design.md",
+    "openspec/changes/graph-engineering-full-migration/prototype/logic/harness.js"
+  ],
+  "allowed_files": [
+    "docs",
+    "package.json",
+    "pnpm-lock.yaml",
+    "apps",
+    "packages"
+  ],
+  "test_paths": [
+    "apps/**.test.ts",
+    "packages/**.test.ts"
+  ],
+  "non_goals": [
+    "Do not expand scope beyond the active change.",
+    "Do not bypass component extraction rules."
+  ],
+  "expected_evidence": [
+    "Focused tests or command output",
+    "Task report",
+    "Spec review",
+    "Quality review"
+  ],
+  "unsafe_assumptions": [
+    "Any missing requirement, API, database, or component decision blocks implementation."
+  ],
+  "stop_condition": "Stop if the task would edit outside scope or duplicate reusable component behavior."
+}

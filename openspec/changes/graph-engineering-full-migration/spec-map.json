@@ -1,0 +1,72 @@
+{
+  "touched_specs": [
+    "ui-design",
+    "system-architecture",
+    "frontend-backend-data-flow",
+    "component-architecture"
+  ],
+  "ui_rules": [
+    "light-only",
+    "mobile-first-390px",
+    "stage-based-progress",
+    "export-boundary-copy"
+  ],
+  "architecture_modules": [
+    "apps/api",
+    "apps/orchestrator",
+    "apps/worker-ai",
+    "apps/worker-media",
+    "apps/web",
+    "packages/graph-contracts",
+    "packages/graph-runtime",
+    "packages/database"
+  ],
+  "api_contracts": [
+    "workflow-run-commands",
+    "human-task-decisions",
+    "workflow-projection-queries",
+    "workflow-sse-invalidation"
+  ],
+  "database_entities": [
+    "workflow_runs",
+    "workflow_signals",
+    "human_tasks",
+    "workflow_node_effects",
+    "workflow_events",
+    "outbox_events",
+    "generation_batches",
+    "generation_outputs",
+    "render_jobs",
+    "export_packages"
+  ],
+  "permissions": [
+    "user_id-plus-project_id-ownership",
+    "task-run-correlation",
+    "audited-admin-repair"
+  ],
+  "operational_constraints": [
+    "transactional-outbox",
+    "bullmq-execution-plane",
+    "per-run-single-writer-lock",
+    "additive-migrations",
+    "feature-flag-canary-rollback"
+  ],
+  "data_flows": [
+    "FLOW-START-WORKFLOW",
+    "FLOW-REVIEW-ANCHOR",
+    "FLOW-CANCEL-WORKFLOW",
+    "FLOW-GENERATE",
+    "FLOW-RENDER-EXPORT",
+    "FLOW-REFRESH-RECOVER"
+  ],
+  "theme_modes": [
+    "light-only",
+    "theme-toggle:none"
+  ],
+  "locale_policy": [
+    "i18n:disabled",
+    "locales:zh-CN",
+    "default-locale:zh-CN"
+  ],
+  "unresolved_gaps": []
+}

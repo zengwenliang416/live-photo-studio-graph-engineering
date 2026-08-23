@@ -1,6 +1,7 @@
 import type { ArgumentsHost, ExceptionFilter } from "@nestjs/common";
 import { Catch, HttpException } from "@nestjs/common";
 import type { ZodError } from "zod";
+import { safeLogEvent } from "@live-photo-studio/graph-contracts";
 import {
   ApplicationProblemError,
   problemDetailsBody,
@@ -58,12 +59,9 @@ export class ProblemDetailsFilter implements ExceptionFilter {
       return;
     }
 
-    console.error(
-      JSON.stringify({
-        event: "api.unhandled_error",
-        message: exception instanceof Error ? exception.name : "UnknownError",
-      }),
-    );
+    console.error(JSON.stringify(safeLogEvent("api.unhandled_error", {
+      message: exception instanceof Error ? exception.name : "UnknownError",
+    })));
     send(500, "INTERNAL_ERROR", "An unexpected error occurred.");
   }
 }

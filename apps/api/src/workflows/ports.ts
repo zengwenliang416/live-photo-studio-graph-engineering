@@ -16,6 +16,7 @@ export interface WorkflowRunRow {
   readonly id: string;
   readonly projectId: string;
   readonly userId: string;
+  readonly traceId?: string | null;
   readonly graphKey: string;
   readonly graphVersion: string;
   readonly status: WorkflowRunStatusValue | string;
@@ -47,6 +48,7 @@ export interface WorkflowRunInsert {
   readonly id: string;
   readonly projectId: string;
   readonly userId: string;
+  readonly traceId?: string | undefined;
   readonly graphKey: string;
   readonly graphVersion: string;
 }
@@ -72,7 +74,12 @@ export interface WorkflowTx {
   listHumanTasksForRun(runId: string): Promise<readonly HumanTaskRow[]>;
   findTaskById(
     taskId: string,
-  ): Promise<{ task: HumanTaskRow; runUserId: string } | null>;
+  ): Promise<{
+    task: HumanTaskRow;
+    runUserId: string;
+    projectId?: string | undefined;
+    traceId?: string | null | undefined;
+  } | null>;
   completePendingTask(taskId: string, result: unknown): Promise<boolean>;
 }
 

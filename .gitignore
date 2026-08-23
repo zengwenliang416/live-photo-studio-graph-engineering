@@ -36,3 +36,8 @@ tmp/
 .idea/
 .vscode/
 *.swp
+
+# Local verification/index state
+.codegraph/
+.specnav/
+openspec/.specnav/

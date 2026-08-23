@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "captured_at": "2026-08-23T18:44:13+08:00",
+  "archive": {
+    "path": "/Users/wenliang_zeng/Downloads/live-photo-studio (2).zip",
+    "sha256": "922a4c229193d90ca56cdc55653c760fea0a256584bb633998d69b6b605aa0ac",
+    "inspection": "read_only",
+    "extracted_reference": "/tmp/live-photo-studio-prototype.vqn5zZ"
+  },
+  "status": "visual_reference_only",
+  "reusable": [
+    "obsidian/gold/editorial visual tokens",
+    "top brand shell and mobile-first navigation",
+    "candidate grid and human review composition",
+    "export manifest inspection and Photos boundary copy"
+  ],
+  "not_promoted": [
+    "Vite/custom browser router",
+    "browser-side mockWorkflowOrchestrator and phase transitions",
+    "localStorage/IndexedDB project, asset and workflow repositories",
+    "browser Blob persistence as a storage source of truth",
+    "browser DemoZipBuilder and placeholder export artifacts",
+    "Gemini/AI Studio metadata and browser API credentials"
+  ],
+  "repository_decision": "Only scoped visual structure and copy were adapted into the Next.js page. Workflow authority remains the API projection and apps/orchestrator; binaries remain outside Graph state and browser domain persistence."
+}

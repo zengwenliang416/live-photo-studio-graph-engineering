@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "active_change": "graph-engineering-full-migration",
+  "status": "passed",
+  "ok": true,
+  "checked_at": "2026-08-23T09:25:00.000Z",
+  "blockers": []
+}

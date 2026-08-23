@@ -80,6 +80,8 @@ async function createApp(input?: { graphWorkflowEnabled?: string }) {
       GRAPH_WORKFLOW_ENABLED: (input?.graphWorkflowEnabled ?? "true") as
         | "true"
         | "false",
+      GRAPH_WORKFLOW_CANARY_USER_IDS: "",
+      GRAPH_ADMIN_USER_IDS: "operator-user",
     } satisfies ApiConfig)
     .overrideProvider(WORKFLOW_TOKENS.pool)
     .useValue({})

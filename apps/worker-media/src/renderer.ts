@@ -1,15 +1,13 @@
 import { createHash } from "node:crypto";
-import { z } from "zod";
+import {
+  renderRequestedPayloadSchema,
+  type RenderRequestedPayload,
+} from "@live-photo-studio/graph-contracts";
 
-/** Payload relayed from the orchestrator effect adapter via the Outbox. */
-export const renderRequestedPayloadSchema = z.object({
-  jobId: z.string().uuid(),
-  workflowRunId: z.string().uuid(),
-  projectId: z.string().uuid(),
-  selectedOutputId: z.string().uuid(),
-});
-
-export type RenderRequestedPayload = z.infer<typeof renderRequestedPayloadSchema>;
+export {
+  renderRequestedPayloadSchema,
+  type RenderRequestedPayload,
+} from "@live-photo-studio/graph-contracts";
 
 export interface RenderArtifacts {
   readonly cover: Uint8Array;

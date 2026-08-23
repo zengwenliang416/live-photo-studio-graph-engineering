@@ -1,0 +1,50 @@
+{
+  "schema": "specnav.prototype.verifier.v1",
+  "status": "green",
+  "checked_entry": "logic/harness.js",
+  "project_fidelity": {
+    "status": "not_applicable",
+    "inventory": "not_applicable",
+    "shell_checked": false,
+    "generic_shell_detected": false,
+    "notes": [
+      "The selected branch is logic-state; no visual shell is part of this prototype."
+    ]
+  },
+  "visual_matrix": {
+    "viewports": [],
+    "theme_modes": [
+      "light"
+    ],
+    "locales": [
+      "zh-CN"
+    ],
+    "states": [
+      "START",
+      "WAITING_GENERATION",
+      "REVIEW_ANCHOR",
+      "WAITING_RENDER",
+      "COMPLETED",
+      "CANCELLED",
+      "FAILED"
+    ]
+  },
+  "checks": [
+    "Harness executes the successful generation-review-render path.",
+    "Duplicate signal IDs are consumed once.",
+    "Wrong job correlation is rejected.",
+    "CANCELLED, COMPLETED and FAILED states ignore late completion signals.",
+    "REGENERATE is bounded by maxRepairAttempts."
+  ],
+  "evidence": [
+    {
+      "command": "node openspec/changes/graph-engineering-full-migration/prototype/logic/harness.js",
+      "result": "start -> WAITING_GENERATION; generation-completed -> REVIEW_ANCHOR; decision -> WAITING_RENDER; render-completed -> COMPLETED"
+    },
+    {
+      "source": "openspec/changes/graph-engineering-full-migration/prototype/logic/harness.js",
+      "result": "Direct transition guards cover duplicate signals, correlation, cancellation and bounded repair."
+    }
+  ],
+  "blockers": []
+}

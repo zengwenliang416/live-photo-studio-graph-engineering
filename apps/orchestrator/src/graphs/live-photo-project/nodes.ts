@@ -1,6 +1,7 @@
 import { interrupt } from "@langchain/langgraph";
 import { defineGraphNode } from "@live-photo-studio/graph-contracts";
 import {
+  buildDeterministicUuid,
   buildNodeEffectKey,
   WorkflowSignalMismatchError,
 } from "@live-photo-studio/graph-runtime";
@@ -35,7 +36,12 @@ export function createLivePhotoProjectNodes(
     version: 1,
     kind: "DATABASE",
     reads: ["projectId", "userId"],
-    writes: ["sourceAssetIds", "coverAssetId", "currentPhase"],
+    writes: [
+      "sourceAssetIds",
+      "coverAssetId",
+      "currentPhase",
+      "maxRepairAttempts",
+    ],
     sideEffect: false,
     idempotent: true,
   });
@@ -51,6 +57,8 @@ export function createLivePhotoProjectNodes(
       sourceAssetIds: [...snapshot.sourceAssetIds],
       coverAssetId: snapshot.coverAssetId,
       currentPhase: "READY_TO_GENERATE",
+      maxRepairAttempts:
+        dependencies.maxRepairAttempts ?? state.maxRepairAttempts,
     };
   };
 
@@ -91,6 +99,7 @@ export function createLivePhotoProjectNodes(
     const job = await dependencies.effects.ensureGenerationBatch({
       workflowRunId: state.workflowRunId,
       projectId: state.projectId,
+      traceId: state.traceId ?? state.workflowRunId,
       sourceAssetIds: state.sourceAssetIds,
       coverAssetId: state.coverAssetId,
       revision: state.generationRevision,
@@ -163,6 +172,8 @@ export function createLivePhotoProjectNodes(
       "selectedAnchorOutputId",
       "reviewAction",
       "generationRevision",
+      "pendingHumanTaskId",
+      "lastErrorCode",
       "currentPhase",
     ],
     sideEffect: false,
@@ -172,16 +183,30 @@ export function createLivePhotoProjectNodes(
   const humanSelectAnchor = async (
     state: LivePhotoProjectStateValue,
   ): Promise<LivePhotoProjectStateUpdate> => {
+    const humanTaskId =
+      state.pendingHumanTaskId ??
+      buildDeterministicUuid(
+        `${state.workflowRunId}:${humanSelectAnchorDefinition.name}:${state.generationRevision}`,
+      );
+    const allowedActions =
+      state.generationRevision < state.maxRepairAttempts
+        ? (["SELECT", "REGENERATE", "CANCEL"] as const)
+        : (["SELECT", "CANCEL"] as const);
     const decision = anchorDecisionSchema.parse(
       interrupt({
         type: "HUMAN_TASK",
         taskType: "SELECT_ANCHOR_IMAGE",
         workflowRunId: state.workflowRunId,
         nodeName: humanSelectAnchorDefinition.name,
+        correlationId: humanTaskId,
+        humanTaskId,
         candidateOutputIds: state.candidateOutputIds,
-        allowedActions: ["SELECT", "REGENERATE", "CANCEL"],
+        allowedActions,
       }),
     );
+    if (decision.correlationId !== humanTaskId) {
+      throw new WorkflowSignalMismatchError(humanTaskId, decision.correlationId);
+    }
     if (decision.action === "SELECT") {
       if (!state.candidateOutputIds.includes(decision.selectedOutputId)) {
         throw new Error("The selected output does not belong to this workflow.");
@@ -189,18 +214,30 @@ export function createLivePhotoProjectNodes(
       return {
         reviewAction: "SELECT",
         selectedAnchorOutputId: decision.selectedOutputId,
+        pendingHumanTaskId: undefined,
+        lastErrorCode: undefined,
         currentPhase: "READY_TO_RENDER",
       };
     }
     if (decision.action === "REGENERATE") {
+      if (state.generationRevision >= state.maxRepairAttempts) {
+        return {
+          reviewAction: "REGENERATE",
+          lastErrorCode: "REGENERATION_LIMIT_REACHED",
+          currentPhase: "FAILED",
+        };
+      }
       return {
         reviewAction: "REGENERATE",
         generationRevision: state.generationRevision + 1,
+        pendingHumanTaskId: undefined,
+        lastErrorCode: undefined,
         currentPhase: "READY_TO_GENERATE",
       };
     }
     return {
       reviewAction: "CANCEL",
+      pendingHumanTaskId: undefined,
       currentPhase: "CANCELLED",
     };
   };
@@ -234,6 +271,7 @@ export function createLivePhotoProjectNodes(
     const job = await dependencies.effects.ensureRenderJob({
       workflowRunId: state.workflowRunId,
       projectId: state.projectId,
+      traceId: state.traceId ?? state.workflowRunId,
       selectedOutputId,
       effectKey,
     });
@@ -315,6 +353,7 @@ export function createLivePhotoProjectNodes(
     await dependencies.effects.markWorkflowCompleted({
       workflowRunId: state.workflowRunId,
       projectId: state.projectId,
+      traceId: state.traceId ?? state.workflowRunId,
       exportId: state.exportId,
       effectKey,
     });
@@ -343,6 +382,7 @@ export function createLivePhotoProjectNodes(
     await dependencies.effects.markWorkflowCancelled({
       workflowRunId: state.workflowRunId,
       projectId: state.projectId,
+      traceId: state.traceId ?? state.workflowRunId,
       effectKey,
     });
     return { currentPhase: "CANCELLED" };
@@ -372,6 +412,7 @@ export function createLivePhotoProjectNodes(
     await dependencies.effects.markWorkflowFailed({
       workflowRunId: state.workflowRunId,
       projectId: state.projectId,
+      traceId: state.traceId ?? state.workflowRunId,
       errorCode,
       effectKey,
     });

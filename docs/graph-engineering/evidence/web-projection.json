@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "assertion_id": "web-projection",
+  "captured_at": "2026-08-23T18:44:13+08:00",
+  "status": "locally_passing",
+  "commands": [
+    {
+      "command": "pnpm --filter @live-photo-studio/web check",
+      "result": "passed",
+      "observed": "TypeScript strict check passed."
+    },
+    {
+      "command": "pnpm --filter @live-photo-studio/web test",
+      "result": "passed",
+      "observed": "11 tests passed, including refresh/reopen revalidation, confirmed-404 replacement, concurrent mount de-duplication, stable action keys, server-authority scan, export boundary copy and static mobile accessibility checks."
+    },
+    {
+      "command": "pnpm test",
+      "result": "passed",
+      "observed": "Repository build and test gate passed; Web suite passed 11/11."
+    },
+    {
+      "command": "git diff --check",
+      "result": "passed",
+      "observed": "No whitespace errors were reported."
+    }
+  ],
+  "verified_controls": [
+    "Stored workflow UUIDs are revalidated against the API projection before reuse.",
+    "Only a confirmed 404 may cause a stored run pointer to be replaced.",
+    "Concurrent mounts share one in-flight start request.",
+    "Write responses are Zod-parsed from unknown JSON before use.",
+    "SSE invalidates queries; it is not treated as final workflow state.",
+    "The page contains explicit Web ZIP versus native Photos-library boundary copy.",
+    "Scoped CSS includes 390px layout rules, 44px touch targets, visible focus and reduced-motion handling."
+  ],
+  "sensory_evidence": {
+    "status": "not_run",
+    "blocker": "This snapshot has no managed browser runtime or rendered deployment surface.",
+    "operator_command": "Start the Next.js Web app in an approved environment, open /projects/{projectId}, run a 390px viewport accessibility/sensory audit, and attach the report here."
+  }
+}

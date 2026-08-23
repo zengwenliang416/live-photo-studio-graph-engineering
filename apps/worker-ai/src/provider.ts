@@ -1,30 +1,23 @@
-import { z } from "zod";
+import {
+  generationRequestedPayloadSchema,
+  type GenerationRequestedPayload,
+} from "@live-photo-studio/graph-contracts";
 
-/**
- * Payload emitted by the orchestrator's transitional effect adapter through
- * the Transactional Outbox and relayed by the API dispatcher.
- */
-export const generationRequestedPayloadSchema = z.object({
-  jobId: z.string().uuid(),
-  workflowRunId: z.string().uuid(),
-  projectId: z.string().uuid(),
-  sourceAssetIds: z.array(z.string().uuid()).min(1),
-  coverAssetId: z.string().uuid(),
-  revision: z.number().int().min(0),
-});
-
-export type GenerationRequestedPayload = z.infer<
-  typeof generationRequestedPayloadSchema
->;
+export {
+  generationRequestedPayloadSchema,
+  type GenerationRequestedPayload,
+} from "@live-photo-studio/graph-contracts";
 
 export interface GeneratedCandidate {
   readonly storageKey: string;
   readonly width: number;
   readonly height: number;
+  readonly providerRequestId?: string | undefined;
 }
 
 export interface ImageGenerationProvider {
   readonly name: string;
+  readonly estimatedCostMicros?: number | undefined;
   generate(input: {
     projectId: string;
     sourceAssetIds: readonly string[];
@@ -32,6 +25,26 @@ export interface ImageGenerationProvider {
     revision: number;
     count: number;
   }): Promise<readonly GeneratedCandidate[]>;
+}
+
+export class ProviderFailureError extends Error {
+  constructor(
+    public readonly code: string,
+    public readonly retryable: boolean,
+  ) {
+    super(code);
+    this.name = "ProviderFailureError";
+  }
+}
+
+export function assertProviderBudget(
+  provider: ImageGenerationProvider,
+  maxCostMicros: number,
+): void {
+  const estimatedCostMicros = provider.estimatedCostMicros ?? 0;
+  if (estimatedCostMicros > maxCostMicros) {
+    throw new ProviderFailureError("MODEL_BUDGET_EXCEEDED", false);
+  }
 }
 
 const WIDTH = 1024;
@@ -44,6 +57,7 @@ const HEIGHT = 1024;
  */
 export class MockImageGenerationProvider implements ImageGenerationProvider {
   readonly name = "mock";
+  readonly estimatedCostMicros = 0;
 
   async generate(input: {
     projectId: string;

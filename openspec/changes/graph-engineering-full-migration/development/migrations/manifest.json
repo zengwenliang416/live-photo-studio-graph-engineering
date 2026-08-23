@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "change_id": "graph-engineering-full-migration",
+  "required": true,
+  "status": "ready",
+  "migrations": [
+    {
+      "id": "graph-engineering-development-evidence",
+      "kind": "data",
+      "order": 1,
+      "path": "development/migrations/001_graph_engineering_development_evidence.sql"
+    }
+  ],
+  "rollback": [
+    {
+      "id": "graph-engineering-development-evidence-rollback",
+      "kind": "rollback",
+      "order": 1,
+      "path": "development/migrations/001_graph_engineering_development_evidence.rollback.sql"
+    }
+  ],
+  "rollback_strategy": "This development-only evidence table may be dropped after validation artifacts are archived. Do not run the rollback against production workflow tables.",
+  "verification": {
+    "commands": [
+      "psql \"$DATABASE_URL\" -v ON_ERROR_STOP=1 -f openspec/changes/graph-engineering-full-migration/development/migrations/001_graph_engineering_development_evidence.sql",
+      "psql \"$DATABASE_URL\" -v ON_ERROR_STOP=1 -f openspec/changes/graph-engineering-full-migration/development/migrations/001_graph_engineering_development_evidence.rollback.sql"
+    ],
+    "evidence": [
+      "openspec/changes/graph-engineering-full-migration/development/validation-log.jsonl"
+    ]
+  },
+  "notes": [
+    "These SQL files are development evidence scaffolding only and do not alter product workflow tables or production data."
+  ]
+}

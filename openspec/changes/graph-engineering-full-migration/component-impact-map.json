@@ -1,0 +1,48 @@
+{
+  "new_components": [
+    "workflow-stage-summary",
+    "human-task-action-group",
+    "candidate-review-grid",
+    "export-boundary-notice"
+  ],
+  "reused_components": [
+    "typed-api-client",
+    "workflow-query-hook",
+    "human-task-query-hook",
+    "sse-invalidation-hook"
+  ],
+  "extraction_triggers": [
+    "action-eligibility-used-by-review-and-project-pages",
+    "stage-derivation-used-by-progress-and-summary",
+    "idempotency-key-generation-shared-by-write-hooks"
+  ],
+  "forbidden_dependencies": [
+    "presentational-component-to-fetch",
+    "web-to-database",
+    "web-to-provider-sdk",
+    "worker-to-graph-routing",
+    "domain-to-framework-or-provider"
+  ],
+  "hooks": [
+    "use-workflow",
+    "use-human-tasks",
+    "use-workflow-events"
+  ],
+  "utilities": [
+    "workflow-stage-derivation",
+    "task-action-eligibility",
+    "stable-idempotency-key"
+  ],
+  "services": [
+    "centralized-api-client",
+    "workflow-command-mutation-boundary"
+  ],
+  "required_component_tests": [
+    "390px-accessibility",
+    "task-payload-action-gating",
+    "duplicate-click-disable",
+    "stale-task-conflict",
+    "export-boundary-copy"
+  ],
+  "unresolved_gaps": []
+}

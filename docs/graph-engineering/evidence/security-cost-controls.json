@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "assertion_id": "A3",
+  "status": "blocked",
+  "captured_at": "2026-08-23T18:44:13+08:00",
+  "commands": [
+    {
+      "command": "pnpm --filter @live-photo-studio/graph-contracts test",
+      "result": "passed",
+      "observed": "4 tests passed, including execution metadata parsing and redaction of secrets, signed URLs, prompts, provider responses and binary values."
+    },
+    {
+      "command": "pnpm --filter @live-photo-studio/worker-ai test",
+      "result": "passed",
+      "observed": "3 tests passed, including zero-cost mock provider behavior and stable non-retryable budget rejection."
+    },
+    {
+      "command": "pnpm --filter @live-photo-studio/worker-media test",
+      "result": "passed",
+      "observed": "4 tests passed, including MIME/magic-byte and pixel bounds, GPS/location metadata removal, deterministic ZIP output and the guarded PostgreSQL suite."
+    },
+    {
+      "command": "pnpm --filter @live-photo-studio/api test",
+      "result": "passed",
+      "observed": "23 tests passed, including ownership, malformed identifiers, malformed routed payload rejection, idempotency, operations authorization and feature-flag behavior."
+    },
+    {
+      "command": "pnpm --filter @live-photo-studio/graph-contracts test",
+      "result": "passed",
+      "observed": "6 tests passed, including malformed signal rejection and the explicit credential, signed URL, Base64, prompt, EXIF/GPS, provider-response and binary redaction matrix."
+    },
+    {
+      "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/worker-ai exec tsx --test src/worker-ai.integration.test.ts",
+      "result": "passed",
+      "observed": "5 PostgreSQL-backed tests passed, including cross-project rejection and zero-cost mock-provider behavior."
+    },
+    {
+      "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/worker-media exec tsx --test src/worker-media.integration.test.ts",
+      "result": "passed",
+      "observed": "5 PostgreSQL-backed tests passed, including cross-project/correlation rejection, MIME and pixel controls, GPS stripping and deterministic export behavior."
+    }
+  ],
+  "verified_controls": [
+    "Graph state and published payload contracts contain IDs and bounded metadata rather than media bytes.",
+    "Mock provider default cost is zero and budget rejection is non-retryable.",
+    "Cross-project workflow and worker access is rejected by current tests.",
+    "Redaction tests cover credentials, signed URLs, prompts, provider responses, Base64-like values, binary values and EXIF/GPS-like keys.",
+    "Malformed signal variants are rejected before queue or graph use.",
+    "Cross-project workflow and worker access paths are covered by API and PostgreSQL worker tests."
+  ],
+  "blockers": [
+    "Private bucket policy and signed-URL TTL cannot be verified because the storage adapter is not present in this snapshot.",
+    "Real provider, FFmpeg/ImageMagick/libheif and device checks were not run.",
+    "The local Redis probe returned NOAUTH Authentication required.",
+    "A Web ZIP is not a PhotoKit-saved Live Photo; iOS Importer verification is not part of this repository."
+  ]
+}

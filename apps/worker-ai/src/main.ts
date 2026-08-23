@@ -3,6 +3,7 @@ import { Worker } from "bullmq";
 import { Redis } from "ioredis";
 import type { Pool } from "pg";
 import { createAppPool } from "@live-photo-studio/database";
+import { safeLogEvent } from "@live-photo-studio/graph-contracts";
 import {
   GenerationService,
 } from "./generation-service.js";
@@ -20,7 +21,12 @@ async function main(): Promise<void> {
   });
 
   const provider = new MockImageGenerationProvider();
-  const service = new GenerationService(pool, provider);
+  const service = new GenerationService(
+    pool,
+    provider,
+    config.CANDIDATES_PER_BATCH,
+    config.AI_MAX_COST_MICROS,
+  );
 
   const worker = new Worker(
     config.GENERATION_JOB_QUEUE,
@@ -44,13 +50,14 @@ async function main(): Promise<void> {
     await service
       .fail(parsed.data, "GENERATION_FAILED")
       .catch(() => undefined);
-    console.error(
-      JSON.stringify({
-        event: "worker_ai.job_failed",
-        jobId: job.id,
-        message: error instanceof Error ? error.name : "UnknownError",
-      }),
-    );
+    console.error(JSON.stringify(safeLogEvent("worker_ai.job_failed", {
+      jobId: job.id,
+      workflowRunId: parsed.data.workflowRunId,
+      projectId: parsed.data.projectId,
+      traceId: parsed.data.traceId,
+      externalJobId: parsed.data.jobId,
+      message: error instanceof Error ? error.name : "UnknownError",
+    })));
   });
 
   const shutdown = async (): Promise<void> => {
@@ -60,22 +67,16 @@ async function main(): Promise<void> {
   process.once("SIGINT", () => void shutdown());
   process.once("SIGTERM", () => void shutdown());
 
-  console.info(
-    JSON.stringify({
-      event: "worker_ai.started",
-      queue: config.GENERATION_JOB_QUEUE,
-      provider: provider.name,
-      concurrency: config.AI_WORKER_CONCURRENCY,
-    }),
-  );
+  console.info(JSON.stringify(safeLogEvent("worker_ai.started", {
+    queue: config.GENERATION_JOB_QUEUE,
+    provider: provider.name,
+    concurrency: config.AI_WORKER_CONCURRENCY,
+  })));
 }
 
 main().catch((error: unknown) => {
-  console.error(
-    JSON.stringify({
-      event: "worker_ai.bootstrap_failed",
-      message: error instanceof Error ? error.name : "UnknownError",
-    }),
-  );
+  console.error(JSON.stringify(safeLogEvent("worker_ai.bootstrap_failed", {
+    message: error instanceof Error ? error.name : "UnknownError",
+  })));
   process.exitCode = 1;
 });

@@ -31,6 +31,7 @@ function mapRunRow(row: Record<string, unknown>): WorkflowRunRow {
     id: row["id"] as string,
     projectId: row["project_id"] as string,
     userId: row["user_id"] as string,
+    traceId: (row["trace_id"] as string | null) ?? null,
     graphKey: row["graph_key"] as string,
     graphVersion: row["graph_version"] as string,
     status: row["status"] as WorkflowRunStatusValue | string,
@@ -88,18 +89,20 @@ class PgWorkflowTx implements WorkflowTx {
     id: string;
     projectId: string;
     userId: string;
+    traceId?: string | undefined;
     graphKey: string;
     graphVersion: string;
   }): Promise<void> {
     await this.client.query(
       `INSERT INTO workflow_runs (
-         id, project_id, user_id, graph_key, graph_version, thread_id, status
-       ) VALUES ($1, $2, $3, $4, $5, $1, 'QUEUED')
+         id, project_id, user_id, trace_id, graph_key, graph_version, thread_id, status
+       ) VALUES ($1, $2, $3, $4, $5, $6, $1, 'QUEUED')
        ON CONFLICT (id) DO NOTHING`,
       [
         input.id,
         input.projectId,
         input.userId,
+        input.traceId ?? null,
         input.graphKey,
         input.graphVersion,
       ],
@@ -176,7 +179,7 @@ class PgWorkflowTx implements WorkflowTx {
 
   async findRunById(runId: string): Promise<WorkflowRunRow | null> {
     const result = await this.client.query<Record<string, unknown>>(
-      `SELECT r.id, r.project_id, r.user_id, r.graph_key, r.graph_version,
+      `SELECT r.id, r.project_id, r.user_id, r.trace_id, r.graph_key, r.graph_version,
               r.status, r.current_node, r.current_phase, r.updated_at,
               (SELECT ht.id FROM human_tasks ht
                 WHERE ht.workflow_run_id = r.id AND ht.status = 'PENDING'
@@ -216,10 +219,13 @@ class PgWorkflowTx implements WorkflowTx {
   async findTaskById(taskId: string): Promise<{
     task: HumanTaskRow;
     runUserId: string;
+    projectId: string;
+    traceId: string | null;
   } | null> {
     const result = await this.client.query<Record<string, unknown>>(
       `SELECT ht.id, ht.workflow_run_id, ht.task_type, ht.node_name,
-              ht.status, ht.payload, ht.created_at, r.user_id AS run_user_id
+              ht.status, ht.payload, ht.created_at, r.user_id AS run_user_id,
+              r.project_id, r.trace_id
          FROM human_tasks ht
          JOIN workflow_runs r ON r.id = ht.workflow_run_id
         WHERE ht.id = $1`,
@@ -230,6 +236,8 @@ class PgWorkflowTx implements WorkflowTx {
     const payload = row["payload"] as Record<string, unknown>;
     return {
       runUserId: row["run_user_id"] as string,
+      projectId: row["project_id"] as string,
+      traceId: (row["trace_id"] as string | null) ?? null,
       task: {
         id: row["id"] as string,
         workflowRunId: row["workflow_run_id"] as string,

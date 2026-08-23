@@ -1,0 +1,19 @@
+{
+  "schema": "specnav.codegraph.claims_report.v1",
+  "generated_at": "2026-08-23T11:24:27.784Z",
+  "active_change": "graph-engineering-full-migration",
+  "claims_file": "openspec/changes/graph-engineering-full-migration/codegraph/claims-map.json",
+  "evidence_index": "openspec/changes/graph-engineering-full-migration/codegraph/evidence-index.json",
+  "claims_count": 6,
+  "verified_claims": [
+    "development:task-001-existing-graph-foundation",
+    "development:task-002-durable-orchestration",
+    "development:task-003-worker-facts",
+    "development:task-004-web-projection",
+    "development:task-005-operations-security",
+    "development:task-006-canary-validation"
+  ],
+  "unverified_claims": [],
+  "blockers": [],
+  "warnings": []
+}

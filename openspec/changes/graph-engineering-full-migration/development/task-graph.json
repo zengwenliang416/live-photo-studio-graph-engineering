@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "planning_status": "ready",
+  "tasks": [
+    "001-existing-graph-foundation",
+    "002-durable-orchestration",
+    "003-worker-facts",
+    "004-web-projection",
+    "005-operations-security",
+    "006-canary-validation"
+  ],
+  "nodes": [
+    {
+      "id": "001-existing-graph-foundation",
+      "task_items": [
+        "1.1",
+        "1.2",
+        "1.3",
+        "1.4"
+      ]
+    },
+    {
+      "id": "002-durable-orchestration",
+      "task_items": [
+        "2.1",
+        "2.2",
+        "2.3",
+        "2.4",
+        "2.5"
+      ]
+    },
+    {
+      "id": "003-worker-facts",
+      "task_items": [
+        "3.1",
+        "3.2",
+        "3.3",
+        "3.4",
+        "3.5"
+      ]
+    },
+    {
+      "id": "004-web-projection",
+      "task_items": [
+        "4.1",
+        "4.2",
+        "4.3",
+        "4.4"
+      ]
+    },
+    {
+      "id": "005-operations-security",
+      "task_items": [
+        "5.1",
+        "5.2",
+        "5.3",
+        "5.4"
+      ]
+    },
+    {
+      "id": "006-canary-validation",
+      "task_items": [
+        "6.1",
+        "6.2",
+        "6.3",
+        "6.4"
+      ]
+    }
+  ],
+  "edges": [
+    ["001-existing-graph-foundation", "002-durable-orchestration"],
+    ["002-durable-orchestration", "003-worker-facts"],
+    ["003-worker-facts", "004-web-projection"],
+    ["004-web-projection", "005-operations-security"],
+    ["005-operations-security", "006-canary-validation"]
+  ]
+}

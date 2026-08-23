@@ -17,6 +17,7 @@ export interface WorkflowEffectPort {
   ensureGenerationBatch(input: {
     workflowRunId: string;
     projectId: string;
+    traceId?: string | undefined;
     sourceAssetIds: readonly string[];
     coverAssetId: string;
     revision: number;
@@ -26,6 +27,7 @@ export interface WorkflowEffectPort {
   ensureRenderJob(input: {
     workflowRunId: string;
     projectId: string;
+    traceId?: string | undefined;
     selectedOutputId: string;
     effectKey: string;
   }): Promise<ExternalJobReference>;
@@ -33,6 +35,7 @@ export interface WorkflowEffectPort {
   markWorkflowCompleted(input: {
     workflowRunId: string;
     projectId: string;
+    traceId?: string | undefined;
     exportId: string;
     effectKey: string;
   }): Promise<void>;
@@ -40,12 +43,14 @@ export interface WorkflowEffectPort {
   markWorkflowCancelled(input: {
     workflowRunId: string;
     projectId: string;
+    traceId?: string | undefined;
     effectKey: string;
   }): Promise<void>;
 
   markWorkflowFailed(input: {
     workflowRunId: string;
     projectId: string;
+    traceId?: string | undefined;
     errorCode: string;
     effectKey: string;
   }): Promise<void>;
@@ -54,5 +59,6 @@ export interface WorkflowEffectPort {
 export interface LivePhotoProjectGraphDependencies {
   readonly projects: ProjectReadPort;
   readonly effects: WorkflowEffectPort;
+  readonly maxRepairAttempts?: number;
   readonly checkpointer?: object;
 }

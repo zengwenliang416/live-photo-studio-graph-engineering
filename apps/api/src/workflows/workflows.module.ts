@@ -13,10 +13,19 @@ import { WorkflowsController } from "./workflows.controller.js";
 import { WorkflowEventsController } from "./workflow-events.controller.js";
 import { WORKFLOW_TOKENS } from "./workflow-tokens.js";
 import { ApiDatabaseModule } from "../database/api-database.module.js";
+import {
+  WorkflowOperationsService,
+} from "./application/workflow-operations-service.js";
+import { PgWorkflowOperations } from "./infrastructure/pg-workflow-operations.js";
+import { WorkflowOperationsController } from "./workflow-operations.controller.js";
 
 @Module({
   imports: [ApiDatabaseModule],
-  controllers: [WorkflowsController, WorkflowEventsController],
+  controllers: [
+    WorkflowsController,
+    WorkflowEventsController,
+    WorkflowOperationsController,
+  ],
   providers: [
     {
       provide: WORKFLOW_TOKENS.workflowUnit,
@@ -26,7 +35,28 @@ import { ApiDatabaseModule } from "../database/api-database.module.js";
     {
       provide: WorkflowService,
       inject: [WORKFLOW_TOKENS.workflowUnit],
-      useFactory: (unit: PgWorkflowUnit) => new WorkflowService(unit),
+        useFactory: (unit: PgWorkflowUnit) => new WorkflowService(unit),
+    },
+    {
+      provide: WORKFLOW_TOKENS.operationsPort,
+      inject: [WORKFLOW_TOKENS.pool],
+      useFactory: (pool: Pool): PgWorkflowOperations =>
+        new PgWorkflowOperations(pool),
+    },
+    {
+      provide: WorkflowOperationsService,
+      inject: [WORKFLOW_TOKENS.operationsPort, WORKFLOW_TOKENS.config],
+      useFactory: (
+        operations: PgWorkflowOperations,
+        config: ApiConfig,
+      ): WorkflowOperationsService =>
+        new WorkflowOperationsService(
+          operations,
+          config.GRAPH_ADMIN_USER_IDS
+            .split(",")
+            .map((value) => value.trim())
+            .filter((value) => value.length > 0),
+        ),
     },
     {
       provide: WORKFLOW_TOKENS.outboxQueues,

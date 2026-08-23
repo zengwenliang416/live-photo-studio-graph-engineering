@@ -19,6 +19,7 @@ const TEST_URL = `postgresql://postgres@localhost:5432/${TEST_DB}`;
 
 const USER_ID = "worker-ai-test";
 const PROJECT_ID = randomUUID();
+const SECOND_PROJECT_ID = randomUUID();
 
 let pool: Pool | null = null;
 
@@ -62,10 +63,10 @@ async function harness(): Promise<{
   pool = createAppPool(TEST_URL);
   // One extra project so every test uses its own aggregate scope while
   // sharing a single database for the whole file.
-  const secondProject = randomUUID();
-  for (const id of [PROJECT_ID, secondProject]) {
+  for (const id of [PROJECT_ID, SECOND_PROJECT_ID]) {
     await pool.query(
-      `INSERT INTO projects (id, user_id, title) VALUES ($1, $2, 'worker-ai')`,
+      `INSERT INTO projects (id, user_id, title)
+       VALUES ($1::uuid, $2::text, 'worker-ai')`,
       [id, USER_ID],
     );
   }
@@ -77,7 +78,7 @@ async function harness(): Promise<{
 }
 
 function otherProjectId(): string {
-  return `${PROJECT_ID}`;
+  return SECOND_PROJECT_ID;
 }
 
 function payload(projectId: string) {
@@ -89,6 +90,30 @@ function payload(projectId: string) {
     coverAssetId: randomUUID(),
     revision: 0,
   });
+}
+
+async function seedWorkflowRun(
+  projectId: string,
+  workflowRunId: string,
+): Promise<void> {
+  await pool!.query(
+    `INSERT INTO workflow_runs (
+       id, project_id, user_id, graph_key, graph_version, thread_id,
+       current_phase, status
+     ) VALUES (
+       $1::uuid, $2::uuid, $3::text, 'live-photo-project', 'v1',
+       $1::text, 'WAITING_GENERATION', 'INTERRUPTED'
+     )`,
+    [workflowRunId, projectId, USER_ID],
+  );
+}
+
+async function workflowPhase(workflowRunId: string): Promise<string | null> {
+  const result = await pool!.query<{ current_phase: string | null }>(
+    "SELECT current_phase FROM workflow_runs WHERE id = $1::uuid",
+    [workflowRunId],
+  );
+  return result.rows[0]?.current_phase ?? null;
 }
 
 if (!RUN_PG_TESTS) {
@@ -116,10 +141,14 @@ if (!RUN_PG_TESTS) {
   test("process writes one batch with four outputs and a correlated signal", async () => {
     const { service, projectId } = await harness();
     const job = payload(projectId);
+    await seedWorkflowRun(projectId, job.workflowRunId);
+    const phaseBefore = await workflowPhase(job.workflowRunId);
 
     const result = await service.process(job);
     assert.equal(result.status, "SUCCEEDED");
     assert.equal(result.outputIds.length, 4);
+    assert.equal(phaseBefore, "WAITING_GENERATION");
+    assert.equal(await workflowPhase(job.workflowRunId), phaseBefore);
 
     const batch = await pool!.query<{ status: string }>(
       "SELECT status FROM generation_batches WHERE id = $1",
@@ -140,26 +169,57 @@ if (!RUN_PG_TESTS) {
   test("duplicate delivery is idempotent and emits nothing", async () => {
     const { service, projectId } = await harness();
     const job = payload(projectId);
+    await seedWorkflowRun(projectId, job.workflowRunId);
 
     const first = await service.process(job);
     const replay = await service.process(job);
     assert.equal(replay.status, "ALREADY_DONE");
     assert.deepEqual(replay.outputIds, first.outputIds);
 
-    const counts = await pool!.query<{ batches: string; outbox: string }>(
+    const counts = await pool!.query<{
+      batches: string;
+      outputs: string;
+      signals: string;
+    }>(
       `SELECT
-         (SELECT COUNT(*)::text FROM generation_batches WHERE id = $1) AS batches,
-         (SELECT COUNT(*)::text FROM outbox_events WHERE aggregate_id = $2) AS outbox`,
+         (SELECT COUNT(*)::text FROM generation_batches WHERE id = $1::uuid) AS batches,
+         (SELECT COUNT(*)::text FROM generation_outputs WHERE batch_id = $1::uuid) AS outputs,
+         (SELECT COUNT(*)::text
+            FROM outbox_events
+           WHERE aggregate_id = $2::text
+             AND event_type = 'GENERATION_BATCH_COMPLETED') AS signals`,
       [job.jobId, job.workflowRunId],
     );
     assert.equal(counts.rows[0]?.batches, "1");
-    assert.equal(counts.rows[0]?.outbox, "1");
+    assert.equal(counts.rows[0]?.outputs, "4");
+    assert.equal(counts.rows[0]?.signals, "1");
+  });
+
+  test("rejects a job whose workflow run belongs to another project", async () => {
+    const { service, projectId } = await harness();
+    const job = payload(otherProjectId());
+    await seedWorkflowRun(projectId, job.workflowRunId);
+
+    await assert.rejects(
+      service.process(job),
+      /WORKFLOW_PROJECT_MISMATCH/u,
+    );
+
+    const rows = await pool!.query<{ batches: string; signals: string }>(
+      `SELECT
+         (SELECT COUNT(*)::text FROM generation_batches WHERE id = $1::uuid) AS batches,
+         (SELECT COUNT(*)::text FROM outbox_events WHERE aggregate_id = $2::text) AS signals`,
+      [job.jobId, job.workflowRunId],
+    );
+    assert.equal(rows.rows[0]?.batches, "0");
+    assert.equal(rows.rows[0]?.signals, "0");
   });
 
   test("fail records once and emits the correlated failure signal", async () => {
     const { service, projectId } = await harness();
     const job = payload(projectId);
     const runId = job.workflowRunId;
+    await seedWorkflowRun(projectId, runId);
 
     await service.fail({ ...job, workflowRunId: runId }, "CONTENT_REJECTED");
     await service.fail({ ...job, workflowRunId: runId }, "CONTENT_REJECTED");

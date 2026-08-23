@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "change_id": "graph-engineering-full-migration",
+  "assertions": [
+    {
+      "id": "A1",
+      "statement": "A workflow can restart, resume, consume duplicate signals once, and reach the correct terminal phase without duplicate business effects.",
+      "verify_via": "e2e",
+      "status": "passing",
+      "evidence_ref": "docs/graph-engineering/evidence/restart-and-duplicate-signals.json"
+    },
+    {
+      "id": "A2",
+      "statement": "Workers write domain facts and correlated signals but do not own Graph-path phase transitions.",
+      "verify_via": "static",
+      "status": "passing",
+      "evidence_ref": "docs/graph-engineering/evidence/phase-ownership-audit.json"
+    },
+    {
+      "id": "A3",
+      "statement": "The Graph path preserves private media storage, ownership checks, redacted logs and mock-provider cost safety.",
+      "verify_via": "redteam",
+      "status": "failing",
+      "evidence_ref": "docs/graph-engineering/evidence/security-cost-controls.json"
+    }
+  ]
+}

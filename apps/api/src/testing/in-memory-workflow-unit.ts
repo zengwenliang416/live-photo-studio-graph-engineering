@@ -72,6 +72,7 @@ export class InMemoryWorkflowUnit implements WorkflowUnitPort {
         if (state.runs.has(run.id)) return;
         state.runs.set(run.id, {
           ...run,
+          traceId: run.traceId ?? null,
           status: "QUEUED",
           currentNode: null,
           currentPhase: null,
@@ -114,7 +115,15 @@ export class InMemoryWorkflowUnit implements WorkflowUnitPort {
       },
       async findTaskById(taskId) {
         const entry = state.tasks.get(taskId);
-        return entry ? { task: entry.task, runUserId: entry.runUserId } : null;
+        const run = entry ? state.runs.get(entry.task.workflowRunId) : undefined;
+        return entry
+          ? {
+              task: entry.task,
+              runUserId: entry.runUserId,
+              ...(run?.projectId ? { projectId: run.projectId } : {}),
+              traceId: run?.traceId,
+            }
+          : null;
       },
       async completePendingTask(taskId, result): Promise<boolean> {
         const entry = state.tasks.get(taskId);

@@ -8,6 +8,7 @@ export const LivePhotoProjectState = Annotation.Root({
   workflowRunId: Annotation<string>(),
   projectId: Annotation<string>(),
   userId: Annotation<string>(),
+  traceId: Annotation<string | undefined>(),
   graphKey: Annotation<string>(),
   graphVersion: Annotation<string>(),
 
@@ -29,10 +30,15 @@ export const LivePhotoProjectState = Annotation.Root({
     reducer: (_current, incoming) => incoming,
     default: () => "STARTING",
   }),
+  maxRepairAttempts: Annotation<number>({
+    reducer: (_current, incoming) => incoming,
+    default: () => 2,
+  }),
   generationRevision: Annotation<number>({
     reducer: (_current, incoming) => incoming,
     default: () => 0,
   }),
+  pendingHumanTaskId: Annotation<string | undefined>(),
   candidateOutputIds: Annotation<string[]>({
     reducer: uniqueStrings,
     default: () => [],
@@ -52,12 +58,14 @@ export const livePhotoProjectStartInputSchema = z.object({
   workflowRunId: z.string().uuid(),
   projectId: z.string().uuid(),
   userId: z.string().min(1),
+  traceId: z.string().uuid().optional(),
   graphKey: z.literal("live-photo-project"),
   graphVersion: z.literal("v1"),
   sourceAssetIds: z.array(z.string().uuid()).min(1),
   coverAssetId: z.string().uuid(),
   styleReferenceAssetIds: z.array(z.string().uuid()).default([]),
   identityReferenceAssetIds: z.array(z.string().uuid()).default([]),
+  maxRepairAttempts: z.number().int().min(0).max(10).default(2),
 });
 
 export type LivePhotoProjectStartInput = z.infer<

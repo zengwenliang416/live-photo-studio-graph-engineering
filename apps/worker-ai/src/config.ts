@@ -7,6 +7,7 @@ export const workerAiConfigSchema = z.object({
   AI_PROVIDER: z.enum(["mock"]).default("mock"),
   AI_WORKER_CONCURRENCY: z.coerce.number().int().positive().default(2),
   CANDIDATES_PER_BATCH: z.coerce.number().int().min(1).max(8).default(4),
+  AI_MAX_COST_MICROS: z.coerce.number().int().min(0).default(0),
 });
 
 export type WorkerAiConfig = z.infer<typeof workerAiConfigSchema>;

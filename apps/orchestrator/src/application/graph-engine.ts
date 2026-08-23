@@ -7,6 +7,7 @@ import type {
   WorkflowSignal,
 } from "@live-photo-studio/graph-contracts";
 import {
+  buildDeterministicUuid,
   extractInterruptPayloads,
   type CompiledWorkflowGraph,
   GraphRegistry,
@@ -34,6 +35,7 @@ interface WorkflowResultProjection {
   readonly status: WorkflowRunStatus;
   readonly currentPhase: string | null;
   readonly lastErrorCode: string | null;
+  readonly externalJobId: string | null;
   readonly interrupts: readonly unknown[];
 }
 
@@ -45,12 +47,24 @@ function projectResult(result: object): WorkflowResultProjection {
   const errorCode = typeof record["lastErrorCode"] === "string"
     ? record["lastErrorCode"]
     : null;
+  const externalJobId =
+    typeof record["pendingExternalJobId"] === "string"
+      ? record["pendingExternalJobId"]
+      : typeof record["renderJobId"] === "string"
+        ? record["renderJobId"]
+        : null;
   const interrupts = extractInterruptPayloads(result);
   let status: WorkflowRunStatus = interrupts.length > 0 ? "INTERRUPTED" : "RUNNING";
   if (phase === "COMPLETED") status = "SUCCEEDED";
   if (phase === "FAILED") status = "FAILED";
   if (phase === "CANCELLED") status = "CANCELLED";
-  return { status, currentPhase: phase, lastErrorCode: errorCode, interrupts };
+  return {
+    status,
+    currentPhase: phase,
+    lastErrorCode: errorCode,
+    externalJobId,
+    interrupts,
+  };
 }
 
 export class GraphEngine {
@@ -84,23 +98,35 @@ export class GraphEngine {
       throw new Error(`Workflow ${signal.workflowRunId} was not found.`);
     }
     await this.lock.withWorkflowLock(run.id, async (client) => {
+      const lockedRun = await this.repository.findRun(signal.workflowRunId);
+      if (!lockedRun) return;
       const inserted = await this.repository.registerSignal(client, {
         signalId: signal.signalId,
         workflowRunId: signal.workflowRunId,
         signalType: signal.signalType,
         correlationId: signal.correlationId,
         payload: signal.payload,
+        traceId: signal.traceId ?? lockedRun.traceId ?? lockedRun.id,
+        nodeName: signal.nodeName ?? undefined,
+        nodeVersion: signal.nodeVersion ?? undefined,
+        externalJobId: signal.externalJobId ?? undefined,
+        providerRequestId: signal.providerRequestId ?? undefined,
       });
       let signalId = signal.signalId;
+      let resumeSignal: ResumeSignal = signal;
       if (!inserted) {
         // The uniqueness constraint found an earlier copy of this signal.
         const existing = await this.repository.findSignalStatus(
           client,
-          run.id,
+          lockedRun.id,
           signal.correlationId,
           signal.signalType,
         );
-        if (!existing || existing.status === "CONSUMED") {
+        if (!existing) {
+          return; // duplicate delivery after successful consumption
+        }
+        await this.repository.incrementSignalDuplicate(client, existing.id);
+        if (existing.status === "CONSUMED") {
           return; // duplicate delivery after successful consumption
         }
         const claimed = await this.repository.claimStaleProcessingSignal(
@@ -112,8 +138,21 @@ export class GraphEngine {
           return; // fresh PROCESSING: another worker owns the resume
         }
         signalId = existing.id;
+        resumeSignal = {
+          signalType: signal.signalType,
+          correlationId: existing.correlationId,
+          payload: existing.payload,
+        };
       }
-      const rejected = await this.tryDriveResume(run, signal);
+      if (
+        lockedRun.status === "SUCCEEDED" ||
+        lockedRun.status === "FAILED" ||
+        lockedRun.status === "CANCELLED"
+      ) {
+        await this.repository.markSignalConsumed(client, signalId);
+        return;
+      }
+      const rejected = await this.tryDriveResume(lockedRun, resumeSignal);
       if (rejected) {
         await this.repository.markSignalFailed(
           client,
@@ -155,6 +194,14 @@ export class GraphEngine {
           Math.ceil(this.signalVisibilityTimeoutMs / 1000),
         );
         if (!claimed) return false;
+        if (
+          run.status === "SUCCEEDED" ||
+          run.status === "FAILED" ||
+          run.status === "CANCELLED"
+        ) {
+          await this.repository.markSignalConsumed(client, staleSignal.id);
+          return true;
+        }
         const rejected = await this.tryDriveResume(run, {
           signalType: parsedType.data,
           correlationId: staleSignal.correlationId,
@@ -225,27 +272,56 @@ export class GraphEngine {
 
   private async start(command: Extract<WorkflowCommand, { type: "START_WORKFLOW" }>): Promise<void> {
     const threadId = command.workflowRunId;
-    await this.repository.createRun({
-      id: command.workflowRunId,
-      projectId: command.projectId,
-      userId: command.userId,
-      graphKey: command.graphKey,
-      graphVersion: command.graphVersion,
-      threadId,
-    });
-    await this.appendEvent(command.workflowRunId, "workflow.started.v1", {
-      graphKey: command.graphKey,
-      graphVersion: command.graphVersion,
-    });
     await this.lock.withWorkflowLock(command.workflowRunId, async () => {
+      const inserted = await this.repository.createRun({
+        id: command.workflowRunId,
+        projectId: command.projectId,
+        userId: command.userId,
+        traceId: command.traceId ?? command.workflowRunId,
+        graphKey: command.graphKey,
+        graphVersion: command.graphVersion,
+        threadId,
+      });
+      const existing = await this.repository.findRun(command.workflowRunId);
+      if (!existing) {
+        throw new Error(`Workflow ${command.workflowRunId} was not created.`);
+      }
+      if (
+        existing.projectId !== command.projectId ||
+        existing.userId !== command.userId ||
+        existing.graphKey !== command.graphKey ||
+        existing.graphVersion !== command.graphVersion
+      ) {
+        throw new Error("WORKFLOW_COMMAND_SCOPE_MISMATCH");
+      }
+      if (!inserted && existing.status !== "QUEUED") {
+        return;
+      }
+      if (
+        !(await this.repository.hasWorkflowEvent(
+          command.workflowRunId,
+          "workflow.started.v1",
+        ))
+      ) {
+        await this.appendEvent(command.workflowRunId, "workflow.started.v1", {
+          graphKey: command.graphKey,
+          graphVersion: command.graphVersion,
+        });
+      }
       const graph = await this.registry.resolve(command.graphKey, command.graphVersion);
       await this.repository.updateProjection({
         id: command.workflowRunId,
         status: "RUNNING",
+        currentNode: "load_project_v1",
+        currentNodeVersion: 1,
         currentPhase: "STARTING",
+        traceId: existing.traceId ?? command.traceId ?? command.workflowRunId,
       });
       const result = await graph.invoke(
-        command.input,
+        {
+          ...command.input,
+          traceId: command.traceId ?? existing.traceId ?? command.workflowRunId,
+        },
         { configurable: { thread_id: threadId } },
       );
       await this.persistProjection(command.workflowRunId, result);
@@ -253,22 +329,54 @@ export class GraphEngine {
   }
 
   private async cancel(workflowRunId: string, reason: string): Promise<void> {
-    await this.repository.updateProjection({
-      id: workflowRunId,
-      status: "CANCELLED",
-      currentPhase: "CANCELLED",
-      lastErrorCode: reason,
+    await this.lock.withWorkflowLock(workflowRunId, async () => {
+      const run = await this.repository.findRun(workflowRunId);
+      if (!run) {
+        throw new Error(`Workflow ${workflowRunId} was not found.`);
+      }
+      if (
+        run.status === "SUCCEEDED" ||
+        run.status === "FAILED" ||
+        run.status === "CANCELLED"
+      ) {
+        return;
+      }
+      await this.repository.cancelPendingHumanTasks(workflowRunId);
+      await this.repository.updateProjection({
+        id: workflowRunId,
+        status: "CANCELLED",
+        currentNode: "cancelled_v1",
+        currentNodeVersion: 1,
+        currentPhase: "CANCELLED",
+        lastErrorCode: reason,
+        traceId: run.traceId ?? workflowRunId,
+      });
+      if (
+        !(await this.repository.hasWorkflowEvent(
+          workflowRunId,
+          "workflow.cancelled.v1",
+        ))
+      ) {
+        await this.appendEvent(workflowRunId, "workflow.cancelled.v1", {
+          reason,
+        });
+      }
     });
-    await this.appendEvent(workflowRunId, "workflow.cancelled.v1", { reason });
   }
 
   private async persistProjection(workflowRunId: string, result: object): Promise<void> {
     const projection = projectResult(result);
+    const run = await this.repository.findRun(workflowRunId);
+    const currentNode = phaseNode(projection.currentPhase);
     await this.repository.updateProjection({
       id: workflowRunId,
       status: projection.status,
+      currentNode,
+      currentNodeVersion: currentNode ? 1 : null,
       currentPhase: projection.currentPhase,
       lastErrorCode: projection.lastErrorCode,
+      externalJobId: projection.externalJobId,
+      traceId: run?.traceId ?? workflowRunId,
     });
     const eventName: WorkflowEventName | null =
       projection.status === "SUCCEEDED"
@@ -296,12 +404,23 @@ export class GraphEngine {
       const nodeName = typeof record["nodeName"] === "string"
         ? record["nodeName"]
         : "unknown";
+      const humanTaskId =
+        typeof record["humanTaskId"] === "string"
+          ? record["humanTaskId"]
+          : typeof record["correlationId"] === "string"
+            ? record["correlationId"]
+            : buildDeterministicUuid(`${workflowRunId}:${nodeName}`);
       await this.repository.upsertHumanTask({
-        id: randomUUID(),
+        id: humanTaskId,
         workflowRunId,
         taskType,
         nodeName,
         payload: record,
+      });
+      await this.appendEvent(workflowRunId, "workflow.human-task.created.v1", {
+        humanTaskId,
+        taskType,
+        nodeName,
       });
     }
   }
@@ -315,7 +434,37 @@ export class GraphEngine {
       id: randomUUID(),
       workflowRunId,
       eventName,
-      payload,
+      payload: {
+        traceId: (await this.repository.findRun(workflowRunId))?.traceId ??
+          workflowRunId,
+        workflowRunId,
+        ...payload,
+      },
     });
+  }
+}
+
+function phaseNode(phase: string | null): string | null {
+  switch (phase) {
+    case "READY_TO_GENERATE":
+      return "dispatch_generation_v1";
+    case "WAITING_GENERATION":
+      return "await_generation_v1";
+    case "REVIEW_ANCHOR":
+      return "human_select_anchor_v1";
+    case "READY_TO_RENDER":
+      return "dispatch_render_v1";
+    case "WAITING_RENDER":
+      return "await_render_v1";
+    case "READY_TO_COMPLETE":
+      return "complete_v1";
+    case "COMPLETED":
+      return "complete_v1";
+    case "CANCELLED":
+      return "cancelled_v1";
+    case "FAILED":
+      return "failed_v1";
+    default:
+      return null;
   }
 }

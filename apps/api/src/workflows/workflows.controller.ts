@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { Body, Controller, Get, Headers, HttpCode, Inject, Param, Post, Req } from "@nestjs/common";
 import { z } from "zod";
 import type { ApiConfig } from "../config.js";
@@ -29,6 +30,11 @@ function requireIdempotencyKey(raw: string | undefined): string {
   return raw;
 }
 
+function resolveTraceId(raw: string | undefined): string {
+  if (raw === undefined) return randomUUID();
+  return z.string().uuid().parse(raw);
+}
+
 interface AuthenticatedRequest {
   userId: string;
 }
@@ -45,12 +51,23 @@ export class WorkflowsController {
     return request.userId;
   }
 
-  private assertFeatureEnabled(): void {
+  private assertFeatureEnabled(userId: string): void {
     if (this.config.GRAPH_WORKFLOW_ENABLED !== "true") {
       throw new ApplicationProblemError(
         404,
         "WORKFLOW_FEATURE_DISABLED",
         "The graph workflow feature is disabled.",
+      );
+    }
+    const canaryUsers = this.config.GRAPH_WORKFLOW_CANARY_USER_IDS
+      .split(",")
+      .map((value) => value.trim())
+      .filter((value) => value.length > 0);
+    if (canaryUsers.length > 0 && !canaryUsers.includes(userId)) {
+      throw new ApplicationProblemError(
+        503,
+        "LEGACY_WORKFLOW_ROUTE_REQUIRED",
+        "The Graph workflow is not enabled for this canary cohort.",
       );
     }
   }
@@ -61,12 +78,14 @@ export class WorkflowsController {
     @Req() request: AuthenticatedRequest,
     @Param("projectId") projectId: string,
     @Headers("idempotency-key") idempotencyKey: string | undefined,
+    @Headers("x-trace-id") traceId: string | undefined,
     @Body() body: unknown,
   ): Promise<unknown> {
-    this.assertFeatureEnabled();
+    this.assertFeatureEnabled(request.userId);
     const result = await this.workflows.startWorkflowRun({
       projectId: uuidParamSchema.parse(projectId),
       userId: this.assertUserId(request),
+      traceId: resolveTraceId(traceId),
       idempotencyKey: requireIdempotencyKey(idempotencyKey),
       body: startWorkflowRunRequestSchema.parse(body ?? {}) as StartWorkflowRunBody,
     });
@@ -105,7 +124,7 @@ export class WorkflowsController {
     @Headers("idempotency-key") idempotencyKey: string | undefined,
     @Body() body: unknown,
   ): Promise<unknown> {
-    this.assertFeatureEnabled();
+    this.assertFeatureEnabled(request.userId);
     const parsed =
       humanTaskDecisionRequestSchema.parse(body ?? {}) as HumanTaskDecisionBody;
     const result = await this.workflows.submitHumanTaskDecision({
@@ -125,7 +144,7 @@ export class WorkflowsController {
     @Headers("idempotency-key") idempotencyKey: string | undefined,
     @Body() body: unknown,
   ): Promise<unknown> {
-    this.assertFeatureEnabled();
+    this.assertFeatureEnabled(request.userId);
     const result = await this.workflows.cancelWorkflowRun({
       workflowRunId: uuidParamSchema.parse(workflowRunId),
       userId: this.assertUserId(request),

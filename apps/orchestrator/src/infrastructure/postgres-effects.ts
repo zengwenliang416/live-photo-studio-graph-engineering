@@ -58,10 +58,13 @@ export class PostgresWorkflowEffectAdapter implements WorkflowEffectPort {
     coverAssetId: string;
     revision: number;
     effectKey: string;
+    traceId?: string | undefined;
   }): Promise<{ jobId: string }> {
     return this.ensureExternalEffect({
       workflowRunId: input.workflowRunId,
       nodeName: "dispatch_generation_v1",
+      nodeVersion: 1,
+      traceId: input.traceId,
       effectKey: input.effectKey,
       eventType: "workflow.generation.requested.v1",
       payload: {
@@ -78,10 +81,13 @@ export class PostgresWorkflowEffectAdapter implements WorkflowEffectPort {
     projectId: string;
     selectedOutputId: string;
     effectKey: string;
+    traceId?: string | undefined;
   }): Promise<{ jobId: string }> {
     return this.ensureExternalEffect({
       workflowRunId: input.workflowRunId,
       nodeName: "dispatch_render_v1",
+      nodeVersion: 1,
+      traceId: input.traceId,
       effectKey: input.effectKey,
       eventType: "workflow.render.requested.v1",
       payload: {
@@ -96,10 +102,13 @@ export class PostgresWorkflowEffectAdapter implements WorkflowEffectPort {
     projectId: string;
     exportId: string;
     effectKey: string;
+    traceId?: string | undefined;
   }): Promise<void> {
     await this.ensureTerminalEffect({
       workflowRunId: input.workflowRunId,
       nodeName: "complete_v1",
+      nodeVersion: 1,
+      traceId: input.traceId,
       effectKey: input.effectKey,
       eventType: "workflow.completed.v1",
       payload: { projectId: input.projectId, exportId: input.exportId },
@@ -110,10 +119,13 @@ export class PostgresWorkflowEffectAdapter implements WorkflowEffectPort {
     workflowRunId: string;
     projectId: string;
     effectKey: string;
+    traceId?: string | undefined;
   }): Promise<void> {
     await this.ensureTerminalEffect({
       workflowRunId: input.workflowRunId,
       nodeName: "cancelled_v1",
+      nodeVersion: 1,
+      traceId: input.traceId,
       effectKey: input.effectKey,
       eventType: "workflow.cancelled.v1",
       payload: { projectId: input.projectId },
@@ -125,10 +137,13 @@ export class PostgresWorkflowEffectAdapter implements WorkflowEffectPort {
     projectId: string;
     errorCode: string;
     effectKey: string;
+    traceId?: string | undefined;
   }): Promise<void> {
     await this.ensureTerminalEffect({
       workflowRunId: input.workflowRunId,
       nodeName: "failed_v1",
+      nodeVersion: 1,
+      traceId: input.traceId,
       effectKey: input.effectKey,
       eventType: "workflow.failed.v1",
       payload: { projectId: input.projectId, errorCode: input.errorCode },
@@ -138,16 +153,18 @@ export class PostgresWorkflowEffectAdapter implements WorkflowEffectPort {
   private async ensureExternalEffect(input: {
     workflowRunId: string;
     nodeName: string;
+    nodeVersion: number;
     effectKey: string;
     eventType: string;
     payload: Record<string, unknown>;
+    traceId?: string | undefined;
   }): Promise<{ jobId: string }> {
     const client = await this.pool.connect();
     try {
       await client.query("BEGIN");
       const existing = await client.query<{ external_job_id: string }>(
         `SELECT external_job_id
-           FROM workflow_node_effects
+         FROM workflow_node_effects
           WHERE effect_key = $1
           FOR UPDATE`,
         [input.effectKey],
@@ -159,20 +176,42 @@ export class PostgresWorkflowEffectAdapter implements WorkflowEffectPort {
       const jobId = randomUUID();
       await client.query(
         `INSERT INTO workflow_node_effects (
-           id, workflow_run_id, node_name, effect_key, external_job_id, status
-         ) VALUES ($1, $2, $3, $4, $5, 'REQUESTED')`,
-        [randomUUID(), input.workflowRunId, input.nodeName, input.effectKey, jobId],
+           id, workflow_run_id, node_name, node_version, effect_key,
+           external_job_id, status, trace_id
+         ) VALUES ($1, $2, $3, $4, $5, $6, 'REQUESTED', $7)`,
+        [
+          randomUUID(),
+          input.workflowRunId,
+          input.nodeName,
+          input.nodeVersion,
+          input.effectKey,
+          jobId,
+          input.traceId ?? input.workflowRunId,
+        ],
       );
       await client.query(
         `INSERT INTO outbox_events (
            id, aggregate_type, aggregate_id, event_type, payload, status,
-           created_at
-         ) VALUES ($1, 'workflow', $2, $3, $4::jsonb, 'PENDING', now())`,
+           created_at, trace_id, node_name, node_version, external_job_id
+         ) VALUES ($1, 'workflow', $2, $3, $4::jsonb, 'PENDING', now(),
+                   $5, $6, $7, $8)`,
         [
           randomUUID(),
           input.workflowRunId,
           input.eventType,
-          JSON.stringify({ ...input.payload, workflowRunId: input.workflowRunId, jobId }),
+          JSON.stringify({
+            ...input.payload,
+            workflowRunId: input.workflowRunId,
+            jobId,
+            traceId: input.traceId ?? input.workflowRunId,
+            nodeName: input.nodeName,
+            nodeVersion: input.nodeVersion,
+            externalJobId: jobId,
+          }),
+          input.traceId ?? input.workflowRunId,
+          input.nodeName,
+          input.nodeVersion,
+          jobId,
         ],
       );
       await client.query("COMMIT");
@@ -188,9 +227,11 @@ export class PostgresWorkflowEffectAdapter implements WorkflowEffectPort {
   private async ensureTerminalEffect(input: {
     workflowRunId: string;
     nodeName: string;
+    nodeVersion: number;
     effectKey: string;
     eventType: string;
     payload: Record<string, unknown>;
+    traceId?: string | undefined;
   }): Promise<void> {
     await this.ensureExternalEffect(input);
   }

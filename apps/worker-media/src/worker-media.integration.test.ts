@@ -32,24 +32,44 @@ after(async () => {
 
 async function seedOutput(
   client: Pool,
-): Promise<{ projectId: string; outputId: string }> {
+): Promise<{ projectId: string; outputId: string; workflowRunId: string }> {
   const projectId = randomUUID();
+  const workflowRunId = randomUUID();
   const batchId = randomUUID();
   const outputId = randomUUID();
-  await client.query(`INSERT INTO projects (id, user_id) VALUES ($1, $2)`, [
-    projectId,
-    USER_ID,
-  ]);
   await client.query(
-    `INSERT INTO generation_batches (id, project_id, status) VALUES ($1, $2, 'SUCCEEDED')`,
-    [batchId, projectId],
+    `INSERT INTO projects (id, user_id) VALUES ($1::uuid, $2::text)`,
+    [projectId, USER_ID],
+  );
+  await client.query(
+    `INSERT INTO workflow_runs (
+       id, project_id, user_id, graph_key, graph_version, thread_id,
+       current_phase, status
+     ) VALUES (
+       $1::uuid, $2::uuid, $3::text, 'live-photo-project', 'v1',
+       $1::text, 'WAITING_RENDER', 'INTERRUPTED'
+     )`,
+    [workflowRunId, projectId, USER_ID],
+  );
+  await client.query(
+    `INSERT INTO generation_batches (id, project_id, workflow_run_id, status)
+     VALUES ($1::uuid, $2::uuid, $3::uuid, 'SUCCEEDED')`,
+    [batchId, projectId, workflowRunId],
   );
   await client.query(
     `INSERT INTO generation_outputs (id, batch_id, storage_key, width, height)
-     VALUES ($1, $2, 'k', 100, 100)`,
+     VALUES ($1::uuid, $2::uuid, 'k', 100, 100)`,
     [outputId, batchId],
   );
-  return { projectId, outputId };
+  return { projectId, outputId, workflowRunId };
+}
+
+async function workflowPhase(workflowRunId: string): Promise<string | null> {
+  const result = await pool!.query<{ current_phase: string | null }>(
+    "SELECT current_phase FROM workflow_runs WHERE id = $1::uuid",
+    [workflowRunId],
+  );
+  return result.rows[0]?.current_phase ?? null;
 }
 
 async function harness(): Promise<RenderService> {
@@ -80,10 +100,11 @@ async function harness(): Promise<RenderService> {
 function payload(input: {
   projectId: string;
   outputId: string;
+  workflowRunId: string;
 }): ReturnType<typeof renderRequestedPayloadSchema.parse> {
   return renderRequestedPayloadSchema.parse({
     jobId: randomUUID(),
-    workflowRunId: randomUUID(),
+    workflowRunId: input.workflowRunId,
     projectId: input.projectId,
     selectedOutputId: input.outputId,
   });
@@ -98,10 +119,13 @@ if (!RUN_PG_TESTS) {
     const service = await harness();
     const seeded = await seedOutput(pool!);
     const job = payload(seeded);
+    const phaseBefore = await workflowPhase(job.workflowRunId);
 
     const result = await service.process(job);
     assert.equal(result.status, "SUCCEEDED");
     assert.ok(result.exportId);
+    assert.equal(phaseBefore, "WAITING_RENDER");
+    assert.equal(await workflowPhase(job.workflowRunId), phaseBefore);
 
     const row = await pool!.query<{
       sha256: string;
@@ -120,6 +144,7 @@ if (!RUN_PG_TESTS) {
     const secondJob = payload({
       projectId: seeded.projectId,
       outputId: seeded.outputId,
+      workflowRunId: seeded.workflowRunId,
     });
     const replay = await service.process(secondJob);
     assert.equal(replay.status, "SUCCEEDED");
@@ -130,8 +155,12 @@ if (!RUN_PG_TESTS) {
     assert.equal(second.rows[0]?.sha256, record.sha256);
 
     const signals = await pool!.query<{ payload: unknown }>(
-      "SELECT payload FROM outbox_events WHERE aggregate_id = $1 AND event_type = 'RENDER_JOB_COMPLETED'",
-      [job.workflowRunId],
+      `SELECT payload
+         FROM outbox_events
+        WHERE aggregate_id = $1::text
+          AND event_type = 'RENDER_JOB_COMPLETED'
+          AND payload->>'correlationId' = $2::text`,
+      [job.workflowRunId, job.jobId],
     );
     assert.equal(signals.rows.length, 1);
     const signal = workflowSignalSchema.parse(signals.rows[0]?.payload);
@@ -153,16 +182,44 @@ if (!RUN_PG_TESTS) {
     assert.equal(duplicate.status, "ALREADY_DONE");
     assert.equal(duplicate.exportId, first.exportId);
 
-    const counts = await pool!.query<{ jobs: string; packages: string; outbox: string }>(
+    const counts = await pool!.query<{
+      jobs: string;
+      packages: string;
+      signals: string;
+    }>(
       `SELECT
-         (SELECT COUNT(*)::text FROM render_jobs WHERE id = $1) AS jobs,
-         (SELECT COUNT(*)::text FROM export_packages WHERE render_job_id = $1) AS packages,
-         (SELECT COUNT(*)::text FROM outbox_events WHERE aggregate_id = $2) AS outbox`,
+         (SELECT COUNT(*)::text FROM render_jobs WHERE id = $1::uuid) AS jobs,
+         (SELECT COUNT(*)::text FROM export_packages WHERE render_job_id = $1::uuid) AS packages,
+         (SELECT COUNT(*)::text
+            FROM outbox_events
+           WHERE aggregate_id = $2::text
+             AND event_type = 'RENDER_JOB_COMPLETED') AS signals`,
       [job.jobId, job.workflowRunId],
     );
     assert.equal(counts.rows[0]?.jobs, "1");
     assert.equal(counts.rows[0]?.packages, "1");
-    assert.equal(counts.rows[0]?.outbox, "1");
+    assert.equal(counts.rows[0]?.signals, "1");
+  });
+
+  test("rejects a job with an unknown workflow correlation", async () => {
+    const service = await harness();
+    const seeded = await seedOutput(pool!);
+    const job = payload({
+      projectId: seeded.projectId,
+      outputId: seeded.outputId,
+      workflowRunId: randomUUID(),
+    });
+
+    await assert.rejects(
+      service.process(job),
+      /WORKFLOW_PROJECT_MISMATCH/u,
+    );
+
+    const rows = await pool!.query<{ count: string }>(
+      "SELECT COUNT(*)::text AS count FROM render_jobs WHERE id = $1::uuid",
+      [job.jobId],
+    );
+    assert.equal(rows.rows[0]?.count, "0");
   });
 
   test("failure path records once and emits the failure signal", async () => {
@@ -192,7 +249,12 @@ if (!RUN_PG_TESTS) {
 
   test("unknown selected output fails fast without partial writes", async () => {
     const service = await harness();
-    const job = payload({ projectId: randomUUID(), outputId: randomUUID() });
+    const seeded = await seedOutput(pool!);
+    const job = payload({
+      projectId: seeded.projectId,
+      outputId: randomUUID(),
+      workflowRunId: seeded.workflowRunId,
+    });
     await assert.rejects(service.process(job), /SELECTED_OUTPUT_NOT_FOUND/u);
     const rows = await pool!.query(
       "SELECT 1 FROM render_jobs WHERE id = $1",

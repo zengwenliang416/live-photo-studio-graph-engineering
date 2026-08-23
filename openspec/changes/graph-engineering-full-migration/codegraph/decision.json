@@ -1,0 +1,12 @@
+{
+  "schema": "specnav.codegraph.decision.v1",
+  "stage": "development",
+  "profile": "active_dev",
+  "effective_mode": "advisory",
+  "required_for_stage": false,
+  "execution_surface": "cli",
+  "result": "pass",
+  "blockers": [],
+  "warnings": [],
+  "explanation": "CodeGraph policy satisfied for development."
+}

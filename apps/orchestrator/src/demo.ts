@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { Command } from "@langchain/langgraph";
+import { buildDeterministicUuid } from "@live-photo-studio/graph-runtime";
 import { createMemoryCheckpointer } from "./checkpointer.js";
 import { buildLivePhotoProjectGraphV1 } from "./graphs/live-photo-project/live-photo-project.graph.js";
 import type {
@@ -18,6 +19,9 @@ const ids = {
   renderJobId: randomUUID(),
   exportId: randomUUID(),
 };
+const humanTaskId = buildDeterministicUuid(
+  `${ids.workflowRunId}:human_select_anchor_v1:0`,
+);
 
 const projects: ProjectReadPort = {
   async getProjectSnapshot() {
@@ -79,6 +83,7 @@ state = await graph.invoke(
   new Command({
     resume: {
       action: "SELECT",
+      correlationId: humanTaskId,
       selectedOutputId: ids.outputId,
     },
   }),

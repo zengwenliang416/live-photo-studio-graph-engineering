@@ -1,6 +1,38 @@
-import { randomUUID } from "node:crypto";
+import { z } from "zod";
 
 const API_BASE = process.env["NEXT_PUBLIC_API_BASE"] ?? "http://localhost:4000";
+
+const workflowRunIdSchema = z.string().uuid();
+const startWorkflowResponseSchema = z.object({
+  data: z.object({ workflowRunId: workflowRunIdSchema }),
+});
+const workflowRunResponseSchema = z.object({
+  data: z.object({
+    status: z.string(),
+    currentPhase: z.string().nullable(),
+    pendingHumanTaskId: workflowRunIdSchema.nullable(),
+  }),
+});
+const humanTasksResponseSchema = z.object({
+  data: z.array(
+    z.object({
+      humanTaskId: workflowRunIdSchema,
+      taskType: z.string(),
+      nodeName: z.string(),
+      allowedActions: z.array(z.string()),
+      candidateOutputIds: z.array(workflowRunIdSchema),
+      status: z.string(),
+    }),
+  ),
+});
+const decisionResponseSchema = z.object({
+  data: z.object({ humanTaskId: workflowRunIdSchema }),
+});
+const cancelResponseSchema = z.object({
+  data: z.object({ workflowRunId: workflowRunIdSchema }),
+});
+
+export type WorkflowAction = "SELECT" | "REGENERATE" | "CANCEL";
 
 export class ApiProblemError extends Error {
   constructor(
@@ -25,12 +57,46 @@ export interface ApiClientOptions {
 }
 
 const memoryKeys = new Map<string, string>();
+
+function readStoredKey(actionId: string): string | undefined {
+  if (typeof window === "undefined") return memoryKeys.get(actionId);
+  try {
+    return window.localStorage.getItem(`workflow-idempotency:${actionId}`) ??
+      memoryKeys.get(actionId);
+  } catch {
+    return memoryKeys.get(actionId);
+  }
+}
+
+function writeStoredKey(actionId: string, key: string): void {
+  memoryKeys.set(actionId, key);
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(`workflow-idempotency:${actionId}`, key);
+  } catch {
+    // Private browsing or restricted storage still has the in-memory fallback.
+  }
+}
+
 const defaultKeyStore = {
-  get: (actionId: string): string | undefined => memoryKeys.get(actionId),
-  set: (actionId: string, key: string): void => {
-    memoryKeys.set(actionId, key);
-  },
+  get: readStoredKey,
+  set: writeStoredKey,
 };
+
+let fallbackKeyCounter = 0;
+
+function newIdempotencyKey(): string {
+  const cryptoApi = globalThis.crypto;
+  if (cryptoApi?.randomUUID) return cryptoApi.randomUUID();
+  const bytes = new Uint8Array(16);
+  if (cryptoApi?.getRandomValues) {
+    cryptoApi.getRandomValues(bytes);
+  } else {
+    fallbackKeyCounter += 1;
+    return `idempotency-${Date.now().toString(36)}-${fallbackKeyCounter.toString(36)}`;
+  }
+  return `idempotency-${Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("")}`;
+}
 
 /**
  * Central workflow API client. Every write carries a stable Idempotency-Key
@@ -55,6 +121,7 @@ export class WorkflowApiClient {
   private async request<T>(
     method: string,
     path: string,
+    schema: z.ZodType<T>,
     body?: unknown,
     actionId?: string,
   ): Promise<T> {
@@ -65,7 +132,7 @@ export class WorkflowApiClient {
     if (actionId) {
       let key = this.keys.get(actionId);
       if (!key) {
-        key = randomUUID();
+        key = newIdempotencyKey();
         this.keys.set(actionId, key);
       }
       headers["idempotency-key"] = key;
@@ -87,36 +154,61 @@ export class WorkflowApiClient {
         problem.title ?? "Request failed.",
       );
     }
-    return (await response.json()) as T;
+    const payload: unknown = await response.json();
+    return schema.parse(payload);
   }
 
-  startWorkflowRun(projectId: string): Promise<{ data: { workflowRunId: string } }> {
+  startWorkflowRun(projectId: string): Promise<{
+    data: { workflowRunId: string };
+  }> {
     return this.request(
       "POST",
       `/v1/projects/${projectId}/workflow-runs`,
+      startWorkflowResponseSchema,
       {},
       `start:${projectId}`,
     );
   }
 
-  getWorkflowRun(workflowRunId: string): Promise<{ data: { status: string; currentPhase: string | null; pendingHumanTaskId: string | null } }> {
-    return this.request("GET", `/v1/workflow-runs/${workflowRunId}`);
+  getWorkflowRun(workflowRunId: string): Promise<{
+    data: {
+      status: string;
+      currentPhase: string | null;
+      pendingHumanTaskId: string | null;
+    };
+  }> {
+    return this.request(
+      "GET",
+      `/v1/workflow-runs/${workflowRunId}`,
+      workflowRunResponseSchema,
+    );
   }
 
   listHumanTasks(workflowRunId: string): Promise<{
     data: ReadonlyArray<{
       humanTaskId: string;
+      taskType: string;
+      nodeName: string;
       allowedActions: readonly string[];
+      candidateOutputIds: readonly string[];
       status: string;
     }>;
   }> {
-    return this.request("GET", `/v1/workflow-runs/${workflowRunId}/human-tasks`);
+    return this.request(
+      "GET",
+      `/v1/workflow-runs/${workflowRunId}/human-tasks`,
+      humanTasksResponseSchema,
+    );
   }
 
-  decide(humanTaskId: string, body: { action: string; selectedOutputId?: string }): Promise<{ data: { humanTaskId: string } }> {
+  decide(
+    humanTaskId: string,
+    body: { action: WorkflowAction; selectedOutputId?: string },
+  ): Promise<{ data: { humanTaskId: string } }> {
     return this.request(
       "POST",
       `/v1/human-tasks/${humanTaskId}/decisions`,
+      decisionResponseSchema,
       body,
       `decide:${humanTaskId}:${body.action}`,
     );
@@ -126,6 +218,7 @@ export class WorkflowApiClient {
     return this.request(
       "POST",
       `/v1/workflow-runs/${workflowRunId}/cancel`,
+      cancelResponseSchema,
       { reason: "USER_REQUESTED" },
       `cancel:${workflowRunId}`,
     );

@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS graph_engineering_development_evidence;

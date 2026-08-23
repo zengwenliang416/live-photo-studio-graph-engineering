@@ -1,0 +1,49 @@
+{
+  "task_id": "002-durable-orchestration",
+  "goal": "A workflow run resumes once after crashes or duplicate signals, rejects wrong correlations, and stops bounded repair safely.",
+  "task_items": [
+    "2.1",
+    "2.2",
+    "2.3",
+    "2.4",
+    "2.5"
+  ],
+  "must_read": [
+    "openspec/changes/graph-engineering-full-migration/development/tasks/002-durable-orchestration/brief.md",
+    "openspec/changes/graph-engineering-full-migration/requirements.md",
+    "openspec/changes/graph-engineering-full-migration/acceptance.md",
+    "openspec/changes/graph-engineering-full-migration/spec-map.json",
+    "openspec/changes/graph-engineering-full-migration/component-impact-map.json",
+    "openspec/changes/graph-engineering-full-migration/prototype/handoff.md",
+    "openspec/changes/graph-engineering-full-migration/prototype/decision.json",
+    "openspec/specs/ui-design/design.md",
+    "openspec/specs/system-architecture/design.md",
+    "openspec/specs/frontend-backend-data-flow/design.md",
+    "openspec/specs/component-architecture/design.md",
+    "openspec/changes/graph-engineering-full-migration/prototype/logic/harness.js"
+  ],
+  "allowed_files": [
+    "apps/orchestrator",
+    "apps/api",
+    "packages/graph-contracts",
+    "docs"
+  ],
+  "test_paths": [
+    "apps/orchestrator/src/**.test.ts",
+    "apps/api/src/**.test.ts"
+  ],
+  "non_goals": [
+    "Do not expand scope beyond the active change.",
+    "Do not bypass component extraction rules."
+  ],
+  "expected_evidence": [
+    "Focused tests or command output",
+    "Task report",
+    "Spec review",
+    "Quality review"
+  ],
+  "unsafe_assumptions": [
+    "Any missing requirement, API, database, or component decision blocks implementation."
+  ],
+  "stop_condition": "Stop if the task would edit outside scope or duplicate reusable component behavior."
+}

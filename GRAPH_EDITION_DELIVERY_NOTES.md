@@ -15,17 +15,35 @@ Generated: 2026-08-23
 - Root and nested `AGENTS.md` Graph rules.
 - `PLANS.md`, a full living ExecPlan and ready-to-run Codex prompts/scripts.
 
-## Deliberately left to the ExecPlan
+## Current integration state
 
-The existing NestJS public API, AI Worker, Media Worker and Next.js UI are not
-silently rewired in this delivery. They need repository-specific integration,
-contract generation and regression testing. The full implementation sequence and
-acceptance criteria are in:
+The minimal end-to-end Graph control-plane slice is now integrated and tested:
+
+- NestJS API writes workflow commands/decisions/cancel requests and Outbox
+  records transactionally; it never invokes a compiled graph directly.
+- AI Worker and Media Worker consume execution jobs, persist domain facts and
+  emit correlated signals without changing Graph-path project phases.
+- Next.js Web uses the API client, TanStack Query projection, SSE invalidation,
+  stable idempotency keys and a server-validated refresh/reopen session helper.
+- Operations triage/replay is bounded, authenticated, audited and backed by
+  PostgreSQL integration coverage.
+
+The full implementation sequence and acceptance criteria remain in:
 
 `docs/execplans/graph-engineering-full-migration.md`
 
-This avoids shipping two competing project state machines without completing the
-cutover and rollback work.
+The project still does not claim private object storage, live Redis/BullMQ,
+real provider/media codec or iOS PhotoKit verification without those external
+capabilities.
+
+## Prototype boundary
+
+`/Users/wenliang_zeng/Downloads/live-photo-studio (2).zip` was inspected
+read-only. Its visual tokens, shell structure, candidate-review composition and
+Photos boundary copy are reference material. Its Vite router, browser-side mock
+orchestrator, localStorage/IndexedDB domain repositories and browser ZIP builder
+are deliberately not copied into the production path. See
+`docs/graph-engineering/evidence/prototype-boundary.json`.
 
 ## Verification required on a development machine
 

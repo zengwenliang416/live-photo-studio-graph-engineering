@@ -18,11 +18,11 @@ signals are duplicated or a process crashes.
   recovery.
 - [x] 2.2 Keep restart, duplicate-signal, stale-recovery and old-version
   integration coverage.
-- [ ] 2.3 Add bounded REGENERATE exhaustion coverage and verify the failure or
+- [x] 2.3 Add bounded REGENERATE exhaustion coverage and verify the failure or
   human fallback state.
-- [ ] 2.4 Add wrong-correlation rejection, cancel-late-signal handling and
+- [x] 2.4 Add wrong-correlation rejection, cancel-late-signal handling and
   duplicate START command coverage.
-- [ ] 2.5 Add Outbox completion/failure routing, malformed-payload failure and
+- [x] 2.5 Add Outbox completion/failure routing, malformed-payload failure and
   event-only delivery coverage.
 
 ## 3. Worker Ownership and Facts
@@ -34,11 +34,11 @@ execution cannot silently move the workflow to another phase.
   use deterministic batch/output identities.
 - [x] 3.2 Keep media worker rendering/export execution outside database
   transactions and use deterministic package identities.
-- [ ] 3.3 Fix PostgreSQL integration seed parameter typing in AI and media
+- [x] 3.3 Fix PostgreSQL integration seed parameter typing in AI and media
   worker tests.
-- [ ] 3.4 Assert before and after each worker job that Graph-path
+- [x] 3.4 Assert before and after each worker job that Graph-path
   `workflow_runs.current_phase` is unchanged.
-- [ ] 3.5 Add cross-project ownership and duplicate completion assertions for
+- [x] 3.5 Add cross-project ownership and duplicate completion assertions for
   both worker paths.
 
 ## 4. Web Projection
@@ -50,9 +50,9 @@ the actions currently allowed by the server task payload.
   TanStack Query workflow/task projection.
 - [x] 4.2 Keep task-payload-gated candidate selection, accessible cancel/error
   states and SSE invalidation behavior.
-- [ ] 4.3 Add refresh/reopen and duplicate-click integration coverage for the
+- [x] 4.3 Add refresh/reopen and duplicate-click integration coverage for the
   project workflow page.
-- [ ] 4.4 Add explicit export-package boundary copy and mobile-width
+- [x] 4.4 Add explicit export-package boundary copy and mobile-width
   accessibility evidence.
 
 ## 5. Operations and Security
@@ -60,13 +60,13 @@ the actions currently allowed by the server task payload.
 User outcome: Operators can locate and safely triage a stuck run without
 exposing media, credentials, prompts or cross-project data.
 
-- [ ] 5.1 Propagate trace, run, project, node, external-job and provider
+- [x] 5.1 Propagate trace, run, project, node, external-job and provider
   request identifiers through API, Outbox, queues and workers.
-- [ ] 5.2 Add metrics and an authenticated read-only triage projection for
+- [x] 5.2 Add metrics and an authenticated read-only triage projection for
   queue age, interrupt age, duplicate signals, node latency and failures.
-- [ ] 5.3 Add redaction and security tests for cross-project access, malformed
+- [x] 5.3 Add redaction and security tests for cross-project access, malformed
   signals, signed URLs, Base64, prompts, EXIF and credentials.
-- [ ] 5.4 Add cost controls, mock-provider defaults and explicit
+- [x] 5.4 Add cost controls, mock-provider defaults and explicit
   non-retryable provider error classification.
 
 ## 6. Canary and Final Validation
@@ -74,11 +74,11 @@ exposing media, credentials, prompts or cross-project data.
 User outcome: The Graph path can be enabled for a canary and rolled back to the
 legacy path without losing recoverability or making unsupported claims.
 
-- [ ] 6.1 Document Graph/legacy feature-flag canary thresholds and rollback
+- [x] 6.1 Document Graph/legacy feature-flag canary thresholds and rollback
   commands in the operations runbook.
-- [ ] 6.2 Capture migration, test, phase-ownership, security and external
+- [x] 6.2 Capture migration, test, phase-ownership, security and external
   blocker evidence under `docs/graph-engineering/evidence/`.
-- [ ] 6.3 Run package, repository, PostgreSQL integration, graph, migration and
+- [x] 6.3 Run package, repository, PostgreSQL integration, graph, migration and
   diff checks with exact observed results.
-- [ ] 6.4 Update the ExecPlan Progress, discoveries, decision log and Outcomes
+- [x] 6.4 Update the ExecPlan Progress, discoveries, decision log and Outcomes
   and retrospective with measured outcomes and genuine blockers.

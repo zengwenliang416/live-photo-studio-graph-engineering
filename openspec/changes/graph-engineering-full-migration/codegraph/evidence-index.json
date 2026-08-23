@@ -1,0 +1,151 @@
+{
+  "schema": "specnav.codegraph.evidence_index.v1",
+  "generated_at": "2026-08-23T11:05:24.845Z",
+  "active_change": "graph-engineering-full-migration",
+  "source_raw": "openspec/changes/graph-engineering-full-migration/codegraph/evidence.jsonl",
+  "by_claim": {
+    "development:task-001-existing-graph-foundation": {
+      "status": "matched",
+      "evidence_ids": [
+        "ev-mt5p8qf9"
+      ],
+      "files": [
+        "apps/api/src/workflows/infrastructure/pg-workflow-operations.integration.test.ts",
+        "packages/graph-runtime/src/graph-registry.ts",
+        "apps/web/src/lib/api-client.ts",
+        "packages/database/src/bin-migrate.ts",
+        "pg-workflow-operations.js",
+        "application/graph-engine.js",
+        "checkpointer.js",
+        "graphs/live-photo-project/live-photo-project.graph.js",
+        "infrastructure/postgres-effects.js",
+        "infrastructure/workflow-repository.js"
+      ],
+      "symbols": [],
+      "blockers": []
+    },
+    "development:task-002-durable-orchestration": {
+      "status": "matched",
+      "evidence_ids": [
+        "ev-mt5p8yy1"
+      ],
+      "files": [
+        "apps/orchestrator/src/application/graph-engine.ts",
+        "apps/orchestrator/src/infrastructure/workflow-repository.ts",
+        "apps/orchestrator/src/graph-engine.integration.test.ts",
+        "../infrastructure/advisory-lock.js",
+        "../infrastructure/workflow-repository.js",
+        "application/graph-engine.js",
+        "checkpointer.js",
+        "graphs/live-photo-project/live-photo-project.graph.js",
+        "infrastructure/postgres-effects.js",
+        "infrastructure/workflow-repository.js"
+      ],
+      "symbols": [],
+      "blockers": []
+    },
+    "development:task-003-worker-facts": {
+      "status": "matched",
+      "evidence_ids": [
+        "ev-mt5p968v"
+      ],
+      "files": [
+        "apps/worker-media/src/renderer.ts",
+        "apps/worker-ai/src/provider.ts",
+        "apps/orchestrator/src/graphs/live-photo-project/ports.ts",
+        "apps/orchestrator/src/infrastructure/workflow-repository.ts",
+        "apps/worker-media/src/export-service.ts",
+        "renderer.js",
+        "zip.js",
+        "manifest.js"
+      ],
+      "symbols": [],
+      "blockers": []
+    },
+    "development:task-004-web-projection": {
+      "status": "matched",
+      "evidence_ids": [
+        "ev-mt5p9d4x"
+      ],
+      "files": [
+        "Next.js",
+        "apps/api/src/workflows/application/workflow-operations-service.ts",
+        "apps/api/src/workflows/ports.ts",
+        "apps/api/src/workflows/workflows.module.ts",
+        "apps/api/src/workflows/application/workflow-service.ts",
+        "apps/web/src/lib/api-client.ts",
+        "../config.js",
+        "../http/problem-details.js",
+        "../openapi.js",
+        "application/workflow-service.js",
+        "request-schemas.js",
+        "workflow-tokens.js",
+        "openapi.js",
+        "workflows.module.ts",
+        "infrastructure/pg-workflow-unit.js",
+        "infrastructure/outbox-dispatcher.js",
+        "workflows.controller.js",
+        "workflow-events.controller.js",
+        "../database/api-database.module.js",
+        "application/workflow-operations-service.js",
+        "infrastructure/pg-workflow-operations.js",
+        "workflow-operations.controller.js",
+        "api-client.js"
+      ],
+      "symbols": [],
+      "blockers": []
+    },
+    "development:task-005-operations-security": {
+      "status": "matched",
+      "evidence_ids": [
+        "ev-mt5p9lze"
+      ],
+      "files": [
+        "apps/api/src/workflows/workflow-operations.controller.ts",
+        "apps/api/src/workflows/workflow-events.controller.ts",
+        "apps/api/src/workflows/workflows.controller.ts",
+        "application/workflow-operations-service.js",
+        "pg-workflow-operations.js",
+        "../config.js",
+        "../http/problem-details.js",
+        "../openapi.js",
+        "application/workflow-service.js",
+        "request-schemas.js",
+        "workflow-tokens.js",
+        "openapi.js",
+        "workflows/application/workflow-operations-service.js"
+      ],
+      "symbols": [],
+      "blockers": []
+    },
+    "development:task-006-canary-validation": {
+      "status": "matched",
+      "evidence_ids": [
+        "ev-mt5pau7e"
+      ],
+      "files": [
+        "packages/database/src/migrate.ts",
+        "apps/orchestrator/src/infrastructure/workflow-repository.ts",
+        "apps/api/src/workflows/infrastructure/pg-workflow-unit.ts",
+        "packages/graph-runtime/src/graph-registry.ts",
+        "packages/database/src/bin-migrate.ts",
+        "bin-migrate.ts",
+        "index.js"
+      ],
+      "symbols": [],
+      "blockers": []
+    }
+  },
+  "by_stage": {
+    "development": {
+      "verified": 6,
+      "partial": 0,
+      "missing": 0,
+      "stale": 0,
+      "blocking": 0
+    }
+  },
+  "blockers": [],
+  "raw_exists": true,
+  "record_count": 6
+}

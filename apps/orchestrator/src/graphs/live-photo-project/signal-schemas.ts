@@ -17,13 +17,16 @@ export const anchorDecisionSchema = z.discriminatedUnion("action", [
   z.object({
     action: z.literal("SELECT"),
     selectedOutputId: z.string().uuid(),
+    correlationId: z.string().uuid(),
   }),
   z.object({
     action: z.literal("REGENERATE"),
     feedback: z.string().max(4000).optional(),
+    correlationId: z.string().uuid(),
   }),
   z.object({
     action: z.literal("CANCEL"),
+    correlationId: z.string().uuid(),
   }),
 ]);
 

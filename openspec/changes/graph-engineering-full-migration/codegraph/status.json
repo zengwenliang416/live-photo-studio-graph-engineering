@@ -1,0 +1,101 @@
+{
+  "schema": "specnav.codegraph.status.v1",
+  "ok": true,
+  "generated_at": "2026-08-23T11:24:27.783Z",
+  "project_root": "/Volumes/zwl/open_sources/live-photo-studio-graph-engineering",
+  "active_change": "graph-engineering-full-migration",
+  "policy": {
+    "enabled": true,
+    "profile": "active_dev",
+    "mode": "advisory",
+    "stage": "development",
+    "required_for_stage": false,
+    "disabled_reason": null
+  },
+  "execution_surface": "cli",
+  "decision": {
+    "stage": "development",
+    "result": "pass",
+    "reason": "CodeGraph policy satisfied for development."
+  },
+  "cli": {
+    "available": true,
+    "version": "1.3.1",
+    "path": "/Users/wenliang_zeng/.local/bin/codegraph",
+    "unsupported": false,
+    "error": null
+  },
+  "mcp": {
+    "configured": true,
+    "visible_in_current_session": false,
+    "restart_required": true,
+    "config_files": [
+      "/Users/wenliang_zeng/.claude.json",
+      "/Users/wenliang_zeng/.codex/config.toml"
+    ]
+  },
+  "index": {
+    "initialized": true,
+    "projectPath": "/Volumes/zwl/open_sources/live-photo-studio-graph-engineering",
+    "indexPath": "/Volumes/zwl/open_sources/live-photo-studio-graph-engineering/.codegraph",
+    "lastIndexed": "2026-08-23T11:05:06.278Z",
+    "fileCount": 91,
+    "nodeCount": 948,
+    "edgeCount": 2316,
+    "pendingChanges": {
+      "added": 0,
+      "modified": 0,
+      "removed": 0
+    },
+    "reindexRecommended": false,
+    "worktreeMismatch": null
+  },
+  "blockers": [],
+  "warnings": [],
+  "raw_codegraph_status": {
+    "initialized": true,
+    "version": "1.3.1",
+    "projectPath": "/Volumes/zwl/open_sources/live-photo-studio-graph-engineering",
+    "indexPath": "/Volumes/zwl/open_sources/live-photo-studio-graph-engineering/.codegraph",
+    "lastIndexed": "2026-08-23T11:05:06.278Z",
+    "fileCount": 91,
+    "nodeCount": 948,
+    "edgeCount": 2316,
+    "dbSizeBytes": 3510272,
+    "backend": "node-sqlite",
+    "journalMode": "wal",
+    "nodesByKind": {
+      "class": 35,
+      "constant": 126,
+      "file": 87,
+      "function": 126,
+      "import": 301,
+      "interface": 46,
+      "method": 147,
+      "property": 34,
+      "route": 10,
+      "type_alias": 26,
+      "variable": 10
+    },
+    "languages": [
+      "javascript",
+      "tsx",
+      "typescript",
+      "yaml"
+    ],
+    "pendingChanges": {
+      "added": 0,
+      "modified": 0,
+      "removed": 0
+    },
+    "worktreeMismatch": null,
+    "index": {
+      "builtWithVersion": "1.3.1",
+      "builtWithExtractionVersion": 24,
+      "currentExtractionVersion": 24,
+      "reindexRecommended": false,
+      "state": "complete",
+      "pendingRefs": 0
+    }
+  }
+}

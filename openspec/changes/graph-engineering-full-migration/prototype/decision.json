@@ -1,0 +1,8 @@
+{
+  "status": "approved",
+  "prototype_code": "required_present",
+  "prototype_type": "logic-state",
+  "approved_variant": "bounded-generation-review-render-v1",
+  "promotion": "requires_development_gate",
+  "blocked_reasons": []
+}

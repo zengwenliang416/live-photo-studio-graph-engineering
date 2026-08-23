@@ -184,6 +184,65 @@ export function buildOpenApiDocument(baseUrl: string): Record<string, unknown> {
           },
         },
       },
+      "/v1/admin/workflow-runs/{workflowRunId}/triage": {
+        get: {
+          summary: "Read a bounded operator workflow projection.",
+          operationId: "getWorkflowTriage",
+          parameters: [
+            userIdHeaderParameter,
+            {
+              name: "workflowRunId",
+              in: "path",
+              required: true,
+              schema: { type: "string", format: "uuid" },
+            },
+          ],
+          responses: {
+            "200": jsonResponse(
+              dataEnvelope({ $ref: "#/components/schemas/WorkflowTriage" }),
+            ),
+            "403": problemResponse("Operator access required."),
+            "404": problemResponse("Workflow run not found."),
+          },
+        },
+      },
+      "/v1/admin/workflow-runs/{workflowRunId}/signals/{signalId}/replay": {
+        post: {
+          summary: "Replay a persisted signal through the Outbox.",
+          operationId: "replayWorkflowSignal",
+          parameters: [
+            userIdHeaderParameter,
+            {
+              name: "workflowRunId",
+              in: "path",
+              required: true,
+              schema: { type: "string", format: "uuid" },
+            },
+            {
+              name: "signalId",
+              in: "path",
+              required: true,
+              schema: { type: "string", format: "uuid" },
+            },
+          ],
+          requestBody: {
+            required: false,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/WorkflowReplayRequest" },
+              },
+            },
+          },
+          responses: {
+            "202": jsonResponse(
+              dataEnvelope({ $ref: "#/components/schemas/WorkflowReplayResult" }),
+            ),
+            "403": problemResponse("Operator access required."),
+            "404": problemResponse("Workflow run not found."),
+            "409": problemResponse("Signal cannot be replayed."),
+          },
+        },
+      },
     },
     components: {
       schemas: {
@@ -243,6 +302,10 @@ export function buildOpenApiDocument(baseUrl: string): Record<string, unknown> {
             nodeName: { type: "string" },
             status: { type: "string" },
             allowedActions: { type: "array", items: { type: "string" } },
+            candidateOutputIds: {
+              type: "array",
+              items: { type: "string", format: "uuid" },
+            },
             createdAt: { type: "string", format: "date-time" },
           },
         },
@@ -273,6 +336,46 @@ export function buildOpenApiDocument(baseUrl: string): Record<string, unknown> {
           properties: {
             workflowRunId: { type: "string", format: "uuid" },
             status: { type: "string", enum: ["CANCELLING"] },
+          },
+        },
+        WorkflowReplayRequest: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            reason: { type: "string", maxLength: 500, default: "OPERATOR_REQUESTED" },
+          },
+        },
+        WorkflowReplayResult: {
+          type: "object",
+          required: ["status", "eventId"],
+          properties: {
+            status: { type: "string", enum: ["ACCEPTED"] },
+            eventId: { type: "string", format: "uuid" },
+          },
+        },
+        WorkflowTriage: {
+          type: "object",
+          required: [
+            "workflowRunId",
+            "projectId",
+            "status",
+            "signals",
+            "effects",
+            "outbox",
+            "metrics",
+          ],
+          properties: {
+            workflowRunId: { type: "string", format: "uuid" },
+            projectId: { type: "string", format: "uuid" },
+            traceId: { type: "string", nullable: true },
+            status: { type: "string" },
+            currentPhase: { type: "string", nullable: true },
+            currentNode: { type: "string", nullable: true },
+            currentNodeVersion: { type: "integer", nullable: true },
+            signals: { type: "array", items: { type: "object" } },
+            effects: { type: "array", items: { type: "object" } },
+            outbox: { type: "array", items: { type: "object" } },
+            metrics: { type: "object" },
           },
         },
       },

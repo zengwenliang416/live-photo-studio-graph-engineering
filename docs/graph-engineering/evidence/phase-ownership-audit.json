@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "assertion_id": "A2",
+  "status": "passed",
+  "captured_at": "2026-08-23T18:15:46+08:00",
+  "commands": [
+    {
+      "command": "rg -n \"current_phase|workflow_runs.*UPDATE|UPDATE workflow_runs|phase ownership\" apps/worker-ai apps/worker-media apps/api packages",
+      "result": "passed",
+      "observed": "Worker production paths did not show a workflow_runs phase UPDATE; current_phase references in worker files are integration-test reads used to assert preservation."
+    },
+    {
+      "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/worker-ai exec tsx --test src/worker-ai.integration.test.ts",
+      "result": "passed",
+      "observed": "5 tests passed, including completion, duplicate delivery, cross-project rejection, phase preservation, and failure idempotency."
+    },
+    {
+      "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/worker-media exec tsx --test src/worker-media.integration.test.ts",
+      "result": "passed",
+      "observed": "5 tests passed, including deterministic export replay, duplicate delivery, cross-project rejection, phase preservation, and failure idempotency."
+    }
+  ],
+  "observed_invariants": [
+    "Workers write domain facts and correlated signals.",
+    "The orchestrator owns Graph-path phase projection updates.",
+    "Worker completion and failure signals use the external job correlation ID.",
+    "Duplicate worker delivery does not create duplicate domain artifacts or signals."
+  ],
+  "limitations": [
+    "The audit covers the current source snapshot; it is not a production deployment proof.",
+    "Real object storage, FFmpeg, HEIC and device playback remain unverified."
+  ]
+}

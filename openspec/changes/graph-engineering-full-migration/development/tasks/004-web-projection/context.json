@@ -1,0 +1,48 @@
+{
+  "task_id": "004-web-projection",
+  "goal": "A user can refresh the project page, recover the server workflow projection, and submit only current task-payload actions.",
+  "task_items": [
+    "4.1",
+    "4.2",
+    "4.3",
+    "4.4"
+  ],
+  "must_read": [
+    "openspec/changes/graph-engineering-full-migration/development/tasks/004-web-projection/brief.md",
+    "openspec/changes/graph-engineering-full-migration/requirements.md",
+    "openspec/changes/graph-engineering-full-migration/acceptance.md",
+    "openspec/changes/graph-engineering-full-migration/spec-map.json",
+    "openspec/changes/graph-engineering-full-migration/component-impact-map.json",
+    "openspec/changes/graph-engineering-full-migration/prototype/handoff.md",
+    "openspec/changes/graph-engineering-full-migration/prototype/decision.json",
+    "openspec/specs/ui-design/design.md",
+    "openspec/specs/system-architecture/design.md",
+    "openspec/specs/frontend-backend-data-flow/design.md",
+    "openspec/specs/component-architecture/design.md",
+    "openspec/changes/graph-engineering-full-migration/prototype/logic/harness.js"
+  ],
+  "allowed_files": [
+    "apps/web",
+    "apps/api",
+    "packages/graph-contracts",
+    "docs"
+  ],
+  "test_paths": [
+    "apps/web/src/**.test.ts",
+    "apps/api/src/**.test.ts"
+  ],
+  "non_goals": [
+    "Do not expand scope beyond the active change.",
+    "Do not bypass component extraction rules."
+  ],
+  "expected_evidence": [
+    "Focused tests or command output",
+    "Task report",
+    "Spec review",
+    "Quality review"
+  ],
+  "unsafe_assumptions": [
+    "Any missing requirement, API, database, or component decision blocks implementation."
+  ],
+  "stop_condition": "Stop if the task would edit outside scope or duplicate reusable component behavior."
+}
