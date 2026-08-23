@@ -711,11 +711,11 @@ state is recorded below.
 - The repository still reports the known Node `v22.19.0` versus declared
   `>=24` engine warning and pnpm's ignored `sharp` build-script warning. No
   new test or implementation failure was observed.
-- The SpecNav replay exposed an existing API test-runner race: one concurrent
-  `pnpm test` attempt returned `403` instead of `409` in the task-action
-  fixture, while the same test passed with
-  `tsx --test --test-concurrency=1`. The API package test script now fixes
-  concurrency at `1` so the declared repository command is deterministic; no
+- The SpecNav replay exposed an existing API multi-file test-runner race: one
+  concurrent attempt returned `403` instead of `409` in the task-action
+  fixture. Running all eight existing API test files through one explicit
+  entrypoint with `tsx --test --test-concurrency=1` removes the cross-file
+  fixture race without relying on an experimental Node isolation flag; no
   test was removed or skipped.
 
 ## Repository context and orientation
