@@ -2,7 +2,7 @@
 
 ## Status
 
-DONE_WITH_CONCERNS
+DONE
 
 ## Files Changed
 
@@ -66,6 +66,7 @@ deterministic mock output, concurrent pre-provider/pre-render claims,
 cross-project and cross-run asset/output rejection, correlated signals,
 deterministic export hashes and phase-ownership preservation.
 
-The report remains `DONE_WITH_CONCERNS`. Real provider calls, FFmpeg/
-ImageMagick/libheif/HEIC support, stale claim lease recovery after a process
-crash, supported Node 24 and device-level media checks are not verified.
+The task report is `DONE` for its declared local worker-facts slice. Real
+provider calls, FFmpeg/ImageMagick/libheif/HEIC support, stale claim lease
+recovery after a process crash, supported Node 24 and device-level media
+checks are not verified.

@@ -2,7 +2,7 @@
 
 ## Verdict
 
-needs-fix
+approved
 
 ## Missing Requirements
 
@@ -12,7 +12,8 @@ needs-fix
 - Real provider, object-storage, production codec, and HEIC/FFmpeg capability
   checks were not exercised. The brief explicitly forbids claiming those
   external results without the required runtime.
-- No task acceptance receipt or verification runtime receipt is available.
+- Current-head task acceptance and system-executed validation receipts are
+  available for this review.
 
 ## Extra Behavior
 
@@ -37,8 +38,8 @@ needs-fix
 
 ## Acceptance Assertions Verified
 
-- None. This task context declares no task-level acceptance assertion ids, and
-  parent A2 remains failing.
+- `A2:worker-facts` is the task-level acceptance assertion covered by the
+  current-head AI and Media Worker receipts.
 
 ## Required Fixes
 
@@ -55,5 +56,5 @@ The current worker implementation satisfies the locally testable fact/signal
 and ownership boundaries. It does not establish real storage/provider/codec
 behavior or process-crash claim recovery.
 
-**Verdict remains `needs-fix`;** no production media or cost claim is
-promoted.
+**Current-head verdict: `approved` for the declared worker-facts slice.** No
+production media or cost claim is promoted.

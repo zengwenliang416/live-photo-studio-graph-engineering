@@ -1,0 +1,609 @@
+{
+  "schema": "specnav.task-acceptance-evidence.v2",
+  "generated_by": "specnav-development/task-acceptance-evidence",
+  "task_id": "002-durable-orchestration",
+  "generated_at": "2026-08-23T12:44:44.038Z",
+  "recorded_at": "2026-08-23T12:35:22.772Z",
+  "status": "approved",
+  "reviewed_git_head": "c363e661a1f16b6f65b7529ddebbae354eaea0f3",
+  "reviewed_git_tree": "5bf97f4903e98487f2cd38b2d72713cd0d55dc47",
+  "implementation_scope": {
+    "included_patterns": [
+      "apps/api/**",
+      "apps/orchestrator/**",
+      "docs/**",
+      "packages/graph-contracts/**"
+    ],
+    "entries": [
+      {
+        "path": "apps/api/package.json",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "4e45e7ee3857e0c6f036629f3ee0737058799aa5"
+      },
+      {
+        "path": "apps/api/src/app.module.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "53bd27265dc7f0cec719790d2e9975b5cda8c07b"
+      },
+      {
+        "path": "apps/api/src/config.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "d1c31b5d45d62d8819e0879a64298dac3ef0e0d8"
+      },
+      {
+        "path": "apps/api/src/database/api-database.module.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "d8deef2cf40febd0361afdd0ec99c7314150d6a9"
+      },
+      {
+        "path": "apps/api/src/exports/application/export-package-service.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "50cc35c672077fb9a97c69aa68fd54d8f811ee08"
+      },
+      {
+        "path": "apps/api/src/exports/application/export-package-service.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "9dac810dedb3c05018ab57fd226183d5472b70cc"
+      },
+      {
+        "path": "apps/api/src/exports/export-packages.controller.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "b83acd317e29e85d3a63d48e35221313ba5133ea"
+      },
+      {
+        "path": "apps/api/src/exports/export-packages.controller.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "8f86b81d5f09ff8883a51226c5c9f8e1698c9dff"
+      },
+      {
+        "path": "apps/api/src/exports/export-tokens.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "59f888d005c1e0b161e117c560bf59826eed026e"
+      },
+      {
+        "path": "apps/api/src/exports/exports.module.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "6af27ce58cdbd80fb4702fb1d8ab214a026fa902"
+      },
+      {
+        "path": "apps/api/src/exports/infrastructure/fake-signed-download-port.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "3615c49f73de8d454e4e5abdf5ce8a247751cf46"
+      },
+      {
+        "path": "apps/api/src/exports/infrastructure/pg-export-package-store.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "548132feffc6d5d417791e63136169bf4918219e"
+      },
+      {
+        "path": "apps/api/src/exports/ports.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "45f3d25eb2b76e6fa89168ba4eb8011ef854ff3d"
+      },
+      {
+        "path": "apps/api/src/http/demo-user.guard.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "cbfbab1560e51a09549b34104f78b185c7b16138"
+      },
+      {
+        "path": "apps/api/src/http/problem-details.filter.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "73780165b51b4202093346ab18fdcc5b952fc902"
+      },
+      {
+        "path": "apps/api/src/http/problem-details.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "a6e7d8620ec9d90c53ba732e7b10a68ab84627aa"
+      },
+      {
+        "path": "apps/api/src/main.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "578d7d96886627ec10eea170eb6885bbc79e138a"
+      },
+      {
+        "path": "apps/api/src/openapi.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "c6965d51a2e7677b1120a4219e572c371984e151"
+      },
+      {
+        "path": "apps/api/src/testing/in-memory-workflow-unit.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "42425e05231041a1115587c345113aaa38ab5762"
+      },
+      {
+        "path": "apps/api/src/workflow-operations.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "0b4762a3930fc3ee8b82211ed46110fd04da9801"
+      },
+      {
+        "path": "apps/api/src/workflow-service.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "6363b23ae00d8170b7c6e6ebffb4882290bb2509"
+      },
+      {
+        "path": "apps/api/src/workflows.controller.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "ffb3cf6238aef4aa3c0cd40469e176da09751b2f"
+      },
+      {
+        "path": "apps/api/src/workflows/application/canonical-json.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "ed892e4058ffe3785d951f7419334bd9f6239ce9"
+      },
+      {
+        "path": "apps/api/src/workflows/application/workflow-operations-service.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "a14a02ef09c4f671a359a8927dc3e7731751ed54"
+      },
+      {
+        "path": "apps/api/src/workflows/application/workflow-service.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "a32bceac4b0818655b10047b5775c3de4e306fdf"
+      },
+      {
+        "path": "apps/api/src/workflows/infrastructure/outbox-dispatcher.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "af34ce84457bc7465fc5e6dc41a843587f13a684"
+      },
+      {
+        "path": "apps/api/src/workflows/infrastructure/outbox-dispatcher.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "37e51d58d04858b4dc008617ccb554510be43684"
+      },
+      {
+        "path": "apps/api/src/workflows/infrastructure/pg-workflow-operations.integration.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "19d93e3800882fb75d85623cc23b89b018e5a188"
+      },
+      {
+        "path": "apps/api/src/workflows/infrastructure/pg-workflow-operations.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "293090252a890456b055c6db8430feaf0159ca5d"
+      },
+      {
+        "path": "apps/api/src/workflows/infrastructure/pg-workflow-unit.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "585ae0f02d4d17b113128708cfbc84046292c3c7"
+      },
+      {
+        "path": "apps/api/src/workflows/ports.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "148fb91f64845651521abfc81653c2f4377a645c"
+      },
+      {
+        "path": "apps/api/src/workflows/request-schemas.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "5d143e8c7cf93b82b9153e7fb8729971ef22fcb9"
+      },
+      {
+        "path": "apps/api/src/workflows/workflow-events.controller.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "531cb1ebcedcb3793662c778c7c489ed7dc14437"
+      },
+      {
+        "path": "apps/api/src/workflows/workflow-operations.controller.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "86309917df9bf285769ecd2dec953eb60425819a"
+      },
+      {
+        "path": "apps/api/src/workflows/workflow-tokens.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "df078765863d2fc622ff6a08026e5ed7184ee70a"
+      },
+      {
+        "path": "apps/api/src/workflows/workflows.controller.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "6c30cb00dc30e6714aa4d8daa49b0d5d94539e99"
+      },
+      {
+        "path": "apps/api/src/workflows/workflows.module.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "22ba400ee6e2ede70532514140fd915fc1cf053d"
+      },
+      {
+        "path": "apps/api/tsconfig.json",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "86757ea4e99139dd0a31be073654391e80f63cb2"
+      },
+      {
+        "path": "apps/orchestrator/AGENTS.md",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "cf7a27072968b83bd264197c5f122ca6f747d721"
+      },
+      {
+        "path": "apps/orchestrator/package.json",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "cf45b95efd560891b6ce82e5a5d46c0541bb3aee"
+      },
+      {
+        "path": "apps/orchestrator/src/application/graph-engine.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "1b5b79f3560414af9dfa404d50259369ff088672"
+      },
+      {
+        "path": "apps/orchestrator/src/checkpointer.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "f9ec7318306ece4d631ebb24a360b64a438da996"
+      },
+      {
+        "path": "apps/orchestrator/src/config.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "acef7698e27d0f64fd5ebcd07aea38940d7b10a4"
+      },
+      {
+        "path": "apps/orchestrator/src/demo.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "21b50808c13b4dec0bdbd3fe2d0220ea1b813d2c"
+      },
+      {
+        "path": "apps/orchestrator/src/graph-engine.integration.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "cdc4c4104e49dd82b63b7ed4ddb00133d0d66e90"
+      },
+      {
+        "path": "apps/orchestrator/src/graph-registry.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "cae07d7bbdc9c0488763e632c4adc547e04581ce"
+      },
+      {
+        "path": "apps/orchestrator/src/graphs/live-photo-project/live-photo-project.graph.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "b66a021db5d8c1d5b16f36c430f8d810b659467f"
+      },
+      {
+        "path": "apps/orchestrator/src/graphs/live-photo-project/live-photo-project.graph.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "a4f5e96f7e99fa0afd0137e460592cb6ee3b7678"
+      },
+      {
+        "path": "apps/orchestrator/src/graphs/live-photo-project/live-photo-project.state.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "5e2b60f61f8a9120f372a870657e64b1bf099d3e"
+      },
+      {
+        "path": "apps/orchestrator/src/graphs/live-photo-project/nodes.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "eb07576fbadfa4be1533309a4756a66375d79223"
+      },
+      {
+        "path": "apps/orchestrator/src/graphs/live-photo-project/ports.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "73f8fdcdf376e8deffcc7bd9cb6375ad4888d5a3"
+      },
+      {
+        "path": "apps/orchestrator/src/graphs/live-photo-project/signal-schemas.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "3f3df9a7de404fcc54157d477539dfe07eaa694c"
+      },
+      {
+        "path": "apps/orchestrator/src/infrastructure/advisory-lock.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "43acb5f0e2a4e1f3976ff68a3d5b8689a5010818"
+      },
+      {
+        "path": "apps/orchestrator/src/infrastructure/postgres-effects.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "a04bc35ae2ab3dbb788de50c35566b5858188cbb"
+      },
+      {
+        "path": "apps/orchestrator/src/infrastructure/workflow-repository.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "2a848f3029e9879f5b0d3a2fda729f74a981a1de"
+      },
+      {
+        "path": "apps/orchestrator/src/main.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "6c803700a78a3d6a1c47ddb8b6ff9094173b41f3"
+      },
+      {
+        "path": "apps/orchestrator/tsconfig.json",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "a72a807d5f98f2017dd06cb5b651e2ea2bef07f9"
+      },
+      {
+        "path": "docs/adr/0010-graph-control-plane.md",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "32987bf03d473c080a7b9a99c7b1b24042ab00ef"
+      },
+      {
+        "path": "docs/execplans/graph-engineering-full-migration.md",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "e35957f61c77a21aa85eb2051919dd97b7ac9f71"
+      },
+      {
+        "path": "docs/graph-engineering/evidence/canary-rollback.json",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "0f4d3c62d59abab55475b7f276a453547d817683"
+      },
+      {
+        "path": "docs/graph-engineering/evidence/observability-triage.json",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "50ae106fad8961125c93bbb96bbac212c12573bb"
+      },
+      {
+        "path": "docs/graph-engineering/evidence/phase-ownership-audit.json",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "8607056f15b3923ba9881892137388288502874d"
+      },
+      {
+        "path": "docs/graph-engineering/evidence/prototype-boundary.json",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "15eb120b84aa462cfce5e684ade455f451d4f7fd"
+      },
+      {
+        "path": "docs/graph-engineering/evidence/restart-and-duplicate-signals.json",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "41ae21a4dbcf2c16bcd4f2c7b578b6f8eca08c76"
+      },
+      {
+        "path": "docs/graph-engineering/evidence/security-cost-controls.json",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "30da8b900dd83ca7c32174895ee8a87601e57d5d"
+      },
+      {
+        "path": "docs/graph-engineering/evidence/web-projection.json",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "d49fc9f2425d78c50cb8da5cea3b83a58675235f"
+      },
+      {
+        "path": "docs/graph-engineering/node-authoring-guide.md",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "dd9b24e7b36f838be796ba6d844d7d62929ee4a5"
+      },
+      {
+        "path": "docs/graph-engineering/operations-runbook.md",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "344d0f35691b5f381d53994abbc0047cbb8cae3e"
+      },
+      {
+        "path": "docs/graph-engineering/README.md",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "c53eb52f19e55b5c653db1c58ade34458caad688"
+      },
+      {
+        "path": "docs/graph-engineering/runtime-model.md",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "08821aeb7de431d00ffe7e882c94dfe86b00e1ef"
+      },
+      {
+        "path": "packages/graph-contracts/AGENTS.md",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "656fa71855856fcd3effe96b94963db1acb7a216"
+      },
+      {
+        "path": "packages/graph-contracts/package.json",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "00c19280b64e9398e18cee8b8078da1723f8cc09"
+      },
+      {
+        "path": "packages/graph-contracts/src/events.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "0d775a9b84e66402e942e08a8d6ef9d16b0c526c"
+      },
+      {
+        "path": "packages/graph-contracts/src/index.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "648f0cbe8000551051ab2dffa7b1841778fb8390"
+      },
+      {
+        "path": "packages/graph-contracts/src/job-payloads.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "0ee2701f664919383100c50998bf8fbe16a60b11"
+      },
+      {
+        "path": "packages/graph-contracts/src/node-definition.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "e19f0155fa96ca79beabf6cb6b992f70316567a8"
+      },
+      {
+        "path": "packages/graph-contracts/src/node-definition.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "93ee41940e2323a842fcd53172288e96e6d875d2"
+      },
+      {
+        "path": "packages/graph-contracts/src/observability.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "e31017bb3cf89e20da37c2e37b72a9eda7c01858"
+      },
+      {
+        "path": "packages/graph-contracts/src/observability.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "0e6950771e3b9ee5b5df0a42623ce9d0724bc335"
+      },
+      {
+        "path": "packages/graph-contracts/src/security-matrix.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "94f650330c09c5e59c679201a45f761f800c4fb7"
+      },
+      {
+        "path": "packages/graph-contracts/src/workflow.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "9f0f14b8f4690a4429ad5c91041749975da35aa1"
+      },
+      {
+        "path": "packages/graph-contracts/tsconfig.json",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "a72a807d5f98f2017dd06cb5b651e2ea2bef07f9"
+      }
+    ],
+    "sha256": "e772e17244b25bd651baa5d3281a40af7c2b3b3a55b01d37cff15c3eb6ccb871"
+  },
+  "artifacts": {
+    "context": {
+      "path": "development/tasks/002-durable-orchestration/context.json",
+      "sha256": "56f948bb9b3af4d0b00c2a492a373fb82882fb52e4bda127bd3bde5298055e4a"
+    },
+    "report": {
+      "path": "development/tasks/002-durable-orchestration/report.md",
+      "sha256": "73c18aeaff08604a7ec2755342859dbc886ccec15ad4c1aadd5f9cddda79e6e8",
+      "status": "DONE"
+    },
+    "spec_review": {
+      "path": "development/tasks/002-durable-orchestration/spec-review.md",
+      "sha256": "06f45706c0451396951b056c2e1ae2821248e4cfc2a00a272f9a98493c7a6a9b",
+      "verdict": "approved"
+    },
+    "quality_review": {
+      "path": "development/tasks/002-durable-orchestration/quality-review.md",
+      "sha256": "72cdbabd719bb447c70beae4f35b3b0d5f9a202c9e3d69bb0be5790d2319bded",
+      "verdict": "approved"
+    }
+  },
+  "test_runs": [
+    {
+      "id": "receipt-0a1f647a1a96c7061dfdfc9612853fb573536f870c5b3613798988724a46317b",
+      "command": "pnpm graph:demo",
+      "assertion_ids": [
+        "A1:durable-orchestration"
+      ],
+      "recorded_at": "2026-08-23T12:35:22.772Z",
+      "validation_receipt_sha256": "94d00f2ac31d755ad511a8929d0fdb2677295ba2a4af26388d613177a626d533",
+      "evidence_log": {
+        "path": "development/evidence/038-002-durable-orchestration.log",
+        "sha256": "8a53cedc6c890fee295b07afd5ada410e78054c540ce4defbbb9eb8f4403f346",
+        "size": 1623
+      }
+    },
+    {
+      "id": "receipt-86a8aca00481290aa7eeeb939ef4b6bf3797ef7bb7db530b1b66673ff970b32f",
+      "command": "pnpm --filter @live-photo-studio/orchestrator test",
+      "assertion_ids": [
+        "A1:durable-orchestration"
+      ],
+      "recorded_at": "2026-08-23T12:35:15.388Z",
+      "validation_receipt_sha256": "4f090a5a3ed0463fdfb520fde38f0ed4ba1d5685bf39cc8d97494fe3f6cee426",
+      "evidence_log": {
+        "path": "development/evidence/035-002-durable-orchestration.log",
+        "sha256": "9d8073344edae30b55b4582a6408081620528bb2a05b6d92cdc5c97018f1f52f",
+        "size": 1304
+      }
+    },
+    {
+      "id": "receipt-90c55fd1cd3c4550cc9442864942f680224b165f56762666c1d5e6d9861b96b0",
+      "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/orchestrator test",
+      "assertion_ids": [
+        "A1:durable-orchestration"
+      ],
+      "recorded_at": "2026-08-23T12:35:16.660Z",
+      "validation_receipt_sha256": "68bd775cc6992b01eded450301b7895f442efcb5a8051e28b51e046c156bc61d",
+      "evidence_log": {
+        "path": "development/evidence/036-002-durable-orchestration.log",
+        "sha256": "2b848bf58d78048e02ebb2f6fae95544fc5eeabd9c0b199af7f44c7a467d4139",
+        "size": 2701
+      }
+    },
+    {
+      "id": "receipt-cc937f6fbf51d676d5864a50eb1c8452c3e52fcc714dbc5b84a2ef053eec6dbc",
+      "command": "pnpm --filter @live-photo-studio/api test",
+      "assertion_ids": [
+        "A1:durable-orchestration"
+      ],
+      "recorded_at": "2026-08-23T12:35:17.971Z",
+      "validation_receipt_sha256": "43f7c259064d8df3af3d0ef735b9159b575b4df599302362be217416d55961cd",
+      "evidence_log": {
+        "path": "development/evidence/037-002-durable-orchestration.log",
+        "sha256": "8144fe4280c4ce09267145ea899ec17bbe5ae3a3e010fe543cfb18384fe12e15",
+        "size": 6327
+      }
+    }
+  ],
+  "assertions": [
+    {
+      "id": "A1:durable-orchestration",
+      "parent_id": "A1",
+      "status": "passing",
+      "test_run_ids": [
+        "receipt-0a1f647a1a96c7061dfdfc9612853fb573536f870c5b3613798988724a46317b",
+        "receipt-86a8aca00481290aa7eeeb939ef4b6bf3797ef7bb7db530b1b66673ff970b32f",
+        "receipt-90c55fd1cd3c4550cc9442864942f680224b165f56762666c1d5e6d9861b96b0",
+        "receipt-cc937f6fbf51d676d5864a50eb1c8452c3e52fcc714dbc5b84a2ef053eec6dbc"
+      ],
+      "direct_evidence": [],
+      "reused_evidence": [],
+      "claim": "A workflow run resumes once after crashes or duplicate signals, rejects wrong correlations, and stops bounded repair safely. (A1:durable-orchestration)"
+    }
+  ],
+  "fallback_used": false
+}

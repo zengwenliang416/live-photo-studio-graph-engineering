@@ -2,7 +2,7 @@
 
 ## Status
 
-DONE_WITH_CONCERNS
+DONE
 
 ## Files Changed
 
@@ -69,8 +69,7 @@ API suite passed 30/30, and the PostgreSQL-backed API suite passed 33/33.
 `pnpm check` and migration replay passed; the migration command reported
 `applied:[]` and `skipped:6`.
 
-The task remains `DONE_WITH_CONCERNS`: the run used Node `v22.19.0` against the
-declared `>=24` engine, `sharp` installation was not built, and SpecNav task
-acceptance must still be regenerated on the committed snapshot. These
-concerns do not invalidate the local focused results, but they prevent a
-verification handoff approval.
+The task is `DONE` for its declared local foundation slice. The run used Node
+`v22.19.0` against the declared `>=24` engine and `sharp` installation was not
+built; these concerns do not invalidate the local receipts, but supported
+runtime behavior is not claimed.

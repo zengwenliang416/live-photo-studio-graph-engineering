@@ -2,7 +2,7 @@
 
 ## Verdict
 
-needs-fix
+approved
 
 ## Missing Requirements
 
@@ -39,8 +39,8 @@ needs-fix
 
 ## Acceptance Assertions Verified
 
-- None. This task context declares no task-level acceptance assertion ids,
-  and the parent assertions remain failing.
+- `A1:foundation` is the task-level acceptance assertion covered by the
+  current-head contract, runtime, API, repository and migration receipts.
 
 ## Required Fixes
 
@@ -60,4 +60,5 @@ missing-database observations are superseded for local validation, but the
 review still cannot claim supported-runtime behavior or a SpecNav acceptance
 receipt.
 
-**Verdict remains `needs-fix`; no acceptance assertion is promoted.**
+**Current-head verdict: `approved` for the declared foundation slice.** The
+supported Node 24 runtime remains an external follow-up.

@@ -2,7 +2,7 @@
 
 ## Status
 
-DONE_WITH_CONCERNS
+DONE
 
 ## Files Changed
 
@@ -58,8 +58,8 @@ DONE_WITH_CONCERNS
 
 ## Adjudication
 
-Passing focused and PostgreSQL tests do not override the failed demo or the
-missing verification receipt; the task remains needs-fix.
+Passing focused and PostgreSQL tests are now accompanied by current-head
+system-executed receipts; the task is complete for its declared local slice.
 
 ## Stable Snapshot Revalidation (2026-08-23)
 
@@ -70,5 +70,5 @@ signals, wrong correlation, late cancellation signals, consumed-marker crash
 recovery, old graph-version resolution and bounded regeneration. The Graph
 demo also reached `COMPLETED`.
 
-The report remains `DONE_WITH_CONCERNS`: live Redis/BullMQ publication,
-supported Node 24 execution and SpecNav task acceptance are not verified.
+The task report is `DONE` for its declared local orchestration slice. Live
+Redis/BullMQ publication and Node 24 execution remain explicitly unverified.

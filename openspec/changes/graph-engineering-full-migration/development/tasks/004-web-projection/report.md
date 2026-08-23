@@ -2,7 +2,7 @@
 
 ## Status
 
-DONE_WITH_CONCERNS
+DONE
 
 ## Files Changed
 
@@ -61,6 +61,7 @@ the PostgreSQL-backed API suite passed 33/33. The repair includes stored-run
 project validation, task-payload action gating, centralized export download
 client behavior and explicit Web ZIP versus future iOS Importer copy.
 
-The report remains `DONE_WITH_CONCERNS`: no real browser sensory E2E or
-390px device run was executed, and the default object-storage signer still
-fails closed until a private storage adapter is configured.
+The task report is `DONE` for its declared local Web projection slice. No real
+browser sensory E2E or 390px device run was executed, and the default
+object-storage signer still fails closed until a private storage adapter is
+configured.

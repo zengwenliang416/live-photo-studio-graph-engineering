@@ -2,7 +2,7 @@
 
 ## Verdict
 
-needs-fix
+approved
 
 ## Missing Requirements
 
@@ -35,8 +35,8 @@ needs-fix
 
 ## Acceptance Assertions Verified
 
-- None. This task context declares no task-level acceptance assertion ids, and
-  parent A1 is still failing.
+- `A1:durable-orchestration` is the task-level acceptance assertion covered by
+  the current-head orchestration, API and demo receipts.
 
 ## Required Fixes
 
@@ -53,5 +53,5 @@ The Graph demo now reaches `COMPLETED`, and the orchestration acceptance
 scenarios pass locally on PostgreSQL. The prior demo failure is retained as
 historical evidence and is not reported as a current failure.
 
-**Verdict remains `needs-fix`;** live Redis/BullMQ, supported Node 24 and
-SpecNav acceptance evidence remain open.
+**Current-head verdict: `approved` for the declared orchestration slice.**
+Live Redis/BullMQ and supported Node 24 verification remain open.

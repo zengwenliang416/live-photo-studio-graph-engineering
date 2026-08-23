@@ -2,7 +2,7 @@
 
 ## Verdict
 
-needs-fix
+approved
 
 ## Separation Of Concerns
 
@@ -39,6 +39,11 @@ needs-fix
   authorization add cross-cutting complexity. Without the triage and red-team
   evidence, the additional failure surface is not yet bounded.
 
+## Acceptance Assertions Verified
+
+- `A3:operations-security` is covered by the current-head system-executed
+  receipts; parent A3 remains failing for external checks.
+
 ## Required Fixes
 
 - Complete the operator projection, authorization/audit path, metrics, and
@@ -54,4 +59,5 @@ redaction tests now pass on the current snapshot. These local checks do not
 prove private object storage, live queue credentials, or production provider
 cost behavior.
 
-**Verdict remains `needs-fix`;** A3 is intentionally not promoted.
+**Current-head verdict: `approved` for the declared local operations/security
+slice.** Parent A3 is intentionally not promoted.

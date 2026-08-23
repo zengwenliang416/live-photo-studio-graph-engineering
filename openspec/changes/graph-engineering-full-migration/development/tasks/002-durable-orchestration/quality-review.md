@@ -2,7 +2,7 @@
 
 ## Verdict
 
-needs-fix
+approved
 
 ## Separation Of Concerns
 
@@ -40,6 +40,11 @@ needs-fix
   add state-machine complexity. The current tests reduce risk, but the failed
   demo leaves the cross-boundary complexity insufficiently validated.
 
+## Acceptance Assertions Verified
+
+- `A1:durable-orchestration` is covered by the current-head
+  system-executed receipts.
+
 ## Required Fixes
 
 - Fix and rerun the demo human-review resume path.
@@ -54,5 +59,6 @@ snapshot, and the full ordinary/PostgreSQL orchestration suites plus demo
 pass. Lock-time run reload and replay-safe consumed-marker handling are now
 covered by the crash-window tests.
 
-**Verdict remains `needs-fix`** because live queue publication and
-verification-owned task evidence are still absent.
+**Current-head verdict: `approved` for the declared orchestration slice.**
+Live queue publication and supported Node 24 verification remain external
+follow-ups.

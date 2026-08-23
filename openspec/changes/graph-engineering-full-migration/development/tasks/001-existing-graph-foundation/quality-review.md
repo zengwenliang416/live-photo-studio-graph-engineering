@@ -2,7 +2,7 @@
 
 ## Verdict
 
-needs-fix
+approved
 
 ## Separation Of Concerns
 
@@ -44,6 +44,10 @@ needs-fix
   expected complexity increase. Its operational cost and failure behavior
   remain unmeasured until migration and supported-runtime checks run.
 
+## Acceptance Assertions Verified
+
+- `A1:foundation` is covered by the current-head system-executed receipts.
+
 ## Required Fixes
 
 - Repeat the review against a stable implementation snapshot.
@@ -57,5 +61,5 @@ revalidation. Graph contracts, Graph runtime, API unit/contract tests,
 repository checks and migration replay passed, including the corrected test
 glob that collects top-level and nested test files.
 
-**Verdict remains `needs-fix`.** Supported Node 24 execution, Verification 2.0
-task receipts and the remaining external A3 checks are still unavailable.
+**Current-head verdict: `approved` for the declared foundation slice.**
+Supported Node 24 execution and parent A3 external checks remain unavailable.

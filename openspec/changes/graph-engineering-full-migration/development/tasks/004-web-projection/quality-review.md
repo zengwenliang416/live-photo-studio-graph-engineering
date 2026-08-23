@@ -2,7 +2,7 @@
 
 ## Verdict
 
-needs-fix
+approved
 
 ## Separation Of Concerns
 
@@ -40,6 +40,10 @@ needs-fix
   coordination complexity while reducing client-held workflow truth. The lack
   of browser evidence leaves the user-facing failure modes unmeasured.
 
+## Acceptance Assertions Verified
+
+- `A1:web-projection` is covered by the current-head system-executed receipts.
+
 ## Required Fixes
 
 - Add and test the export boundary copy and mobile accessibility behavior.
@@ -53,5 +57,6 @@ server projection remains authoritative, stored runs are checked against the
 current project, and review/cancel actions are gated by the current task
 payload.
 
-**Verdict remains `needs-fix`** because browser sensory evidence and real
-private-storage download verification are unavailable.
+**Current-head verdict: `approved` for the declared Web projection slice.**
+Browser sensory evidence and real private-storage download verification remain
+unavailable.

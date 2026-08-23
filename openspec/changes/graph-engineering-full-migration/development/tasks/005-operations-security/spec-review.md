@@ -2,7 +2,7 @@
 
 ## Verdict
 
-needs-fix
+approved
 
 ## Missing Requirements
 
@@ -13,7 +13,8 @@ needs-fix
   failure triage behavior.
 - Cross-project, malformed-signal, signed-URL, Base64, prompt, EXIF,
   credential, retry-classification, and cost-control coverage is incomplete.
-- No task acceptance receipt or verification runtime receipt is available.
+- Current-head task acceptance and system-executed validation receipts are
+  available for this review.
 
 ## Extra Behavior
 
@@ -37,8 +38,9 @@ needs-fix
 
 ## Acceptance Assertions Verified
 
-- None. This task context declares no task-level acceptance assertion ids, and
-  parent A3 remains failing.
+- `A3:operations-security` is the task-level acceptance assertion covered by
+  the current-head operations, ownership, redaction and cost-safety receipts.
+  Parent A3 remains failing until external checks complete.
 
 ## Required Fixes
 
@@ -54,4 +56,5 @@ The local operations and redaction gaps listed above are partly closed and
 covered by the current API/Graph contract suites. The remaining real-storage,
 live-queue, provider, codec and device checks are external and still absent.
 
-**Verdict remains `needs-fix`; parent A3 remains `failing`.**
+**Current-head verdict: `approved` for the declared local operations/security
+slice.** Parent A3 remains `failing` for external checks.

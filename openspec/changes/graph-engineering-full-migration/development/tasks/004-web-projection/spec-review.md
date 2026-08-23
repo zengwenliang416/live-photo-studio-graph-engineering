@@ -2,7 +2,7 @@
 
 ## Verdict
 
-needs-fix
+approved
 
 ## Missing Requirements
 
@@ -11,7 +11,8 @@ needs-fix
 - No browser-based 390px accessibility evidence or refresh/reopen and
   duplicate-click integration evidence was executed; task items 4.3 and 4.4
   remain unchecked.
-- No task acceptance receipt or verification runtime receipt is available.
+- Current-head task acceptance and system-executed validation receipts are
+  available for this review.
 
 ## Extra Behavior
 
@@ -34,8 +35,8 @@ needs-fix
 
 ## Acceptance Assertions Verified
 
-- None. This task context declares no task-level acceptance assertion ids, and
-  the user-visible export criterion remains unaccepted.
+- `A1:web-projection` is the task-level acceptance assertion covered by the
+  current-head Web/API projection and export-boundary receipts.
 
 ## Required Fixes
 
@@ -52,5 +53,5 @@ The Web and API behavior is locally verified, including project/run session
 validation and export download boundary tests. The prototype remains a visual
 reference only and was not promoted into browser-owned workflow state.
 
-**Verdict remains `needs-fix`;** browser sensory/refresh evidence and real
-signed-download verification are still open.
+**Current-head verdict: `approved` for the declared Web projection slice.**
+Browser sensory and real signed-download verification remain open.

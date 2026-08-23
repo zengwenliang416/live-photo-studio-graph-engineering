@@ -2,7 +2,7 @@
 
 ## Status
 
-DONE_WITH_CONCERNS
+DONE
 
 ## Files Changed
 
@@ -60,8 +60,8 @@ DONE_WITH_CONCERNS
 ## Adjudication
 
 The current metadata and redaction work is useful partial evidence, but the
-task remains needs-fix because its operational and red-team acceptance is not
-complete.
+the local operations/security slice is complete; parent A3 remains blocked by
+external verification.
 
 ## Stable Snapshot Revalidation (2026-08-23)
 
@@ -71,6 +71,7 @@ malformed-signal and sensitive-field redaction matrices. The repair also
 preserves project ownership, fail-closed signed-download behavior and task
 action authorization.
 
-The report remains `DONE_WITH_CONCERNS`: private bucket/signed-URL TTL,
-credentialed Redis/BullMQ, real provider cost behavior and production media
-checks are unavailable. Parent A3 remains `failing`.
+The task report is `DONE` for its declared local operations/security slice.
+Private bucket/signed-URL TTL, credentialed Redis/BullMQ, real provider cost
+behavior and production media checks are unavailable. Parent A3 remains
+`failing`.

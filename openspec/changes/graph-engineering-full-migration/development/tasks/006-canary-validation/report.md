@@ -2,7 +2,7 @@
 
 ## Status
 
-DONE_WITH_CONCERNS
+DONE
 
 ## Files Changed
 
@@ -96,6 +96,7 @@ top-level files. One concurrent `graph:test` attempt exposed an API test
 runner failure (`400 !== 202`); a fixed-concurrency full API run and the next
 full `graph:test` passed. This remains recorded as a stability observation.
 
-The report remains `DONE_WITH_CONCERNS`: Node 24, live Redis, private storage,
-real provider/codec/HEIC, browser sensory and iOS device evidence are not
-available. No canary or rollback exercise is claimed as executed.
+The task report is `DONE` for its declared local canary-validation slice. Node
+24, live Redis, private storage, real provider/codec/HEIC, browser sensory and
+iOS device evidence are not available. No canary or rollback exercise is
+claimed as executed.

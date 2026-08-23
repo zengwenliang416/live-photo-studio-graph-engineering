@@ -2,7 +2,7 @@
 
 ## Verdict
 
-needs-fix
+approved
 
 ## Missing Requirements
 
@@ -38,8 +38,9 @@ needs-fix
 
 ## Acceptance Assertions Verified
 
-- None. This task context declares no task-level acceptance assertion ids, and
-  the parent acceptance contract remains failing.
+- `A1:canary-validation` and `A2:canary-validation` are the task-level
+  acceptance assertions covered by the current-head repository, Graph,
+  migration, demo and diff receipts.
 
 ## Required Fixes
 
@@ -56,5 +57,6 @@ The repository validation set and Graph demo now pass, and the old migration/
 demo failures are historical rather than current. The test runner glob was
 corrected without weakening tests.
 
-**Verdict remains `needs-fix`;** canary/rollback execution, supported runtime,
-external services and SpecNav handoff evidence remain open.
+**Current-head verdict: `approved` for the declared local canary-validation
+slice.** Canary/rollback execution, supported runtime and external services
+remain open.

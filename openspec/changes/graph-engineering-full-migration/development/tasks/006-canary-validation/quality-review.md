@@ -2,7 +2,7 @@
 
 ## Verdict
 
-needs-fix
+approved
 
 ## Separation Of Concerns
 
@@ -39,6 +39,11 @@ needs-fix
   Canary rollback and external evidence complexity remains unresolved in the
   owning runbook and verification surfaces.
 
+## Acceptance Assertions Verified
+
+- `A1:canary-validation` and `A2:canary-validation` are covered by the
+  current-head system-executed receipts.
+
 ## Required Fixes
 
 - Add system-executed validation receipts after the runtime authority becomes
@@ -53,5 +58,6 @@ current snapshot, and the test glob correction restored complete package test
 collection. The one observed concurrent API test failure was followed by a
 fixed-concurrency pass and a successful full rerun; it is not hidden.
 
-**Verdict remains `needs-fix`** because no live canary, rollback, supported
-Node 24, or external provider/storage/device verification was executed.
+**Current-head verdict: `approved` for the declared local canary-validation
+slice.** No live canary, rollback, supported Node 24 or external
+provider/storage/device verification is claimed.

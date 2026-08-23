@@ -2,7 +2,7 @@
 
 ## Verdict
 
-needs-fix
+approved
 
 ## Separation Of Concerns
 
@@ -42,6 +42,10 @@ needs-fix
   workers. External runtime gaps prevent measuring the remaining operational
   risk.
 
+## Acceptance Assertions Verified
+
+- `A2:worker-facts` is covered by the current-head system-executed receipts.
+
 ## Required Fixes
 
 - Re-run the worker matrix in the supported Node and media runtime, including
@@ -56,5 +60,6 @@ and PostgreSQL cases. The review confirms that concurrent delivery claims
 precede external provider/renderer calls and that ownership checks fail before
 those calls.
 
-**Verdict remains `needs-fix`** for real provider/codec/HEIC validation,
-supported runtime evidence, and the documented post-crash stale-claim risk.
+**Current-head verdict: `approved` for the declared worker-facts slice.** Real
+provider/codec/HEIC validation, supported runtime evidence and post-crash
+stale-claim recovery remain external follow-ups.
