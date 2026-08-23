@@ -2,11 +2,11 @@
   "schema": "specnav.task-acceptance-evidence.v2",
   "generated_by": "specnav-development/task-acceptance-evidence",
   "task_id": "005-operations-security",
-  "generated_at": "2026-08-23T12:53:52.494Z",
-  "recorded_at": "2026-08-23T12:52:53.376Z",
+  "generated_at": "2026-08-23T16:09:43.025Z",
+  "recorded_at": "2026-08-23T16:07:47.792Z",
   "status": "approved",
-  "reviewed_git_head": "12abbdede1a3e31618c3944f2d1b57c868a32353",
-  "reviewed_git_tree": "8b272308e129056c4bc4a8e70b6517ab41911146",
+  "reviewed_git_head": "70ebe55817d92da054b15298a417a142d2f227b5",
+  "reviewed_git_tree": "d7673b86fc96dd45dc1cb62526ce0a001cbc8bba",
   "implementation_scope": {
     "included_patterns": [
       "apps/api/**",
@@ -21,7 +21,7 @@
         "path": "apps/api/package.json",
         "mode": "100644",
         "type": "blob",
-        "object_id": "4e45e7ee3857e0c6f036629f3ee0737058799aa5"
+        "object_id": "8f5fff3cc9a9bd7113d39da73cfddefbdd7dcf67"
       },
       {
         "path": "apps/api/src/app.module.ts",
@@ -75,13 +75,25 @@
         "path": "apps/api/src/exports/exports.module.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "6af27ce58cdbd80fb4702fb1d8ab214a026fa902"
+        "object_id": "ac2981b0f51379fd0eb94ce3d51e5b77ce54c1ca"
       },
       {
         "path": "apps/api/src/exports/infrastructure/fake-signed-download-port.ts",
         "mode": "100644",
         "type": "blob",
         "object_id": "3615c49f73de8d454e4e5abdf5ce8a247751cf46"
+      },
+      {
+        "path": "apps/api/src/exports/infrastructure/object-storage-signed-download-port.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "7ed4055142316bb95750ccbf7aaffda4d74955ad"
+      },
+      {
+        "path": "apps/api/src/exports/infrastructure/object-storage-signed-download-port.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "8fdb993daa386c132ddfbbfa523f03690ed0a3b8"
       },
       {
         "path": "apps/api/src/exports/infrastructure/pg-export-package-store.ts",
@@ -124,6 +136,12 @@
         "mode": "100644",
         "type": "blob",
         "object_id": "c6965d51a2e7677b1120a4219e572c371984e151"
+      },
+      {
+        "path": "apps/api/src/test-entrypoint.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "12e8a2d72db45e3b99ee4989a55b25b208f95f9d"
       },
       {
         "path": "apps/api/src/testing/in-memory-workflow-unit.ts",
@@ -411,7 +429,7 @@
         "path": "apps/worker-media/package.json",
         "mode": "100644",
         "type": "blob",
-        "object_id": "d7f633b03f755c5250663ea95adacd68d03468ba"
+        "object_id": "11874f58eef0f3a7e72a508768fb91a4da5a5141"
       },
       {
         "path": "apps/worker-media/src/config.ts",
@@ -423,13 +441,13 @@
         "path": "apps/worker-media/src/export-service.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "1b4271d0ef3eb2aac24db85483e4a3e9729fb812"
+        "object_id": "60f4c1e39027985303a155081cc4f1cd5366dad7"
       },
       {
         "path": "apps/worker-media/src/main.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "665e8d57af16e971b832defb78326604b7d00201"
+        "object_id": "a98d2148f599f8c35aebf6fb5261a8ff6b5ec69c"
       },
       {
         "path": "apps/worker-media/src/media-safety.test.ts",
@@ -453,7 +471,7 @@
         "path": "apps/worker-media/src/worker-media.integration.test.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "14a3d37379cc60cbe226235a00aea64894ca45ba"
+        "object_id": "8e1f561be7c639d2118ddd695d3257203b2139a1"
       },
       {
         "path": "apps/worker-media/src/zip.test.ts",
@@ -483,7 +501,7 @@
         "path": "docs/execplans/graph-engineering-full-migration.md",
         "mode": "100644",
         "type": "blob",
-        "object_id": "74ee374b2723771766473f16e6709ac3623456a2"
+        "object_id": "dd83f17d8be6ac22a29bef1f52874bf6972642d2"
       },
       {
         "path": "docs/graph-engineering/evidence/canary-rollback.json",
@@ -501,7 +519,7 @@
         "path": "docs/graph-engineering/evidence/phase-ownership-audit.json",
         "mode": "100644",
         "type": "blob",
-        "object_id": "8607056f15b3923ba9881892137388288502874d"
+        "object_id": "d06b9d278441e5f4533d7c6446303bec46fdc5e3"
       },
       {
         "path": "docs/graph-engineering/evidence/prototype-boundary.json",
@@ -519,7 +537,7 @@
         "path": "docs/graph-engineering/evidence/security-cost-controls.json",
         "mode": "100644",
         "type": "blob",
-        "object_id": "30da8b900dd83ca7c32174895ee8a87601e57d5d"
+        "object_id": "39749d650c98ea1303f5ee1b2b8189834672791b"
       },
       {
         "path": "docs/graph-engineering/evidence/web-projection.json",
@@ -537,19 +555,19 @@
         "path": "docs/graph-engineering/operations-runbook.md",
         "mode": "100644",
         "type": "blob",
-        "object_id": "344d0f35691b5f381d53994abbc0047cbb8cae3e"
+        "object_id": "f1c1168fe886e12bdc0efc2332826bd601c68d5f"
       },
       {
         "path": "docs/graph-engineering/README.md",
         "mode": "100644",
         "type": "blob",
-        "object_id": "c53eb52f19e55b5c653db1c58ade34458caad688"
+        "object_id": "8f9e44d51b9c7315e6add3eade9b3cb09002ef41"
       },
       {
         "path": "docs/graph-engineering/runtime-model.md",
         "mode": "100644",
         "type": "blob",
-        "object_id": "08821aeb7de431d00ffe7e882c94dfe86b00e1ef"
+        "object_id": "9f936ceb325ce8e58f19c5827f486236d365163a"
       },
       {
         "path": "packages/graph-contracts/AGENTS.md",
@@ -624,7 +642,7 @@
         "object_id": "a72a807d5f98f2017dd06cb5b651e2ea2bef07f9"
       }
     ],
-    "sha256": "28872256c45f639f9c5eab5c03bf6960a069296e51377e40ad9edbe390350617"
+    "sha256": "20b7db2d108e3cd6ad24066fd5755f6c8677cdb3af67cc8424ea669c3f8390ad"
   },
   "artifacts": {
     "context": {
@@ -649,73 +667,73 @@
   },
   "test_runs": [
     {
-      "id": "receipt-09b1c57da9e5addf787ab0b8531631edca92bac9902694b215b70d0102ced814",
-      "command": "pnpm test",
-      "assertion_ids": [
-        "A3:operations-security"
-      ],
-      "recorded_at": "2026-08-23T12:52:50.373Z",
-      "validation_receipt_sha256": "0af361d7ffa6dc4a8d2339a4a3695d647cb5cbbb03fcbb0b4a9a7a49a1bc6213",
-      "evidence_log": {
-        "path": "development/evidence/104-005-operations-security.log",
-        "sha256": "1abb2a6bcfb73835f23893331959079e9f0eca2ba291b454392e859cb2c42f87",
-        "size": 23018
-      }
-    },
-    {
-      "id": "receipt-97299b21746a45927e5cda3b0832f0818993b622f952b8b23bf288d3a6785290",
-      "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/worker-media test",
-      "assertion_ids": [
-        "A3:operations-security"
-      ],
-      "recorded_at": "2026-08-23T12:52:53.343Z",
-      "validation_receipt_sha256": "0f7e17f8d6a8ea9c226798de3dc0803b329bd16cbfe93ca49dbdb273a375e50a",
-      "evidence_log": {
-        "path": "development/evidence/107-005-operations-security.log",
-        "sha256": "0ef834a6bb057b075ca0c031628b147cc9b6c577726c8ebc29d97f21e37e5705",
-        "size": 2952
-      }
-    },
-    {
-      "id": "receipt-b4c0f297b9c4c5b5455a1870ce27ec1e5609e13b91ba0b8f4ff27bca13dae0fb",
-      "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/orchestrator test",
-      "assertion_ids": [
-        "A3:operations-security"
-      ],
-      "recorded_at": "2026-08-23T12:52:51.946Z",
-      "validation_receipt_sha256": "b809f530c47de8d5f756610c6540186e93544ee3fcf25413f199d40e8070c957",
-      "evidence_log": {
-        "path": "development/evidence/105-005-operations-security.log",
-        "sha256": "2167025efc611a2dd2d144cadaeff6e28bb1878ea9948c784b43987349cd9534",
-        "size": 2700
-      }
-    },
-    {
-      "id": "receipt-dfb6a1b3ba77b09f0b03230b483177ed1067a9bbd1d26fb42393698d74dda0d0",
-      "command": "git diff --check",
-      "assertion_ids": [
-        "A3:operations-security"
-      ],
-      "recorded_at": "2026-08-23T12:52:53.376Z",
-      "validation_receipt_sha256": "af6c835cbbf719e783f03f618a8acba6352667560f1831957e6ed9f40f8c511c",
-      "evidence_log": {
-        "path": "development/evidence/108-005-operations-security.log",
-        "sha256": "8268c5d00b870497f7bc03ff848f3a1165eadfe138566c8b6d5e89ed0e6ed5ff",
-        "size": 101
-      }
-    },
-    {
-      "id": "receipt-e8f3df894d0236c79355c2f1c159043079f58d0f2a2047acdd1fceaf35909379",
+      "id": "receipt-2b89544eefe75dfb44e4e43939b9fe6c046a942793664bbcdba0807258c4a743",
       "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/worker-ai test",
       "assertion_ids": [
         "A3:operations-security"
       ],
-      "recorded_at": "2026-08-23T12:52:52.628Z",
-      "validation_receipt_sha256": "8df379f80fa189d051dc7136089bb04704f78235ca4cd1f2d5ae31ed7144b462",
+      "recorded_at": "2026-08-23T16:07:46.952Z",
+      "validation_receipt_sha256": "c125496586a1f48d1b4c253f248c7c5c36039155d73e3305c7a5756cca14597e",
       "evidence_log": {
-        "path": "development/evidence/106-005-operations-security.log",
-        "sha256": "6ed3b69baa67232cbad272f301b6be755a2a2872bc18345b904005bf8a3f4d83",
-        "size": 2236
+        "path": "development/evidence/251-005-operations-security.log",
+        "sha256": "500b0cba3add4c0b6933247ea4e6d19012bfee367845d99be5f64c7615f506b1",
+        "size": 2237
+      }
+    },
+    {
+      "id": "receipt-64ad3229423ff6c2fb9fd9aa4f184c22d2316d1c64cec7354ecfda775f2f5b31",
+      "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/worker-media test",
+      "assertion_ids": [
+        "A3:operations-security"
+      ],
+      "recorded_at": "2026-08-23T16:07:47.740Z",
+      "validation_receipt_sha256": "4a9e04734262dceea5be04fbc56e894542d72b8661d255244eed085b901f316e",
+      "evidence_log": {
+        "path": "development/evidence/252-005-operations-security.log",
+        "sha256": "c1d3561dfc8c906f11bc1948a1700cb9940a2565b21afc05d28c9d8a4e66d55c",
+        "size": 2944
+      }
+    },
+    {
+      "id": "receipt-a63481b172c177fd16a34484c7e62c7058cfa50c553756c989a6b24fac0e33db",
+      "command": "pnpm test",
+      "assertion_ids": [
+        "A3:operations-security"
+      ],
+      "recorded_at": "2026-08-23T16:07:44.775Z",
+      "validation_receipt_sha256": "d39cd7d515cd2323a300b77a2636dc690c97f39467a7ade0f5cef75272555b08",
+      "evidence_log": {
+        "path": "development/evidence/249-005-operations-security.log",
+        "sha256": "d5b9c3d4f6d7d2649ffa81bf76b91387b8563c82f78df78d5977b68d455ade40",
+        "size": 25254
+      }
+    },
+    {
+      "id": "receipt-c7d77867d85988e03b4d54bc9733be81679c50aec4240cf52dd1be7aca61a50a",
+      "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/orchestrator test",
+      "assertion_ids": [
+        "A3:operations-security"
+      ],
+      "recorded_at": "2026-08-23T16:07:46.257Z",
+      "validation_receipt_sha256": "40c56988267247f86e5748c2a5edc27292fd7610338740384857e014cdb6469c",
+      "evidence_log": {
+        "path": "development/evidence/250-005-operations-security.log",
+        "sha256": "75f7fb7daf04c5968c49d3f118dde160e7abf193c2cc2d882ce378b203508dcb",
+        "size": 2702
+      }
+    },
+    {
+      "id": "receipt-d00f9d6dc731000ec06e77e1a0deb58504cb64658aba207b96c52276e7bff271",
+      "command": "git diff --check",
+      "assertion_ids": [
+        "A3:operations-security"
+      ],
+      "recorded_at": "2026-08-23T16:07:47.792Z",
+      "validation_receipt_sha256": "cd9d10d5ec26fa342359c0ad6eb7d7f4153bc5d4ecc919b835bd6b5b0c58c797",
+      "evidence_log": {
+        "path": "development/evidence/253-005-operations-security.log",
+        "sha256": "c9f123b907dab6eddbc5c1fc857bf4cf27536bba38581531e528cee609dc2499",
+        "size": 101
       }
     }
   ],
@@ -725,11 +743,11 @@
       "parent_id": "A3",
       "status": "passing",
       "test_run_ids": [
-        "receipt-09b1c57da9e5addf787ab0b8531631edca92bac9902694b215b70d0102ced814",
-        "receipt-97299b21746a45927e5cda3b0832f0818993b622f952b8b23bf288d3a6785290",
-        "receipt-b4c0f297b9c4c5b5455a1870ce27ec1e5609e13b91ba0b8f4ff27bca13dae0fb",
-        "receipt-dfb6a1b3ba77b09f0b03230b483177ed1067a9bbd1d26fb42393698d74dda0d0",
-        "receipt-e8f3df894d0236c79355c2f1c159043079f58d0f2a2047acdd1fceaf35909379"
+        "receipt-2b89544eefe75dfb44e4e43939b9fe6c046a942793664bbcdba0807258c4a743",
+        "receipt-64ad3229423ff6c2fb9fd9aa4f184c22d2316d1c64cec7354ecfda775f2f5b31",
+        "receipt-a63481b172c177fd16a34484c7e62c7058cfa50c553756c989a6b24fac0e33db",
+        "receipt-c7d77867d85988e03b4d54bc9733be81679c50aec4240cf52dd1be7aca61a50a",
+        "receipt-d00f9d6dc731000ec06e77e1a0deb58504cb64658aba207b96c52276e7bff271"
       ],
       "direct_evidence": [],
       "reused_evidence": [],

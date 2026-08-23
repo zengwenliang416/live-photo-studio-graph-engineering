@@ -2,11 +2,11 @@
   "schema": "specnav.task-acceptance-evidence.v2",
   "generated_by": "specnav-development/task-acceptance-evidence",
   "task_id": "006-canary-validation",
-  "generated_at": "2026-08-23T12:53:52.523Z",
-  "recorded_at": "2026-08-23T12:53:36.272Z",
+  "generated_at": "2026-08-23T16:09:43.062Z",
+  "recorded_at": "2026-08-23T16:09:09.409Z",
   "status": "approved",
-  "reviewed_git_head": "12abbdede1a3e31618c3944f2d1b57c868a32353",
-  "reviewed_git_tree": "8b272308e129056c4bc4a8e70b6517ab41911146",
+  "reviewed_git_head": "70ebe55817d92da054b15298a417a142d2f227b5",
+  "reviewed_git_tree": "d7673b86fc96dd45dc1cb62526ce0a001cbc8bba",
   "implementation_scope": {
     "included_patterns": [
       "apps/**",
@@ -20,7 +20,7 @@
         "path": "apps/api/package.json",
         "mode": "100644",
         "type": "blob",
-        "object_id": "4e45e7ee3857e0c6f036629f3ee0737058799aa5"
+        "object_id": "8f5fff3cc9a9bd7113d39da73cfddefbdd7dcf67"
       },
       {
         "path": "apps/api/src/app.module.ts",
@@ -74,13 +74,25 @@
         "path": "apps/api/src/exports/exports.module.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "6af27ce58cdbd80fb4702fb1d8ab214a026fa902"
+        "object_id": "ac2981b0f51379fd0eb94ce3d51e5b77ce54c1ca"
       },
       {
         "path": "apps/api/src/exports/infrastructure/fake-signed-download-port.ts",
         "mode": "100644",
         "type": "blob",
         "object_id": "3615c49f73de8d454e4e5abdf5ce8a247751cf46"
+      },
+      {
+        "path": "apps/api/src/exports/infrastructure/object-storage-signed-download-port.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "7ed4055142316bb95750ccbf7aaffda4d74955ad"
+      },
+      {
+        "path": "apps/api/src/exports/infrastructure/object-storage-signed-download-port.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "8fdb993daa386c132ddfbbfa523f03690ed0a3b8"
       },
       {
         "path": "apps/api/src/exports/infrastructure/pg-export-package-store.ts",
@@ -123,6 +135,12 @@
         "mode": "100644",
         "type": "blob",
         "object_id": "c6965d51a2e7677b1120a4219e572c371984e151"
+      },
+      {
+        "path": "apps/api/src/test-entrypoint.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "12e8a2d72db45e3b99ee4989a55b25b208f95f9d"
       },
       {
         "path": "apps/api/src/testing/in-memory-workflow-unit.ts",
@@ -482,7 +500,7 @@
         "path": "apps/worker-media/package.json",
         "mode": "100644",
         "type": "blob",
-        "object_id": "d7f633b03f755c5250663ea95adacd68d03468ba"
+        "object_id": "11874f58eef0f3a7e72a508768fb91a4da5a5141"
       },
       {
         "path": "apps/worker-media/src/config.ts",
@@ -494,13 +512,13 @@
         "path": "apps/worker-media/src/export-service.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "1b4271d0ef3eb2aac24db85483e4a3e9729fb812"
+        "object_id": "60f4c1e39027985303a155081cc4f1cd5366dad7"
       },
       {
         "path": "apps/worker-media/src/main.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "665e8d57af16e971b832defb78326604b7d00201"
+        "object_id": "a98d2148f599f8c35aebf6fb5261a8ff6b5ec69c"
       },
       {
         "path": "apps/worker-media/src/media-safety.test.ts",
@@ -524,7 +542,7 @@
         "path": "apps/worker-media/src/worker-media.integration.test.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "14a3d37379cc60cbe226235a00aea64894ca45ba"
+        "object_id": "8e1f561be7c639d2118ddd695d3257203b2139a1"
       },
       {
         "path": "apps/worker-media/src/zip.test.ts",
@@ -554,7 +572,7 @@
         "path": "docs/execplans/graph-engineering-full-migration.md",
         "mode": "100644",
         "type": "blob",
-        "object_id": "74ee374b2723771766473f16e6709ac3623456a2"
+        "object_id": "dd83f17d8be6ac22a29bef1f52874bf6972642d2"
       },
       {
         "path": "docs/graph-engineering/evidence/canary-rollback.json",
@@ -572,7 +590,7 @@
         "path": "docs/graph-engineering/evidence/phase-ownership-audit.json",
         "mode": "100644",
         "type": "blob",
-        "object_id": "8607056f15b3923ba9881892137388288502874d"
+        "object_id": "d06b9d278441e5f4533d7c6446303bec46fdc5e3"
       },
       {
         "path": "docs/graph-engineering/evidence/prototype-boundary.json",
@@ -590,7 +608,7 @@
         "path": "docs/graph-engineering/evidence/security-cost-controls.json",
         "mode": "100644",
         "type": "blob",
-        "object_id": "30da8b900dd83ca7c32174895ee8a87601e57d5d"
+        "object_id": "39749d650c98ea1303f5ee1b2b8189834672791b"
       },
       {
         "path": "docs/graph-engineering/evidence/web-projection.json",
@@ -608,19 +626,19 @@
         "path": "docs/graph-engineering/operations-runbook.md",
         "mode": "100644",
         "type": "blob",
-        "object_id": "344d0f35691b5f381d53994abbc0047cbb8cae3e"
+        "object_id": "f1c1168fe886e12bdc0efc2332826bd601c68d5f"
       },
       {
         "path": "docs/graph-engineering/README.md",
         "mode": "100644",
         "type": "blob",
-        "object_id": "c53eb52f19e55b5c653db1c58ade34458caad688"
+        "object_id": "8f9e44d51b9c7315e6add3eade9b3cb09002ef41"
       },
       {
         "path": "docs/graph-engineering/runtime-model.md",
         "mode": "100644",
         "type": "blob",
-        "object_id": "08821aeb7de431d00ffe7e882c94dfe86b00e1ef"
+        "object_id": "9f936ceb325ce8e58f19c5827f486236d365163a"
       },
       {
         "path": "package.json",
@@ -827,13 +845,67 @@
         "object_id": "a72a807d5f98f2017dd06cb5b651e2ea2bef07f9"
       },
       {
+        "path": "packages/storage/package.json",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "99cbd399aabef2cd6d03c6bc845a9990046a390d"
+      },
+      {
+        "path": "packages/storage/src/config.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "bd3f8c20bf2d8fee856ca5a324d2da36d59b1be7"
+      },
+      {
+        "path": "packages/storage/src/factory.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "6a1e187ecde417f4cc724c012a0dee1ebcfe4bef"
+      },
+      {
+        "path": "packages/storage/src/in-memory-object-storage.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "4cfa28366bf2cecd49357cbef0137275503c9b49"
+      },
+      {
+        "path": "packages/storage/src/index.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "ee055e17b3ca7c5f083b202c0a6b392622faff55"
+      },
+      {
+        "path": "packages/storage/src/ports.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "9c50f31225c302b4c54ca97daa9192f72fb3af0f"
+      },
+      {
+        "path": "packages/storage/src/s3-object-storage.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "4e3bfce7c221ee7142caec34f93fe4cef2ef717f"
+      },
+      {
+        "path": "packages/storage/src/storage.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "e5d653764960435cc7e924e8a4df90636ff8f0d8"
+      },
+      {
+        "path": "packages/storage/tsconfig.json",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "a72a807d5f98f2017dd06cb5b651e2ea2bef07f9"
+      },
+      {
         "path": "pnpm-lock.yaml",
         "mode": "100644",
         "type": "blob",
-        "object_id": "db6e1523f5a0832e1e8ee201c7c69d84be8e00ae"
+        "object_id": "525171c47bd111b23977e74188631727ceb63258"
       }
     ],
-    "sha256": "85e43e300476299c78e857a4c6c19a75158325f2489880a1de5f75018fa8c152"
+    "sha256": "3821454530ff3a2226477b9ae63392a709a21612ece5c63d3b83661ad2c3222a"
   },
   "artifacts": {
     "context": {
@@ -858,123 +930,123 @@
   },
   "test_runs": [
     {
-      "id": "receipt-042871ddec4ab81c443c5dcf283f2199695c276e925966afba9c45eed8b60330",
-      "command": "git diff --check",
-      "assertion_ids": [
-        "A1:canary-validation",
-        "A2:canary-validation"
-      ],
-      "recorded_at": "2026-08-23T12:53:36.272Z",
-      "validation_receipt_sha256": "09d70083e854033e6f87b26857dcb44372be720ff3aa28ed59d29b3733e9736f",
-      "evidence_log": {
-        "path": "development/evidence/116-006-canary-validation.log",
-        "sha256": "2b4bad1c7e3a2bb93724458d5d87381eac33b2f55a9b9ca78d31ec19a5a2e4d1",
-        "size": 101
-      }
-    },
-    {
-      "id": "receipt-0ea4283e4ef33620557509084e68df5c2d299ea1757681612cd6e88c05ec74e3",
+      "id": "receipt-0c2418a0329803de4aa5256162ac09f95f0f364a71fbb995feaaaa2199a3d8eb",
       "command": "pnpm check",
       "assertion_ids": [
         "A1:canary-validation",
         "A2:canary-validation"
       ],
-      "recorded_at": "2026-08-23T12:53:02.319Z",
-      "validation_receipt_sha256": "18eb2f40928be15064b858906393ab986d13786a5f52971735b113972159e749",
+      "recorded_at": "2026-08-23T16:08:00.742Z",
+      "validation_receipt_sha256": "3f184104bb47a19ff88151254a25b9960b5027e1f50e66c9d106ba982f49e98c",
       "evidence_log": {
-        "path": "development/evidence/110-006-canary-validation.log",
-        "sha256": "32c6c3be718a27c0fff9ad09cf966391a8fdd09b25b2a9b4888c05095c5c48ef",
-        "size": 1941
+        "path": "development/evidence/255-006-canary-validation.log",
+        "sha256": "f83f6b9f1905a3c96918956b14d43734e541b36df1d6dce60ac2aa8cebea386b",
+        "size": 2101
       }
     },
     {
-      "id": "receipt-10cf12695b5519809e9e8bb55a829f70ffbac081855f5fac44a2e47a996c8818",
-      "command": "pnpm test",
-      "assertion_ids": [
-        "A1:canary-validation",
-        "A2:canary-validation"
-      ],
-      "recorded_at": "2026-08-23T12:53:09.354Z",
-      "validation_receipt_sha256": "9c89d3f1c97254e2b25f42d563e24992791d45da79fe1452aa3324c6a1228ee2",
-      "evidence_log": {
-        "path": "development/evidence/111-006-canary-validation.log",
-        "sha256": "278ef0643cf4912c4f4a14e3dad8afdcc724856372f6fd5fb58887b0d8d1c489",
-        "size": 23025
-      }
-    },
-    {
-      "id": "receipt-3fcc0524e44799a954a643144f5ebe4d20240e3696e7469e9f9e51e6a2187c04",
+      "id": "receipt-0f1374e098ebd4633b01c77e173ed41da0d1e5092d2dac9a348fc43dccb9fc13",
       "command": "pnpm graph:demo",
       "assertion_ids": [
         "A1:canary-validation",
         "A2:canary-validation"
       ],
-      "recorded_at": "2026-08-23T12:53:30.040Z",
-      "validation_receipt_sha256": "415b1ac989b614b8a8e2cba34c132f3da92f325c3b9de25dd04620906884316e",
+      "recorded_at": "2026-08-23T16:08:55.588Z",
+      "validation_receipt_sha256": "9a47dcf062912147ab2cfb5377d3879fc2b568357accbea097ef43967a7b8086",
       "evidence_log": {
-        "path": "development/evidence/114-006-canary-validation.log",
-        "sha256": "862a2937eadf301610cbccdbe63ebd86e0d0c151bb4d841507a86a7c39737481",
-        "size": 1623
+        "path": "development/evidence/259-006-canary-validation.log",
+        "sha256": "fb92d7c19d602b44a63159b384a47a58ac7dd2ba64dd79f491e29582521d94a3",
+        "size": 1698
       }
     },
     {
-      "id": "receipt-518b9b0fc15653d338b3852e7df1702997c0cfe005f1d2141aac6c0cbb849ee3",
-      "command": "pnpm install --frozen-lockfile",
-      "assertion_ids": [
-        "A1:canary-validation",
-        "A2:canary-validation"
-      ],
-      "recorded_at": "2026-08-23T12:52:53.829Z",
-      "validation_receipt_sha256": "d105cf4413eb75755db3bbeee9846cb7bd0e9d417c607aead0b1223a25a836b8",
-      "evidence_log": {
-        "path": "development/evidence/109-006-canary-validation.log",
-        "sha256": "519b4d970cc2fed1e1f4dd4889b3a62a9270353488b863ffb01f5dbf39da18d4",
-        "size": 1239
-      }
-    },
-    {
-      "id": "receipt-89d3019d438cd3f3c494b2da466c6e33c9b35028825dc89a6d29ebd303b120ff",
-      "command": "pnpm graph:check",
-      "assertion_ids": [
-        "A1:canary-validation",
-        "A2:canary-validation"
-      ],
-      "recorded_at": "2026-08-23T12:53:17.785Z",
-      "validation_receipt_sha256": "6f9a7121eb4a6b6fac60d6626f8421b830dd1dd4ee25bdcdac799cfab09029fe",
-      "evidence_log": {
-        "path": "development/evidence/112-006-canary-validation.log",
-        "sha256": "d52ec6d6730003e4304d7614fbbe8692892cefc904b9a67f638160a02c317f7f",
-        "size": 2272
-      }
-    },
-    {
-      "id": "receipt-ec8fe6fa2baf4e96de0431ae3fcc9ddca2d02b85e828d018dac41d107d909792",
-      "command": "pnpm graph:test",
-      "assertion_ids": [
-        "A1:canary-validation",
-        "A2:canary-validation"
-      ],
-      "recorded_at": "2026-08-23T12:53:24.913Z",
-      "validation_receipt_sha256": "3d8b44a983c15edb70bc66b5525aa4ee0dd095f17656da825e7320edaf5ba00f",
-      "evidence_log": {
-        "path": "development/evidence/113-006-canary-validation.log",
-        "sha256": "e65a37dbe17a15bb7424adcf69c43efe67d02796f4be20e1a6d1a81ef6198a28",
-        "size": 23356
-      }
-    },
-    {
-      "id": "receipt-fb11084c24054a45e75b642643eee411f940143e07416aa11058cee047276263",
+      "id": "receipt-30171cda98d9a8ff5240b3add3f1441c22d12c41537e62e64ba76f744d7bdf97",
       "command": "DATABASE_URL=postgresql://postgres@localhost:5432/postgres pnpm db:migrate",
       "assertion_ids": [
         "A1:canary-validation",
         "A2:canary-validation"
       ],
-      "recorded_at": "2026-08-23T12:53:36.216Z",
-      "validation_receipt_sha256": "7e65b4b6483dde54ab534bc08f47b48fa0ccd08de5e55ac9f7ad85a041923c21",
+      "recorded_at": "2026-08-23T16:09:09.247Z",
+      "validation_receipt_sha256": "f57477ed2adb9f658e24cb589eeea06d77d6de258f58e8d013118f5d6aca3a2e",
       "evidence_log": {
-        "path": "development/evidence/115-006-canary-validation.log",
-        "sha256": "aa46b60179b1c0b00eadcc59365d576c819d44c786615fce3d469d681c3639d9",
-        "size": 1560
+        "path": "development/evidence/260-006-canary-validation.log",
+        "sha256": "fa7221a92c06972e503551011e67faaba9e18bd237bd2d29a340cd7929a8c4b5",
+        "size": 1636
+      }
+    },
+    {
+      "id": "receipt-549df007e8fefee80d1af96dd650f16732cd762ce3b3f563f4af6c6b418facd1",
+      "command": "pnpm graph:check",
+      "assertion_ids": [
+        "A1:canary-validation",
+        "A2:canary-validation"
+      ],
+      "recorded_at": "2026-08-23T16:08:29.857Z",
+      "validation_receipt_sha256": "8cfedf3f3627b242f2c3602ccaa4337bf48593e4e2df3371319dcec5e929b8de",
+      "evidence_log": {
+        "path": "development/evidence/257-006-canary-validation.log",
+        "sha256": "e595aac3b01504dbc92228637804e62855b3da62fc1e152c21e6af818c9016df",
+        "size": 2432
+      }
+    },
+    {
+      "id": "receipt-59b94870a4e0c221b16aebd1b745b584873b880529dc8b3027d2e4dd024eedba",
+      "command": "pnpm graph:test",
+      "assertion_ids": [
+        "A1:canary-validation",
+        "A2:canary-validation"
+      ],
+      "recorded_at": "2026-08-23T16:08:45.676Z",
+      "validation_receipt_sha256": "392fc2d50b54d2c0060fda51706905319627ad66634fad37f3ae555f24b6ff0f",
+      "evidence_log": {
+        "path": "development/evidence/258-006-canary-validation.log",
+        "sha256": "10d13610704f33f3d02bab2679a570e9c496c97fcba8e9435261a4d273d819c7",
+        "size": 25602
+      }
+    },
+    {
+      "id": "receipt-79bce88737baa20ef6b83e1f194dacf991df0390fd18f8ad5de04cd321befd04",
+      "command": "pnpm install --frozen-lockfile",
+      "assertion_ids": [
+        "A1:canary-validation",
+        "A2:canary-validation"
+      ],
+      "recorded_at": "2026-08-23T16:07:48.343Z",
+      "validation_receipt_sha256": "091a31725497d769130de34e65dc30dc34530570f9e779cc9c6aa3cc62360af1",
+      "evidence_log": {
+        "path": "development/evidence/254-006-canary-validation.log",
+        "sha256": "c5c13ceae70ae982daa40fb007013b850580f1303e1d4f63e6679df9de4b3437",
+        "size": 350
+      }
+    },
+    {
+      "id": "receipt-9cea329de7c5c329ea5f96a86fa0b5757a5f64c67fa0d54228300afd1ff3e688",
+      "command": "git diff --check",
+      "assertion_ids": [
+        "A1:canary-validation",
+        "A2:canary-validation"
+      ],
+      "recorded_at": "2026-08-23T16:09:09.409Z",
+      "validation_receipt_sha256": "20c5720f4d405f64d1b9cbbd9d902c844d890b20b26a7347cacb19b32abd7061",
+      "evidence_log": {
+        "path": "development/evidence/261-006-canary-validation.log",
+        "sha256": "988e9703bd3c44beb8f05d56d9dc5487799996e0a335b2a4ce85c75fe17bb4d8",
+        "size": 102
+      }
+    },
+    {
+      "id": "receipt-c179623f534817e20880669aa5b84c78d2f2822e496c4f14fef536b87ff1aae2",
+      "command": "pnpm test",
+      "assertion_ids": [
+        "A1:canary-validation",
+        "A2:canary-validation"
+      ],
+      "recorded_at": "2026-08-23T16:08:15.280Z",
+      "validation_receipt_sha256": "c1695411ac594834d7b813dbe0c8ad2fb25cea454a115e271959c41f0d641342",
+      "evidence_log": {
+        "path": "development/evidence/256-006-canary-validation.log",
+        "sha256": "65d5b716434bcf5c7c6a9ce26f00c705106d27bdfb835ca72dff04d4543cfe73",
+        "size": 25257
       }
     }
   ],
@@ -984,14 +1056,14 @@
       "parent_id": "A1",
       "status": "passing",
       "test_run_ids": [
-        "receipt-042871ddec4ab81c443c5dcf283f2199695c276e925966afba9c45eed8b60330",
-        "receipt-0ea4283e4ef33620557509084e68df5c2d299ea1757681612cd6e88c05ec74e3",
-        "receipt-10cf12695b5519809e9e8bb55a829f70ffbac081855f5fac44a2e47a996c8818",
-        "receipt-3fcc0524e44799a954a643144f5ebe4d20240e3696e7469e9f9e51e6a2187c04",
-        "receipt-518b9b0fc15653d338b3852e7df1702997c0cfe005f1d2141aac6c0cbb849ee3",
-        "receipt-89d3019d438cd3f3c494b2da466c6e33c9b35028825dc89a6d29ebd303b120ff",
-        "receipt-ec8fe6fa2baf4e96de0431ae3fcc9ddca2d02b85e828d018dac41d107d909792",
-        "receipt-fb11084c24054a45e75b642643eee411f940143e07416aa11058cee047276263"
+        "receipt-0c2418a0329803de4aa5256162ac09f95f0f364a71fbb995feaaaa2199a3d8eb",
+        "receipt-0f1374e098ebd4633b01c77e173ed41da0d1e5092d2dac9a348fc43dccb9fc13",
+        "receipt-30171cda98d9a8ff5240b3add3f1441c22d12c41537e62e64ba76f744d7bdf97",
+        "receipt-549df007e8fefee80d1af96dd650f16732cd762ce3b3f563f4af6c6b418facd1",
+        "receipt-59b94870a4e0c221b16aebd1b745b584873b880529dc8b3027d2e4dd024eedba",
+        "receipt-79bce88737baa20ef6b83e1f194dacf991df0390fd18f8ad5de04cd321befd04",
+        "receipt-9cea329de7c5c329ea5f96a86fa0b5757a5f64c67fa0d54228300afd1ff3e688",
+        "receipt-c179623f534817e20880669aa5b84c78d2f2822e496c4f14fef536b87ff1aae2"
       ],
       "direct_evidence": [],
       "reused_evidence": [],
@@ -1002,14 +1074,14 @@
       "parent_id": "A2",
       "status": "passing",
       "test_run_ids": [
-        "receipt-042871ddec4ab81c443c5dcf283f2199695c276e925966afba9c45eed8b60330",
-        "receipt-0ea4283e4ef33620557509084e68df5c2d299ea1757681612cd6e88c05ec74e3",
-        "receipt-10cf12695b5519809e9e8bb55a829f70ffbac081855f5fac44a2e47a996c8818",
-        "receipt-3fcc0524e44799a954a643144f5ebe4d20240e3696e7469e9f9e51e6a2187c04",
-        "receipt-518b9b0fc15653d338b3852e7df1702997c0cfe005f1d2141aac6c0cbb849ee3",
-        "receipt-89d3019d438cd3f3c494b2da466c6e33c9b35028825dc89a6d29ebd303b120ff",
-        "receipt-ec8fe6fa2baf4e96de0431ae3fcc9ddca2d02b85e828d018dac41d107d909792",
-        "receipt-fb11084c24054a45e75b642643eee411f940143e07416aa11058cee047276263"
+        "receipt-0c2418a0329803de4aa5256162ac09f95f0f364a71fbb995feaaaa2199a3d8eb",
+        "receipt-0f1374e098ebd4633b01c77e173ed41da0d1e5092d2dac9a348fc43dccb9fc13",
+        "receipt-30171cda98d9a8ff5240b3add3f1441c22d12c41537e62e64ba76f744d7bdf97",
+        "receipt-549df007e8fefee80d1af96dd650f16732cd762ce3b3f563f4af6c6b418facd1",
+        "receipt-59b94870a4e0c221b16aebd1b745b584873b880529dc8b3027d2e4dd024eedba",
+        "receipt-79bce88737baa20ef6b83e1f194dacf991df0390fd18f8ad5de04cd321befd04",
+        "receipt-9cea329de7c5c329ea5f96a86fa0b5757a5f64c67fa0d54228300afd1ff3e688",
+        "receipt-c179623f534817e20880669aa5b84c78d2f2822e496c4f14fef536b87ff1aae2"
       ],
       "direct_evidence": [],
       "reused_evidence": [],

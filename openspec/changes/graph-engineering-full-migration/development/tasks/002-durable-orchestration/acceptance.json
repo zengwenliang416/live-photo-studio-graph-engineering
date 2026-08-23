@@ -2,11 +2,11 @@
   "schema": "specnav.task-acceptance-evidence.v2",
   "generated_by": "specnav-development/task-acceptance-evidence",
   "task_id": "002-durable-orchestration",
-  "generated_at": "2026-08-23T12:53:52.411Z",
-  "recorded_at": "2026-08-23T12:52:38.103Z",
+  "generated_at": "2026-08-23T16:09:42.893Z",
+  "recorded_at": "2026-08-23T16:07:29.269Z",
   "status": "approved",
-  "reviewed_git_head": "12abbdede1a3e31618c3944f2d1b57c868a32353",
-  "reviewed_git_tree": "8b272308e129056c4bc4a8e70b6517ab41911146",
+  "reviewed_git_head": "70ebe55817d92da054b15298a417a142d2f227b5",
+  "reviewed_git_tree": "d7673b86fc96dd45dc1cb62526ce0a001cbc8bba",
   "implementation_scope": {
     "included_patterns": [
       "apps/api/**",
@@ -19,7 +19,7 @@
         "path": "apps/api/package.json",
         "mode": "100644",
         "type": "blob",
-        "object_id": "4e45e7ee3857e0c6f036629f3ee0737058799aa5"
+        "object_id": "8f5fff3cc9a9bd7113d39da73cfddefbdd7dcf67"
       },
       {
         "path": "apps/api/src/app.module.ts",
@@ -73,13 +73,25 @@
         "path": "apps/api/src/exports/exports.module.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "6af27ce58cdbd80fb4702fb1d8ab214a026fa902"
+        "object_id": "ac2981b0f51379fd0eb94ce3d51e5b77ce54c1ca"
       },
       {
         "path": "apps/api/src/exports/infrastructure/fake-signed-download-port.ts",
         "mode": "100644",
         "type": "blob",
         "object_id": "3615c49f73de8d454e4e5abdf5ce8a247751cf46"
+      },
+      {
+        "path": "apps/api/src/exports/infrastructure/object-storage-signed-download-port.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "7ed4055142316bb95750ccbf7aaffda4d74955ad"
+      },
+      {
+        "path": "apps/api/src/exports/infrastructure/object-storage-signed-download-port.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "8fdb993daa386c132ddfbbfa523f03690ed0a3b8"
       },
       {
         "path": "apps/api/src/exports/infrastructure/pg-export-package-store.ts",
@@ -122,6 +134,12 @@
         "mode": "100644",
         "type": "blob",
         "object_id": "c6965d51a2e7677b1120a4219e572c371984e151"
+      },
+      {
+        "path": "apps/api/src/test-entrypoint.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "12e8a2d72db45e3b99ee4989a55b25b208f95f9d"
       },
       {
         "path": "apps/api/src/testing/in-memory-workflow-unit.ts",
@@ -367,7 +385,7 @@
         "path": "docs/execplans/graph-engineering-full-migration.md",
         "mode": "100644",
         "type": "blob",
-        "object_id": "74ee374b2723771766473f16e6709ac3623456a2"
+        "object_id": "dd83f17d8be6ac22a29bef1f52874bf6972642d2"
       },
       {
         "path": "docs/graph-engineering/evidence/canary-rollback.json",
@@ -385,7 +403,7 @@
         "path": "docs/graph-engineering/evidence/phase-ownership-audit.json",
         "mode": "100644",
         "type": "blob",
-        "object_id": "8607056f15b3923ba9881892137388288502874d"
+        "object_id": "d06b9d278441e5f4533d7c6446303bec46fdc5e3"
       },
       {
         "path": "docs/graph-engineering/evidence/prototype-boundary.json",
@@ -403,7 +421,7 @@
         "path": "docs/graph-engineering/evidence/security-cost-controls.json",
         "mode": "100644",
         "type": "blob",
-        "object_id": "30da8b900dd83ca7c32174895ee8a87601e57d5d"
+        "object_id": "39749d650c98ea1303f5ee1b2b8189834672791b"
       },
       {
         "path": "docs/graph-engineering/evidence/web-projection.json",
@@ -421,19 +439,19 @@
         "path": "docs/graph-engineering/operations-runbook.md",
         "mode": "100644",
         "type": "blob",
-        "object_id": "344d0f35691b5f381d53994abbc0047cbb8cae3e"
+        "object_id": "f1c1168fe886e12bdc0efc2332826bd601c68d5f"
       },
       {
         "path": "docs/graph-engineering/README.md",
         "mode": "100644",
         "type": "blob",
-        "object_id": "c53eb52f19e55b5c653db1c58ade34458caad688"
+        "object_id": "8f9e44d51b9c7315e6add3eade9b3cb09002ef41"
       },
       {
         "path": "docs/graph-engineering/runtime-model.md",
         "mode": "100644",
         "type": "blob",
-        "object_id": "08821aeb7de431d00ffe7e882c94dfe86b00e1ef"
+        "object_id": "9f936ceb325ce8e58f19c5827f486236d365163a"
       },
       {
         "path": "packages/graph-contracts/AGENTS.md",
@@ -508,7 +526,7 @@
         "object_id": "a72a807d5f98f2017dd06cb5b651e2ea2bef07f9"
       }
     ],
-    "sha256": "7f95200205932621e7a9ed7a9d54a5b44feaf12c7a9fb900bd6e4afd05efc2ac"
+    "sha256": "5a2db64d6ef8ead25a7a8f6dcbafc3d3217621d75b46c87a3f8c79acb6211d0e"
   },
   "artifacts": {
     "context": {
@@ -533,59 +551,59 @@
   },
   "test_runs": [
     {
-      "id": "receipt-3891c3be6e630a54a5c5505d4f122ae3eace879518e48bc496c36429ddfd32c5",
-      "command": "pnpm graph:demo",
-      "assertion_ids": [
-        "A1:durable-orchestration"
-      ],
-      "recorded_at": "2026-08-23T12:52:38.103Z",
-      "validation_receipt_sha256": "d9b16fd992fbf6c710d8389423ac765913a31925140a4ca66c42a5f56059e207",
-      "evidence_log": {
-        "path": "development/evidence/096-002-durable-orchestration.log",
-        "sha256": "0a8acd78a8c0df9fc8eaa0390a24395659fef60b8130e96888cd1c7ec20088b6",
-        "size": 1623
-      }
-    },
-    {
-      "id": "receipt-3d688f9e4175f99771eca6da93e3bfaaf4df13bc88facce10a5bab852f3485e9",
-      "command": "pnpm --filter @live-photo-studio/api test",
-      "assertion_ids": [
-        "A1:durable-orchestration"
-      ],
-      "recorded_at": "2026-08-23T12:52:31.694Z",
-      "validation_receipt_sha256": "17a7d6025f4ed19822957886a4048b740e08c87a9cf3b15eed931e97898b7149",
-      "evidence_log": {
-        "path": "development/evidence/095-002-durable-orchestration.log",
-        "sha256": "68a3cbcf6e0ef5dd4a221759ca45d6aebe83a32014a919d5e02e34977827b037",
-        "size": 6333
-      }
-    },
-    {
-      "id": "receipt-59d44cd12c7620df5be20dd480a4bc8bf5f8dd85e0a26ca36f1d5ad9e39921bf",
+      "id": "receipt-4759af3412662140bda0638d8a9d678d78000b914c423c59b1b5a75729554698",
       "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/orchestrator test",
       "assertion_ids": [
         "A1:durable-orchestration"
       ],
-      "recorded_at": "2026-08-23T12:52:29.346Z",
-      "validation_receipt_sha256": "4a4d644f22c520b1dd0cbfd9d70f45d0986f248debb7e5311c9797671221160d",
+      "recorded_at": "2026-08-23T16:07:18.698Z",
+      "validation_receipt_sha256": "972329c2cbb6aaf98e7c96bd7440b3352efd6d06f2cc7ef36089cb8f242cfd80",
       "evidence_log": {
-        "path": "development/evidence/094-002-durable-orchestration.log",
-        "sha256": "1ab910a92e3c83975bade3a893668c826199a2b8bf476c1ef11159e592f1c06a",
-        "size": 2711
+        "path": "development/evidence/239-002-durable-orchestration.log",
+        "sha256": "08eb990f5f78a5fd96a500ee3dc587540eea06c6cc4e17905262aa9998deeac8",
+        "size": 2703
       }
     },
     {
-      "id": "receipt-682d1469c9e439351fddedd0c37e38d60bd47f347983c60901f50c2bcbfd8872",
+      "id": "receipt-501c27c7b41c886a8f8d5b92a066d8396e73748e07f50514862b1cb92615975f",
+      "command": "pnpm --filter @live-photo-studio/api test",
+      "assertion_ids": [
+        "A1:durable-orchestration"
+      ],
+      "recorded_at": "2026-08-23T16:07:22.294Z",
+      "validation_receipt_sha256": "edf2897b725456d537a1b3b37bd20770af135d042018ca5658c57e70d35309b7",
+      "evidence_log": {
+        "path": "development/evidence/240-002-durable-orchestration.log",
+        "sha256": "8b68d8e50b1cc34351b2ffabf2ba7e33b0880b46ffabc289a6214fb459ff4a1e",
+        "size": 6934
+      }
+    },
+    {
+      "id": "receipt-6911565627b8118c027bfca8554a474ef002936e5395910a8f6f1577c8af7a76",
       "command": "pnpm --filter @live-photo-studio/orchestrator test",
       "assertion_ids": [
         "A1:durable-orchestration"
       ],
-      "recorded_at": "2026-08-23T12:52:11.246Z",
-      "validation_receipt_sha256": "d47675c706d1e4a12f718390afaab40703c5f1d95e64b65c7c12a8985cd78a43",
+      "recorded_at": "2026-08-23T16:07:15.764Z",
+      "validation_receipt_sha256": "edcf1da4e06cfe4c6ca7306a3de0ecc9485b79b34375b55a107bd6888f86c7eb",
       "evidence_log": {
-        "path": "development/evidence/093-002-durable-orchestration.log",
-        "sha256": "04e2652ee9bc8abb9621a3bc2ecdbee43d29f80e93a586a7c44400b401a851c0",
-        "size": 1311
+        "path": "development/evidence/238-002-durable-orchestration.log",
+        "sha256": "333e9b70959f6d7fb3a8796fd312544afeb867d2fedc8271d3b8bc4e398c9d4f",
+        "size": 1308
+      }
+    },
+    {
+      "id": "receipt-aab2bdb1c03bd1e57221c29a857b82d68a208325caa06c2782c56e160ec06738",
+      "command": "pnpm graph:demo",
+      "assertion_ids": [
+        "A1:durable-orchestration"
+      ],
+      "recorded_at": "2026-08-23T16:07:29.269Z",
+      "validation_receipt_sha256": "7b4648896b18e93a3ee61e211014ca7c62718f309b6676539f165b348814fedd",
+      "evidence_log": {
+        "path": "development/evidence/241-002-durable-orchestration.log",
+        "sha256": "797ca1acca817591be06bdecdef931f26462dca6b52fc4e1bc467bc6b5b3fb02",
+        "size": 1698
       }
     }
   ],
@@ -595,10 +613,10 @@
       "parent_id": "A1",
       "status": "passing",
       "test_run_ids": [
-        "receipt-3891c3be6e630a54a5c5505d4f122ae3eace879518e48bc496c36429ddfd32c5",
-        "receipt-3d688f9e4175f99771eca6da93e3bfaaf4df13bc88facce10a5bab852f3485e9",
-        "receipt-59d44cd12c7620df5be20dd480a4bc8bf5f8dd85e0a26ca36f1d5ad9e39921bf",
-        "receipt-682d1469c9e439351fddedd0c37e38d60bd47f347983c60901f50c2bcbfd8872"
+        "receipt-4759af3412662140bda0638d8a9d678d78000b914c423c59b1b5a75729554698",
+        "receipt-501c27c7b41c886a8f8d5b92a066d8396e73748e07f50514862b1cb92615975f",
+        "receipt-6911565627b8118c027bfca8554a474ef002936e5395910a8f6f1577c8af7a76",
+        "receipt-aab2bdb1c03bd1e57221c29a857b82d68a208325caa06c2782c56e160ec06738"
       ],
       "direct_evidence": [],
       "reused_evidence": [],

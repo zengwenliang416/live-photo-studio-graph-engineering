@@ -291,20 +291,24 @@ migration.
   deleted the object. No credential, signed URL or object bytes were logged.
   The existing bucket is shared with the camera-rental deployment; a dedicated
   production bucket/policy remains an operator decision.
-- [~] 2026-08-23T23:55:00+08:00: Starting the SpecNav validation-log
-  adjudication closure. The current committed HEAD has later system-executed
-  PASS receipts for the same task/command/assertion sets, while two preserved
-  historical failures (`006-canary-validation` and
-  `002-durable-orchestration`) still block handoff. This pass will append only
-  runner-generated `specnav.validationAdjudication.v1` successor records, then
-  rerun task acceptance and the development handoff contract.
-- [~] 2026-08-23: During current-HEAD receipt refresh, the API test harness
-  failed nondeterministically because a synthetic `test-entrypoint.test.ts`
-  imported all suites while the glob-based runner also discovered test files,
-  causing duplicate collection and shared-process fixture interference. The
-  real eight API test files pass when listed explicitly with
-  `--test-concurrency=1`; the package script now uses that explicit list while
-  the aggregation harness remains available only for ad-hoc runs.
+- [x] 2026-08-23: Completed the SpecNav validation-log adjudication closure.
+  The managed evidence runner appended three
+  `specnav.validationAdjudication.v1` `retest_pass` records for the preserved
+  failures in `006-canary-validation`, `002-durable-orchestration` and
+  `004-web-projection`. The current-HEAD replay retained the historical lines,
+  replayed 29 formal task commands with `failed=0`, `overturned=0` and
+  `remaining=0`, and did not hand-edit or delete evidence.
+- [x] 2026-08-23: Resolved the API test-collection race found during the
+  current-HEAD receipt refresh. The package script now enumerates the eight
+  real API test files and runs them with `--test-concurrency=1`; the
+  aggregation harness remains available only for ad-hoc runs. The fixed
+  package command observed `31/31` passing without deleting or skipping tests.
+- [~] 2026-08-23: Starting the post-`70ebe55` stable-snapshot closure. Commit
+  the living plan together with the current validation log and six task
+  acceptance artifacts, exclude CodeGraph state files, then rerun current-head
+  receipts, task acceptance and the development handoff contract. Finish with
+  the repository, Graph, migration and strict OpenSpec gates; keep A3
+  external/provider/media/browser/device gaps explicitly failing.
 
 ## Surprises and discoveries
 
@@ -428,6 +432,16 @@ migration.
   top-level tests into one shared process, and a glob that also includes the
   entrypoint duplicates all tests. The stable contract is an explicit list of
   real test files with `--test-concurrency=1`.
+- 2026-08-23: The current-head evidence refresh materialized six approved
+  task-acceptance artifacts against the committed implementation snapshot.
+  These task-level approvals cover their namespaced evidence only and do not
+  change the parent acceptance result, where A1 and A2 pass and A3 remains
+  failing.
+- 2026-08-23: The evidence runner modified three CodeGraph status reports while
+  refreshing the local index. They are local lifecycle state, not product or
+  delivery artifacts, so this checkpoint must exclude
+  `codegraph/claims-report.json`, `codegraph/guard-report.json` and
+  `codegraph/status.json` from the commit.
 
 ## Decision log
 
@@ -543,6 +557,10 @@ migration.
   rather than relying on an experimental Node isolation flag or a synthetic
   import harness. This preserves every real test file while preventing
   duplicate discovery and cross-suite fixture interference.
+- 2026-08-23: Because the user authorized local commits, use the current
+  implementation commit plus validation artifacts as the stable evidence
+  boundary, then regenerate receipts after any subsequent plan commit. Do not
+  push, deploy or alter the 80-server RustFS deployment.
 
 ## Outcomes and retrospective
 
@@ -752,6 +770,29 @@ state is recorded below.
   entrypoint with `tsx --test --test-concurrency=1` removes the cross-file
   fixture race without relying on an experimental Node isolation flag; no
   test was removed or skipped.
+
+2026-08-23 (SpecNav adjudication and stable-snapshot preparation):
+
+- The current committed implementation snapshot is `70ebe55817d92da054b15298a417a142d2f227b5`.
+  The managed verification runner replayed 29 declared task commands with
+  `failed=0`, `overturned=0` and `remaining=0`.
+- Three append-only adjudications were generated for the preserved historical
+  failures: `006-canary-validation`, `002-durable-orchestration` and
+  `004-web-projection`. Each names its failed evidence log and the later
+  current-HEAD PASS log; no historical failure was rewritten.
+- Six task acceptance files were materialized with status `approved`, all bound
+  to the same reviewed implementation HEAD. The parent acceptance remains
+  intentionally mixed: A1=`passing`, A2=`passing`, A3=`failing`.
+- A3 remains incomplete for dedicated RustFS bucket/policy, authenticated
+  Redis/BullMQ publication, real provider calls, production
+  FFmpeg/ImageMagick/libheif/HEIC behavior, browser sensory E2E and iOS
+  PhotoKit/device acceptance. The credentialed RustFS canary only proves the
+  observed shared bucket's adapter path, private access and 60-second signed
+  download behavior.
+- The next command boundary is a local checkpoint commit followed by a fresh
+  current-head evidence refresh. The repository must not claim final handoff
+  until the refreshed `development-contract.js --mode handoff --json` returns
+  `ok=true`.
 
 ## Repository context and orientation
 

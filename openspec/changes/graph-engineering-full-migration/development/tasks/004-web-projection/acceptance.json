@@ -2,11 +2,11 @@
   "schema": "specnav.task-acceptance-evidence.v2",
   "generated_by": "specnav-development/task-acceptance-evidence",
   "task_id": "004-web-projection",
-  "generated_at": "2026-08-23T12:53:52.466Z",
-  "recorded_at": "2026-08-23T12:52:43.077Z",
+  "generated_at": "2026-08-23T16:09:42.988Z",
+  "recorded_at": "2026-08-23T16:07:34.866Z",
   "status": "approved",
-  "reviewed_git_head": "12abbdede1a3e31618c3944f2d1b57c868a32353",
-  "reviewed_git_tree": "8b272308e129056c4bc4a8e70b6517ab41911146",
+  "reviewed_git_head": "70ebe55817d92da054b15298a417a142d2f227b5",
+  "reviewed_git_tree": "d7673b86fc96dd45dc1cb62526ce0a001cbc8bba",
   "implementation_scope": {
     "included_patterns": [
       "apps/api/**",
@@ -19,7 +19,7 @@
         "path": "apps/api/package.json",
         "mode": "100644",
         "type": "blob",
-        "object_id": "4e45e7ee3857e0c6f036629f3ee0737058799aa5"
+        "object_id": "8f5fff3cc9a9bd7113d39da73cfddefbdd7dcf67"
       },
       {
         "path": "apps/api/src/app.module.ts",
@@ -73,13 +73,25 @@
         "path": "apps/api/src/exports/exports.module.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "6af27ce58cdbd80fb4702fb1d8ab214a026fa902"
+        "object_id": "ac2981b0f51379fd0eb94ce3d51e5b77ce54c1ca"
       },
       {
         "path": "apps/api/src/exports/infrastructure/fake-signed-download-port.ts",
         "mode": "100644",
         "type": "blob",
         "object_id": "3615c49f73de8d454e4e5abdf5ce8a247751cf46"
+      },
+      {
+        "path": "apps/api/src/exports/infrastructure/object-storage-signed-download-port.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "7ed4055142316bb95750ccbf7aaffda4d74955ad"
+      },
+      {
+        "path": "apps/api/src/exports/infrastructure/object-storage-signed-download-port.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "8fdb993daa386c132ddfbbfa523f03690ed0a3b8"
       },
       {
         "path": "apps/api/src/exports/infrastructure/pg-export-package-store.ts",
@@ -122,6 +134,12 @@
         "mode": "100644",
         "type": "blob",
         "object_id": "c6965d51a2e7677b1120a4219e572c371984e151"
+      },
+      {
+        "path": "apps/api/src/test-entrypoint.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "12e8a2d72db45e3b99ee4989a55b25b208f95f9d"
       },
       {
         "path": "apps/api/src/testing/in-memory-workflow-unit.ts",
@@ -325,7 +343,7 @@
         "path": "docs/execplans/graph-engineering-full-migration.md",
         "mode": "100644",
         "type": "blob",
-        "object_id": "74ee374b2723771766473f16e6709ac3623456a2"
+        "object_id": "dd83f17d8be6ac22a29bef1f52874bf6972642d2"
       },
       {
         "path": "docs/graph-engineering/evidence/canary-rollback.json",
@@ -343,7 +361,7 @@
         "path": "docs/graph-engineering/evidence/phase-ownership-audit.json",
         "mode": "100644",
         "type": "blob",
-        "object_id": "8607056f15b3923ba9881892137388288502874d"
+        "object_id": "d06b9d278441e5f4533d7c6446303bec46fdc5e3"
       },
       {
         "path": "docs/graph-engineering/evidence/prototype-boundary.json",
@@ -361,7 +379,7 @@
         "path": "docs/graph-engineering/evidence/security-cost-controls.json",
         "mode": "100644",
         "type": "blob",
-        "object_id": "30da8b900dd83ca7c32174895ee8a87601e57d5d"
+        "object_id": "39749d650c98ea1303f5ee1b2b8189834672791b"
       },
       {
         "path": "docs/graph-engineering/evidence/web-projection.json",
@@ -379,19 +397,19 @@
         "path": "docs/graph-engineering/operations-runbook.md",
         "mode": "100644",
         "type": "blob",
-        "object_id": "344d0f35691b5f381d53994abbc0047cbb8cae3e"
+        "object_id": "f1c1168fe886e12bdc0efc2332826bd601c68d5f"
       },
       {
         "path": "docs/graph-engineering/README.md",
         "mode": "100644",
         "type": "blob",
-        "object_id": "c53eb52f19e55b5c653db1c58ade34458caad688"
+        "object_id": "8f9e44d51b9c7315e6add3eade9b3cb09002ef41"
       },
       {
         "path": "docs/graph-engineering/runtime-model.md",
         "mode": "100644",
         "type": "blob",
-        "object_id": "08821aeb7de431d00ffe7e882c94dfe86b00e1ef"
+        "object_id": "9f936ceb325ce8e58f19c5827f486236d365163a"
       },
       {
         "path": "packages/graph-contracts/AGENTS.md",
@@ -466,7 +484,7 @@
         "object_id": "a72a807d5f98f2017dd06cb5b651e2ea2bef07f9"
       }
     ],
-    "sha256": "2d97d00a69dccf76f5d3de70bb903fe65d24486b05f89e06e1b81198d3bc2bdb"
+    "sha256": "3244380dbdc92756a9c544025c44229a7937d44351e4f05c7fdbf45f08a33450"
   },
   "artifacts": {
     "context": {
@@ -491,44 +509,44 @@
   },
   "test_runs": [
     {
-      "id": "receipt-19d3473284a8a25860679777668b1e4c2075367291244ca66c32198399345403",
-      "command": "pnpm --filter @live-photo-studio/web test",
-      "assertion_ids": [
-        "A1:web-projection"
-      ],
-      "recorded_at": "2026-08-23T12:52:41.951Z",
-      "validation_receipt_sha256": "ddfc976a71a9a37aaf1e9753b5aef18eaa8e12aca4b880e7bc5713c9addc3da0",
-      "evidence_log": {
-        "path": "development/evidence/101-004-web-projection.log",
-        "sha256": "63ded8f8431d7b04772ab9e58e23b62e42a6afaecccc5e5fa69265711451a373",
-        "size": 2855
-      }
-    },
-    {
-      "id": "receipt-a23406a43bc50e05f4b55a60fe991fa1e37c654aab6cc83bad65fbdf47849c94",
+      "id": "receipt-44e674bab442ea85c4639b2e94387b164bb239929d5414a67093ba0a3600c806",
       "command": "pnpm --filter @live-photo-studio/api test",
       "assertion_ids": [
         "A1:web-projection"
       ],
-      "recorded_at": "2026-08-23T12:52:43.025Z",
-      "validation_receipt_sha256": "db9ded45496a86f5fe8527d3309ac74cb80794abc55b92c16b6c0a46df3e5540",
+      "recorded_at": "2026-08-23T16:07:34.809Z",
+      "validation_receipt_sha256": "250857dab9aa43a36ca2f2898e1ab8a2ceef98fcea817da55bd70dcdbec55073",
       "evidence_log": {
-        "path": "development/evidence/102-004-web-projection.log",
-        "sha256": "5e2e4c732cb725dda482594dfd49336937a6d82aafe7fa49296d0e4a34176702",
-        "size": 6327
+        "path": "development/evidence/247-004-web-projection.log",
+        "sha256": "764b47b6fe0df998eae14d069ce1a41923f6a192052384337b2f1a63cc16f507",
+        "size": 6931
       }
     },
     {
-      "id": "receipt-a623fd5ba72bedff724b95e21f9741a0cf6891b5b96d34c51b450f8fe2a59ede",
+      "id": "receipt-5a15a3432c4bf05fd25118de9505814034c4d0e933981153953b931208b66460",
+      "command": "pnpm --filter @live-photo-studio/web test",
+      "assertion_ids": [
+        "A1:web-projection"
+      ],
+      "recorded_at": "2026-08-23T16:07:32.374Z",
+      "validation_receipt_sha256": "4290f2663c89bd08f1be953194d148728d9c5c175a07d82d5d22f9631e6ff742",
+      "evidence_log": {
+        "path": "development/evidence/246-004-web-projection.log",
+        "sha256": "0519f0db81f380fdda99d464d569ff6d6d4a2d0a5a436e614fbd102cd81131a3",
+        "size": 2843
+      }
+    },
+    {
+      "id": "receipt-7c333b05695da4b81805a3253d9da08ccbf3c34c044415fd0002d5b9b9a4c453",
       "command": "git diff --check",
       "assertion_ids": [
         "A1:web-projection"
       ],
-      "recorded_at": "2026-08-23T12:52:43.077Z",
-      "validation_receipt_sha256": "b981872835840a8c288dea12146ac3acc8f68ce17b02d6fb4ee754ae0cec5be1",
+      "recorded_at": "2026-08-23T16:07:34.866Z",
+      "validation_receipt_sha256": "4e10bc46482aab0c48142ea025c0e89c900293cd24c396e1130d6c813d94d091",
       "evidence_log": {
-        "path": "development/evidence/103-004-web-projection.log",
-        "sha256": "c9f123b907dab6eddbc5c1fc857bf4cf27536bba38581531e528cee609dc2499",
+        "path": "development/evidence/248-004-web-projection.log",
+        "sha256": "efd7d4b1fc8ff9c35c0dba1955609f994df980f31424667335e3dc99f6749bb1",
         "size": 101
       }
     }
@@ -539,9 +557,9 @@
       "parent_id": "A1",
       "status": "passing",
       "test_run_ids": [
-        "receipt-19d3473284a8a25860679777668b1e4c2075367291244ca66c32198399345403",
-        "receipt-a23406a43bc50e05f4b55a60fe991fa1e37c654aab6cc83bad65fbdf47849c94",
-        "receipt-a623fd5ba72bedff724b95e21f9741a0cf6891b5b96d34c51b450f8fe2a59ede"
+        "receipt-44e674bab442ea85c4639b2e94387b164bb239929d5414a67093ba0a3600c806",
+        "receipt-5a15a3432c4bf05fd25118de9505814034c4d0e933981153953b931208b66460",
+        "receipt-7c333b05695da4b81805a3253d9da08ccbf3c34c044415fd0002d5b9b9a4c453"
       ],
       "direct_evidence": [],
       "reused_evidence": [],
