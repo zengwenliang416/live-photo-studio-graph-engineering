@@ -6,6 +6,8 @@ export const apiConfigSchema = z.object({
   REDIS_URL: z.string().min(1),
   GRAPH_COMMAND_QUEUE: z.string().min(1).default("graph-commands"),
   GRAPH_SIGNAL_QUEUE: z.string().min(1).default("graph-signals"),
+  GENERATION_JOB_QUEUE: z.string().min(1).default("generation-jobs"),
+  RENDER_JOB_QUEUE: z.string().min(1).default("render-jobs"),
   OUTBOX_DISPATCH_INTERVAL_MS: z.coerce.number().int().positive().default(500),
   OUTBOX_DISPATCH_BATCH_SIZE: z.coerce.number().int().positive().max(200).default(20),
   OUTBOX_VISIBILITY_TIMEOUT_MS: z.coerce.number().int().positive().default(60_000),

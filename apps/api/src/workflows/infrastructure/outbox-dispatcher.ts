@@ -5,6 +5,8 @@ import { withTransaction } from "@live-photo-studio/database";
 export interface OutboxQueuePair {
   readonly commands: Queue;
   readonly signals: Queue;
+  readonly generationJobs: Queue;
+  readonly renderJobs: Queue;
 }
 
 interface OutboxRow {
@@ -184,11 +186,14 @@ export function routeEvent(
   queues: OutboxQueuePair,
 ): Queue | null {
   if (eventType === "HUMAN_TASK_COMPLETED") return queues.signals;
-  if (
-    eventType === "START_WORKFLOW" ||
-    eventType === "CANCEL_WORKFLOW"
-  ) {
+  if (eventType === "START_WORKFLOW" || eventType === "CANCEL_WORKFLOW") {
     return queues.commands;
+  }
+  if (eventType === "workflow.generation.requested.v1") {
+    return queues.generationJobs;
+  }
+  if (eventType === "workflow.render.requested.v1") {
+    return queues.renderJobs;
   }
   return null;
 }

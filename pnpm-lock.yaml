@@ -115,6 +115,43 @@ importers:
         specifier: ^5.9.0
         version: 5.9.3
 
+  apps/worker-ai:
+    dependencies:
+      '@live-photo-studio/database':
+        specifier: workspace:*
+        version: link:../../packages/database
+      '@live-photo-studio/graph-contracts':
+        specifier: workspace:*
+        version: link:../../packages/graph-contracts
+      bullmq:
+        specifier: ^6.0.0
+        version: 6.2.0(ioredis@5.11.1)(pg@8.23.0)
+      dotenv:
+        specifier: ^17.0.0
+        version: 17.4.2
+      ioredis:
+        specifier: ^5.7.0
+        version: 5.11.1
+      pg:
+        specifier: ^8.16.0
+        version: 8.23.0
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.13.3
+      '@types/pg':
+        specifier: ^8.15.0
+        version: 8.23.1
+      tsx:
+        specifier: ^4.20.0
+        version: 4.23.12
+      typescript:
+        specifier: ^5.9.0
+        version: 5.9.3
+
   packages/database:
     dependencies:
       dotenv:

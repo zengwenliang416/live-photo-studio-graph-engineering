@@ -81,20 +81,28 @@ migration.
   tasks/outbox rows, concurrent duplicate signals producing one transition,
   and old-version runs resolvable after v2 registration. Repository-wide
   build/check/test green (22 unit tests + 6 integration).
-- [ ] Connect workflow generation requests to the existing generation service and
-  AI Worker; make workers emit correlated completion/failure signals.
-  - Blocked in this snapshot: the legacy `apps/worker-ai` and its generation
-    use case are absent from the working copy. Next actions when present:
-    implement a `WorkflowGenerationEffectPort` adapter replacing the
-    transitional `workflow.generation.requested.v1` bridge, emit
-    `GENERATION_BATCH_*` signals from the AI Worker transactionally, remove
-    worker-owned phase writes behind `GRAPH_WORKFLOW_ENABLED`.
-- [ ] Connect human task completion to Graph resume with authorization and
-  idempotency.
-  - Core path already proven end-to-end by the API decision endpoint plus the
-    integration suite (SELECT resumes the correct run; duplicates replay).
-    Remaining when legacy surface lands: expose only task-payload actions in
-    the web review UI and bind REGENERATE to a bounded revision loop.
+- [x] 2026-08-23: Connected workflow generation requests to the generation
+  service and AI Worker (minimal surface recreated in-snapshot). The API
+  Outbox dispatcher now routes `workflow.generation.requested.v1` /
+  `workflow.render.requested.v1` to dedicated BullMQ job queues
+  (`generation-jobs` / `render-jobs`). Migration `0003_generation_domain.sql`
+  adds `generation_batches` / `generation_outputs` (IDs and storage keys only,
+  no binaries). `apps/worker-ai` consumes the job queue behind an
+  ImageGenerationProvider port with a deterministic MockProvider; the service
+  writes batch + four candidates and the correlated
+  `GENERATION_BATCH_COMPLETED` signal (correlationId = jobId) in ONE
+  transaction; duplicate deliveries return existing outputs and emit nothing;
+  terminal failures are recorded once with a correlated `GENERATION_BATCH_FAILED`
+  signal via the worker's final-attempt hook; BullMQ retries stay transient-only.
+  Verified: repository-wide build/check/test green (api 17 incl. routing map);
+  worker-ai integration 4/4 on PostgreSQL 16; migration applies idempotently.
+  Deferred to later milestones: live-Redis end-to-end smoke (operator runbook)
+  and cancellation-driven display rules (web milestone).
+- [~] 2026-08-23: Human task completion to Graph resume is proven end-to-end by
+  the API decision endpoint plus the orchestrator integration suite (SELECT
+  resumes the correct run; duplicates replay; stale tasks conflict). Remaining:
+  expose only task-payload actions in a web review UI and bind REGENERATE to a
+  bounded revision loop once `apps/web` exists.
 - [ ] Connect workflow render requests to the existing render service and Media
   Worker; emit correlated export signals.
 - [ ] Remove worker-owned project phase transitions on the Graph path.

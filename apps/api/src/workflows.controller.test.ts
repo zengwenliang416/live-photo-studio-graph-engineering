@@ -54,9 +54,12 @@ function seed(unit: InMemoryWorkflowUnit): void {
 async function createApp(input?: { graphWorkflowEnabled?: string }) {
   const unit = new InMemoryWorkflowUnit();
   seed(unit);
+  const fakeQueue = { add: async () => undefined, close: async () => undefined };
   const fakeQueues = {
-    commands: { add: async () => undefined, close: async () => undefined },
-    signals: { add: async () => undefined, close: async () => undefined },
+    commands: fakeQueue,
+    signals: fakeQueue,
+    generationJobs: fakeQueue,
+    renderJobs: fakeQueue,
   } as unknown as OutboxQueuePair;
 
   const moduleRef = await Test.createTestingModule({
@@ -69,6 +72,8 @@ async function createApp(input?: { graphWorkflowEnabled?: string }) {
       REDIS_URL: "redis://unittest.invalid:6379",
       GRAPH_COMMAND_QUEUE: "graph-commands-test",
       GRAPH_SIGNAL_QUEUE: "graph-signals-test",
+      GENERATION_JOB_QUEUE: "generation-jobs-test",
+      RENDER_JOB_QUEUE: "render-jobs-test",
       OUTBOX_DISPATCH_INTERVAL_MS: 60_000,
       OUTBOX_DISPATCH_BATCH_SIZE: 10,
       OUTBOX_VISIBILITY_TIMEOUT_MS: 60_000,

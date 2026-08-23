@@ -40,6 +40,8 @@ import { ApiDatabaseModule } from "../database/api-database.module.js";
         return {
           commands: build(config.GRAPH_COMMAND_QUEUE),
           signals: build(config.GRAPH_SIGNAL_QUEUE),
+          generationJobs: build(config.GENERATION_JOB_QUEUE),
+          renderJobs: build(config.RENDER_JOB_QUEUE),
         };
       },
     },
@@ -77,6 +79,8 @@ export class WorkflowsModule implements OnModuleDestroy {
     await Promise.allSettled([
       this.queues.commands.close(),
       this.queues.signals.close(),
+      this.queues.generationJobs.close(),
+      this.queues.renderJobs.close(),
     ]);
   }
 }
