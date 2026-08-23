@@ -53,3 +53,14 @@ DONE_WITH_CONCERNS
 
 Projection and action gating are locally evidenced, but the user-visible
 export boundary and sensory acceptance remain needs-fix.
+
+## Stable Snapshot Revalidation (2026-08-23)
+
+The complete Web suite passed 13/13. The complete API suite passed 30/30 and
+the PostgreSQL-backed API suite passed 33/33. The repair includes stored-run
+project validation, task-payload action gating, centralized export download
+client behavior and explicit Web ZIP versus future iOS Importer copy.
+
+The report remains `DONE_WITH_CONCERNS`: no real browser sensory E2E or
+390px device run was executed, and the default object-storage signer still
+fails closed until a private storage adapter is configured.

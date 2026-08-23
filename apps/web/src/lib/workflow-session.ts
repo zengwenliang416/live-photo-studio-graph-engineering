@@ -33,8 +33,11 @@ async function resolveWithoutInFlight(
   const storedRunId = storage?.getItem(storageKey)?.trim() ?? "";
   if (storedRunId.length > 0) {
     try {
-      await client.getWorkflowRun(storedRunId);
-      return storedRunId;
+      const storedRun = await client.getWorkflowRun(storedRunId);
+      if (storedRun.data.projectId === projectId) {
+        return storedRunId;
+      }
+      storage?.removeItem(storageKey);
     } catch (error: unknown) {
       if (!isNotFound(error)) throw error;
       storage?.removeItem(storageKey);

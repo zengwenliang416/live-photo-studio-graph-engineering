@@ -87,6 +87,39 @@ test("SELECT decisions carry the task-selected output id", async () => {
   assert.match(String(calls[0]?.path), /\/v1\/human-tasks\/task-1\/decisions$/u);
 });
 
+test("latest export download requests a project-scoped short-lived grant", async () => {
+  const projectId = "00000000-0000-4000-8000-000000000010";
+  const exportPackageId = "00000000-0000-4000-8000-000000000011";
+  const expiresAt = new Date(Date.now() + 300_000).toISOString();
+  const calls: string[] = [];
+  const client = new WorkflowApiClient({
+    fetchImpl: async (input, init) => {
+      calls.push(`${String(init?.method)} ${String(input)}`);
+      return jsonResponse({
+        data: {
+          exportPackageId,
+          projectId,
+          downloadUrl: "https://storage.example.test/signed/package.zip",
+          expiresAt,
+          sha256: "a".repeat(64),
+          durationMs: 1500,
+          bytes: 42,
+        },
+      });
+    },
+    baseUrl: "http://test",
+    userId: "u",
+  });
+
+  const result = await client.getLatestExportDownload(projectId);
+
+  assert.equal(result.data.projectId, projectId);
+  assert.equal(result.data.exportPackageId, exportPackageId);
+  assert.deepEqual(calls, [
+    `GET http://test/v1/projects/${projectId}/export-packages/latest/download`,
+  ]);
+});
+
 test("problem+json responses raise typed errors", async () => {
   const client = new WorkflowApiClient({
     fetchImpl: async () =>

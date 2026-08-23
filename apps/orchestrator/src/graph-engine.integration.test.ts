@@ -10,7 +10,10 @@ import {
   GraphRegistry,
 } from "@live-photo-studio/graph-runtime";
 import type { WorkflowSignal } from "@live-photo-studio/graph-contracts";
-import { GraphEngine } from "./application/graph-engine.js";
+import {
+  GraphEngine,
+  type GraphEngineOptions,
+} from "./application/graph-engine.js";
 import {
   createMemoryCheckpointer,
   createProductionCheckpointer,
@@ -61,7 +64,9 @@ after(async () => {
   }
 });
 
-async function buildEngine(): Promise<{ engine: GraphEngine; pool: Pool }> {
+async function buildEngine(
+  options: GraphEngineOptions = {},
+): Promise<{ engine: GraphEngine; pool: Pool }> {
   const durable = await createProductionCheckpointer({
     connectionString: TEST_URL,
     setup: false,
@@ -81,6 +86,7 @@ async function buildEngine(): Promise<{ engine: GraphEngine; pool: Pool }> {
   return {
     engine: new GraphEngine(pool, registry, {
       signalVisibilityTimeoutMs: 1000,
+      ...options,
     }),
     pool,
   };
@@ -448,27 +454,54 @@ if (!RUN_PG_TESTS) {
     assert.equal(tasks.rows[0]?.count, "1");
   });
 
-  test("a resume that crashed before its consumed marker replays idempotently", async () => {
+  test("a crash after the graph checkpoint advances is recovered from PROCESSING", async () => {
     const h = await harness();
     const workflowRunId = randomUUID();
     await h.engineA.handleCommand(startCommand(workflowRunId));
     const jobId = await effectJobId(h.pool, workflowRunId, "dispatch_generation_v1");
-    await h.engineA.handleSignal(externalSignal({
+    const delivery = externalSignal({
       workflowRunId,
       correlationId: jobId,
       payload: { type: "GENERATION_BATCH_COMPLETED", outputIds: [randomUUID()] },
-    }));
-    assert.match(await runStateLabel(h.pool, workflowRunId), /^INTERRUPTED:REVIEW_ANCHOR$/);
+    });
 
-    // Simulate the crash window: the resume happened but the CONSUMED marker
-    // was never durably written.
-    const flipped = await h.pool.query(
+    let shouldCrash = true;
+    const crashing = await buildEngine({
+      afterGraphResume: () => {
+        if (shouldCrash) {
+          shouldCrash = false;
+          throw new Error("SIMULATED_RESUME_CRASH");
+        }
+      },
+    });
+    await assert.rejects(
+      crashing.engine.handleSignal(delivery),
+      /SIMULATED_RESUME_CRASH/,
+    );
+
+    const processing = await h.pool.query<{
+      status: string;
+      current_phase: string | null;
+    }>(
+      `SELECT s.status, r.current_phase
+         FROM workflow_signals s
+         JOIN workflow_runs r ON r.id = s.workflow_run_id
+        WHERE s.workflow_run_id = $1 AND s.correlation_id = $2`,
+      [workflowRunId, jobId],
+    );
+    assert.deepEqual(processing.rows[0], {
+      status: "PROCESSING",
+      current_phase: "WAITING_GENERATION",
+    });
+
+    // The claim is durable, while the graph checkpoint has already advanced.
+    // Aging the row models the visibility timeout that makes it recoverable.
+    await h.pool.query(
       `UPDATE workflow_signals
           SET status = 'PROCESSING', updated_at = now() - interval '10 minutes'
-        WHERE workflow_run_id = $1 RETURNING id`,
-      [workflowRunId],
+        WHERE workflow_run_id = $1 AND correlation_id = $2`,
+      [workflowRunId, jobId],
     );
-    assert.equal(flipped.rowCount, 1);
 
     const { engine } = await buildEngine();
     const recovered = await engine.recoverStuckSignals();

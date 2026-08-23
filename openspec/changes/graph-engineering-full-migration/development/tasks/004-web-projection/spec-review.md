@@ -45,3 +45,12 @@ needs-fix
   checks, then record exact results.
 - Stabilize the source revision and obtain verification-owned acceptance
   evidence before approval.
+
+## Stable Snapshot Revalidation (2026-08-23)
+
+The Web and API behavior is locally verified, including project/run session
+validation and export download boundary tests. The prototype remains a visual
+reference only and was not promoted into browser-owned workflow state.
+
+**Verdict remains `needs-fix`;** browser sensory/refresh evidence and real
+signed-download verification are still open.

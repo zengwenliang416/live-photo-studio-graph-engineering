@@ -82,3 +82,20 @@ DONE_WITH_CONCERNS
 The task report is now evidence-bearing, but the task is not ready for a
 successful verification handoff. Its failures and unavailable external
 checks remain visible and must not be converted into passing evidence.
+
+## Stable Snapshot Revalidation (2026-08-23)
+
+Final observed commands passed: `pnpm install --frozen-lockfile`,
+`pnpm check`, `pnpm test`, `pnpm graph:check`, `pnpm graph:test`,
+`pnpm graph:demo`, `DATABASE_URL=postgresql://postgres@localhost:5432/postgres
+pnpm db:migrate` and `git diff --check`. Migration replay reported
+`applied:[]` and `skipped:6`; the demo reached `COMPLETED`.
+
+The package test glob was corrected so the final root test run includes
+top-level files. One concurrent `graph:test` attempt exposed an API test
+runner failure (`400 !== 202`); a fixed-concurrency full API run and the next
+full `graph:test` passed. This remains recorded as a stability observation.
+
+The report remains `DONE_WITH_CONCERNS`: Node 24, live Redis, private storage,
+real provider/codec/HEIC, browser sensory and iOS device evidence are not
+available. No canary or rollback exercise is claimed as executed.

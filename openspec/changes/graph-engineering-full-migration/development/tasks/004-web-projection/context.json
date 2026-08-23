@@ -25,10 +25,10 @@
     "openspec/changes/graph-engineering-full-migration/prototype/logic/harness.js"
   ],
   "allowed_files": [
-    "apps/web",
-    "apps/api",
-    "packages/graph-contracts",
-    "docs"
+    "apps/web/**",
+    "apps/api/**",
+    "packages/graph-contracts/**",
+    "docs/**"
   ],
   "test_paths": [
     "pnpm --filter @live-photo-studio/web test",

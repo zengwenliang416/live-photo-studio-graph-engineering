@@ -26,11 +26,11 @@
     "openspec/changes/graph-engineering-full-migration/prototype/logic/harness.js"
   ],
   "allowed_files": [
-    "docs",
+    "docs/**",
     "package.json",
     "pnpm-lock.yaml",
-    "apps",
-    "packages"
+    "apps/**",
+    "packages/**"
   ],
   "test_paths": [
     "pnpm install --frozen-lockfile",

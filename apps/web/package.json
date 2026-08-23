@@ -6,7 +6,7 @@
     "dev": "next dev -p 3000",
     "build": "tsc -p tsconfig.json --noEmit",
     "check": "tsc -p tsconfig.json --noEmit",
-    "test": "tsx --test src/**/*.test.ts"
+    "test": "tsx --test \"src/**/*.test.ts\""
   },
   "dependencies": {
     "@live-photo-studio/graph-contracts": "workspace:*",

@@ -184,6 +184,29 @@ export function buildOpenApiDocument(baseUrl: string): Record<string, unknown> {
           },
         },
       },
+      "/v1/projects/{projectId}/export-packages/latest/download": {
+        get: {
+          summary: "Create a short-lived signed download grant for the latest export.",
+          operationId: "getLatestExportDownload",
+          parameters: [
+            userIdHeaderParameter,
+            {
+              name: "projectId",
+              in: "path",
+              required: true,
+              schema: { type: "string", format: "uuid" },
+            },
+          ],
+          responses: {
+            "200": jsonResponse(
+              dataEnvelope({ $ref: "#/components/schemas/ExportPackageDownloadResult" }),
+            ),
+            "403": problemResponse("Project access denied."),
+            "404": problemResponse("Project or export package not found."),
+            "503": problemResponse("Signed download is not available."),
+          },
+        },
+      },
       "/v1/admin/workflow-runs/{workflowRunId}/triage": {
         get: {
           summary: "Read a bounded operator workflow projection.",
@@ -336,6 +359,27 @@ export function buildOpenApiDocument(baseUrl: string): Record<string, unknown> {
           properties: {
             workflowRunId: { type: "string", format: "uuid" },
             status: { type: "string", enum: ["CANCELLING"] },
+          },
+        },
+        ExportPackageDownloadResult: {
+          type: "object",
+          required: [
+            "exportPackageId",
+            "projectId",
+            "downloadUrl",
+            "expiresAt",
+            "sha256",
+            "durationMs",
+            "bytes",
+          ],
+          properties: {
+            exportPackageId: { type: "string", format: "uuid" },
+            projectId: { type: "string", format: "uuid" },
+            downloadUrl: { type: "string", format: "uri" },
+            expiresAt: { type: "string", format: "date-time" },
+            sha256: { type: "string" },
+            durationMs: { type: "integer", minimum: 0 },
+            bytes: { type: "integer", minimum: 1 },
           },
         },
         WorkflowReplayRequest: {

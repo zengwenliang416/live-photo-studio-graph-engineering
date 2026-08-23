@@ -8,6 +8,7 @@ const startWorkflowResponseSchema = z.object({
 });
 const workflowRunResponseSchema = z.object({
   data: z.object({
+    projectId: z.string().uuid(),
     status: z.string(),
     currentPhase: z.string().nullable(),
     pendingHumanTaskId: workflowRunIdSchema.nullable(),
@@ -30,6 +31,17 @@ const decisionResponseSchema = z.object({
 });
 const cancelResponseSchema = z.object({
   data: z.object({ workflowRunId: workflowRunIdSchema }),
+});
+const exportDownloadResponseSchema = z.object({
+  data: z.object({
+    exportPackageId: workflowRunIdSchema,
+    projectId: z.string().uuid(),
+    downloadUrl: z.string().url(),
+    expiresAt: z.string().datetime(),
+    sha256: z.string().min(1),
+    durationMs: z.number().int().nonnegative(),
+    bytes: z.number().int().positive(),
+  }),
 });
 
 export type WorkflowAction = "SELECT" | "REGENERATE" | "CANCEL";
@@ -172,6 +184,7 @@ export class WorkflowApiClient {
 
   getWorkflowRun(workflowRunId: string): Promise<{
     data: {
+      projectId: string;
       status: string;
       currentPhase: string | null;
       pendingHumanTaskId: string | null;
@@ -221,6 +234,24 @@ export class WorkflowApiClient {
       cancelResponseSchema,
       { reason: "USER_REQUESTED" },
       `cancel:${workflowRunId}`,
+    );
+  }
+
+  getLatestExportDownload(projectId: string): Promise<{
+    data: {
+      exportPackageId: string;
+      projectId: string;
+      downloadUrl: string;
+      expiresAt: string;
+      sha256: string;
+      durationMs: number;
+      bytes: number;
+    };
+  }> {
+    return this.request(
+      "GET",
+      `/v1/projects/${projectId}/export-packages/latest/download`,
+      exportDownloadResponseSchema,
     );
   }
 

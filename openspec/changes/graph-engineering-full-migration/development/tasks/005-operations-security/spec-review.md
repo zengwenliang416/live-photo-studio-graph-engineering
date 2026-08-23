@@ -47,3 +47,11 @@ needs-fix
 - Complete the red-team and retry/cost-control matrix with exact evidence.
 - Re-run the review on a stable revision and obtain verification-owned
   acceptance evidence before approval.
+
+## Stable Snapshot Revalidation (2026-08-23)
+
+The local operations and redaction gaps listed above are partly closed and
+covered by the current API/Graph contract suites. The remaining real-storage,
+live-queue, provider, codec and device checks are external and still absent.
+
+**Verdict remains `needs-fix`; parent A3 remains `failing`.**

@@ -42,6 +42,8 @@ function ReviewPanel(): React.JSX.Element {
   const [isStarting, setIsStarting] = useState(true);
   const [sessionError, setSessionError] = useState<unknown>(null);
   const [sessionAttempt, setSessionAttempt] = useState(0);
+  const [downloadError, setDownloadError] = useState<unknown>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -87,6 +89,21 @@ function ReviewPanel(): React.JSX.Element {
     }
     workflow.refresh();
   }, [sessionError, workflow]);
+
+  const downloadLatestExport = useCallback(async () => {
+    if (isDownloading || !projectId) return;
+    setDownloadError(null);
+    setIsDownloading(true);
+    try {
+      const client = new WorkflowApiClient();
+      const result = await client.getLatestExportDownload(projectId);
+      window.location.assign(result.data.downloadUrl);
+    } catch (error: unknown) {
+      setDownloadError(error);
+    } finally {
+      setIsDownloading(false);
+    }
+  }, [isDownloading, projectId]);
 
   const onDecide = useCallback(
     (action: WorkflowAction) => {
@@ -181,6 +198,8 @@ function ReviewPanel(): React.JSX.Element {
     workflow.run?.status === "SUCCEEDED" ||
     workflow.run?.status === "FAILED" ||
     workflow.run?.status === "CANCELLED";
+  const canCancel =
+    !terminal && workflow.allowedActions.includes("CANCEL");
 
   return (
     <main className={styles.shell}>
@@ -290,7 +309,7 @@ function ReviewPanel(): React.JSX.Element {
                 Regenerate
               </button>
             )}
-            {!terminal && (
+            {canCancel && (
               <button
                 className={`${styles.button} ${styles.buttonDanger}`}
                 type="button"
@@ -301,6 +320,28 @@ function ReviewPanel(): React.JSX.Element {
               </button>
             )}
           </div>
+
+          {workflow.run?.status === "SUCCEEDED" && (
+            <div className={styles.actions}>
+              <button
+                className={`${styles.button} ${styles.buttonPrimary}`}
+                type="button"
+                onClick={() => void downloadLatestExport()}
+                disabled={isDownloading}
+              >
+                {isDownloading
+                  ? "Preparing download..."
+                  : "Download resource package"}
+              </button>
+            </div>
+          )}
+          {downloadError !== null && downloadError !== undefined && (
+            <p className={styles.error} role="alert">
+              {downloadError instanceof Error
+                ? downloadError.message
+                : "The export download is not available yet."}
+            </p>
+          )}
 
           <p className={styles.notice}>
             The Web result is a downloadable resource package for a future iOS Importer. The Web export does not save a Live Photo directly to the iPhone Photos library as a native Live Photo. This page never creates a browser ZIP; completed exports come from the Media Worker and are delivered through the API&apos;s private download boundary.

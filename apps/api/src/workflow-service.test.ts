@@ -251,6 +251,35 @@ test("cancel enqueues a cancel command once per key and guards terminal runs", a
   );
 });
 
+test("cancel requires the current task payload to allow CANCEL", async () => {
+  const runId = "7c1f6d2e-4f89-4a0c-9b0c-0305e82c7005";
+  const { unit, service } = createService();
+  const taskId = seedPendingTask(unit, runId);
+  const seeded = unit.tasks.get(taskId);
+  assert.ok(seeded);
+  unit.tasks.set(taskId, {
+    ...seeded,
+    task: { ...seeded.task, allowedActions: ["SELECT"] },
+  });
+
+  await assert.rejects(
+    service.cancelWorkflowRun({
+      workflowRunId: runId,
+      userId: USER,
+      idempotencyKey: "key-cancel-0000003",
+      body: {},
+    }),
+    (error: unknown) => {
+      assert.equal(
+        (error as Error & { code?: string }).code,
+        "WORKFLOW_CANCEL_NOT_ALLOWED",
+      );
+      return true;
+    },
+  );
+  assert.equal(unit.outbox.length, 0);
+});
+
 test("get projection enforces ownership and exposes pending task", async () => {
   const runId = "7c1f6d2e-4f89-4a0c-9b0c-0305e82c7004";
   const { unit, service } = createService();

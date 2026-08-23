@@ -14,6 +14,18 @@ interface ExportRecord {
   readonly exportId: string;
 }
 
+interface RenderJobRecord {
+  readonly projectId: string;
+  readonly workflowRunId: string | null;
+  readonly selectedOutputId: string;
+  readonly status: "RUNNING" | "SUCCEEDED" | "FAILED" | "CANCELLED";
+}
+
+type RenderClaim =
+  | { readonly kind: "CLAIMED" }
+  | { readonly kind: "IN_PROGRESS" }
+  | { readonly kind: "ALREADY_DONE"; readonly exportId: string };
+
 export class RenderService {
   constructor(
     private readonly pool: Pool,
@@ -27,7 +39,7 @@ export class RenderService {
    * workflow signal commit atomically. The worker never writes project phases.
    */
   async process(payload: RenderRequestedPayload): Promise<{
-    status: "SUCCEEDED" | "ALREADY_DONE";
+    status: "SUCCEEDED" | "ALREADY_DONE" | "IN_PROGRESS";
     exportId?: string | undefined;
   }> {
     await this.assertWorkflowInput(payload);
@@ -37,106 +49,111 @@ export class RenderService {
       return { status: "ALREADY_DONE", exportId: existing.exportId };
     }
 
-    // Media rendering must not run inside a database transaction. If the
-    // process crashes after rendering, the deterministic job/export ids let a
-    // replay finish the durable rows and signal without overwriting input.
-    const artifacts = await this.renderer.render({
-      projectId: payload.projectId,
-      selectedOutputId: payload.selectedOutputId,
-      durationMs: this.durationMs,
-    });
-    const manifestBytes = new TextEncoder().encode(
-      JSON.stringify(artifacts.manifest),
-    );
-    const base = `projects/${payload.projectId}/exports/${payload.jobId}`;
-    const zip = buildStoreZip([
-      { name: "cover.jpg", bytes: artifacts.cover },
-      { name: "motion.mov", bytes: artifacts.motion },
-      { name: "manifest.json", bytes: manifestBytes },
-    ]);
-    const sha256 = sha256Hex(zip);
-    const exportId = deterministicUuid(`${payload.jobId}:export`);
-    const manifest = {
-      ...(artifacts.manifest as Record<string, unknown>),
-      schemaVersion: MANIFEST_SCHEMA_VERSION,
-      recipeVersion: this.renderer.recipeVersion,
-      packageSha256: sha256,
-      entries: ["cover.jpg", "motion.mov", "manifest.json"],
-    };
+    const claim = await this.claimRenderJob(payload);
+    if (claim.kind === "ALREADY_DONE") {
+      await this.repairCompletionSignal(payload, claim.exportId);
+      return { status: "ALREADY_DONE", exportId: claim.exportId };
+    }
+    if (claim.kind === "IN_PROGRESS") {
+      return { status: "IN_PROGRESS" };
+    }
 
-    const client = await this.pool.connect();
     try {
-      await client.query("BEGIN");
-      const inserted = await client.query(
-        `INSERT INTO render_jobs (
-           id, project_id, workflow_run_id, selected_output_id, status,
-           trace_id, external_job_id
-         ) VALUES ($1, $2, $3, $4, 'RUNNING', $5, $1)
-         ON CONFLICT (id) DO NOTHING
-         RETURNING id`,
-        [
-          payload.jobId,
-          payload.projectId,
-          payload.workflowRunId,
-          payload.selectedOutputId,
-          payload.traceId ?? payload.workflowRunId,
-        ],
+      // Media rendering must not run inside a database transaction. The
+      // durable claim above prevents concurrent duplicate renders; deterministic
+      // ids still make a replay safe after the renderer returns.
+      const artifacts = await this.renderer.render({
+        projectId: payload.projectId,
+        selectedOutputId: payload.selectedOutputId,
+        durationMs: this.durationMs,
+      });
+      const manifestBytes = new TextEncoder().encode(
+        JSON.stringify(artifacts.manifest),
       );
-      if (inserted.rowCount === 0) {
-        const prior = await this.findExisting(client, payload);
-        if (prior) {
-          await this.insertCompletionSignal(client, payload, prior.exportId);
-          await client.query(
-            "UPDATE render_jobs SET status = 'SUCCEEDED', updated_at = now() WHERE id = $1",
-            [payload.jobId],
-          );
-          await client.query("COMMIT");
-          return { status: "ALREADY_DONE", exportId: prior.exportId };
-        }
-      }
+      const base = `projects/${payload.projectId}/exports/${payload.jobId}`;
+      const zip = buildStoreZip([
+        { name: "cover.jpg", bytes: artifacts.cover },
+        { name: "motion.mov", bytes: artifacts.motion },
+        { name: "manifest.json", bytes: manifestBytes },
+      ]);
+      const sha256 = sha256Hex(zip);
+      const exportId = deterministicUuid(`${payload.jobId}:export`);
+      const manifest = {
+        ...(artifacts.manifest as Record<string, unknown>),
+        schemaVersion: MANIFEST_SCHEMA_VERSION,
+        recipeVersion: this.renderer.recipeVersion,
+        packageSha256: sha256,
+        entries: ["cover.jpg", "motion.mov", "manifest.json"],
+      };
 
-      await client.query(
-        `INSERT INTO export_packages (
-           id, render_job_id, project_id, package_key,
-           cover_key, motion_key, manifest_key, manifest,
-           sha256, duration_ms, bytes
-         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9, $10, $11)
-         ON CONFLICT (render_job_id) DO NOTHING`,
-        [
-          exportId,
-          payload.jobId,
-          payload.projectId,
-          `${base}/package.zip`,
-          `${base}/cover.jpg`,
-          `${base}/motion.mov`,
-          `${base}/manifest.json`,
-          JSON.stringify(manifest),
-          sha256,
-          this.durationMs,
-          zip.length,
-        ],
-      );
-      const stored = await this.findExisting(client, payload);
-      if (!stored) {
-        throw new Error("EXPORT_PACKAGE_NOT_PERSISTED");
+      const client = await this.pool.connect();
+      try {
+        await client.query("BEGIN");
+        await client.query(
+          `INSERT INTO export_packages (
+             id, render_job_id, project_id, package_key,
+             cover_key, motion_key, manifest_key, manifest,
+             sha256, duration_ms, bytes
+           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9, $10, $11)
+           ON CONFLICT (render_job_id) DO NOTHING`,
+          [
+            exportId,
+            payload.jobId,
+            payload.projectId,
+            `${base}/package.zip`,
+            `${base}/cover.jpg`,
+            `${base}/motion.mov`,
+            `${base}/manifest.json`,
+            JSON.stringify(manifest),
+            sha256,
+            this.durationMs,
+            zip.length,
+          ],
+        );
+        const stored = await this.findExisting(client, payload);
+        if (!stored) {
+          throw new Error("EXPORT_PACKAGE_NOT_PERSISTED");
+        }
+        await this.insertCompletionSignal(client, payload, stored.exportId);
+        const completed = await client.query(
+          `UPDATE render_jobs
+              SET status = 'SUCCEEDED',
+                  recipe_version = $5,
+                  updated_at = now()
+            WHERE id = $1
+              AND project_id = $2
+              AND workflow_run_id = $3
+              AND selected_output_id = $4
+              AND status = 'RUNNING'`,
+          [
+            payload.jobId,
+            payload.projectId,
+            payload.workflowRunId,
+            payload.selectedOutputId,
+            this.renderer.recipeVersion,
+          ],
+        );
+        if (completed.rowCount === 0) {
+          throw new Error("RENDER_JOB_SCOPE_MISMATCH");
+        }
+        await client.query("COMMIT");
+        return { status: "SUCCEEDED", exportId: stored.exportId };
+      } catch (error) {
+        await client.query("ROLLBACK").catch(() => undefined);
+        throw error;
+      } finally {
+        client.release();
       }
-      await this.insertCompletionSignal(client, payload, stored.exportId);
-      await client.query(
-        "UPDATE render_jobs SET status = 'SUCCEEDED', updated_at = now() WHERE id = $1",
-        [payload.jobId],
-      );
-      await client.query("COMMIT");
-      return { status: "SUCCEEDED", exportId: stored.exportId };
     } catch (error) {
-      await client.query("ROLLBACK").catch(() => undefined);
+      // A failed attempt must not strand a RUNNING claim and block a later
+      // BullMQ retry. A committed export protects its claim from deletion.
+      await this.releaseRenderClaim(payload).catch(() => undefined);
       throw error;
-    } finally {
-      client.release();
     }
   }
 
   async fail(payload: RenderRequestedPayload, errorCode: string): Promise<void> {
-    await this.assertWorkflowProject(payload);
+    await this.assertWorkflowInput(payload);
     const client = await this.pool.connect();
     try {
       await client.query("BEGIN");
@@ -160,6 +177,11 @@ export class RenderService {
         ],
       );
       if (inserted.rowCount === 0) {
+        const current = await this.findRenderJob(client, payload.jobId);
+        if (!current) {
+          throw new Error("RENDER_JOB_NOT_FOUND");
+        }
+        this.assertRenderJobScope(current, payload);
         await client.query("COMMIT");
         return;
       }
@@ -205,6 +227,125 @@ export class RenderService {
     }
   }
 
+  private async claimRenderJob(
+    payload: RenderRequestedPayload,
+  ): Promise<RenderClaim> {
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN");
+      const inserted = await client.query(
+        `INSERT INTO render_jobs (
+           id, project_id, workflow_run_id, selected_output_id, status,
+           recipe_version, trace_id, external_job_id
+         ) VALUES ($1, $2, $3, $4, 'RUNNING', $5, $6, $1)
+         ON CONFLICT (id) DO NOTHING
+         RETURNING id`,
+        [
+          payload.jobId,
+          payload.projectId,
+          payload.workflowRunId,
+          payload.selectedOutputId,
+          this.renderer.recipeVersion,
+          payload.traceId ?? payload.workflowRunId,
+        ],
+      );
+      if (inserted.rowCount === 1) {
+        await client.query("COMMIT");
+        return { kind: "CLAIMED" };
+      }
+
+      const current = await this.findRenderJob(client, payload.jobId);
+      if (!current) {
+        throw new Error("RENDER_JOB_NOT_FOUND");
+      }
+      this.assertRenderJobScope(current, payload);
+
+      const existing = await this.findExisting(client, payload);
+      if (existing) {
+        await client.query("COMMIT");
+        return { kind: "ALREADY_DONE", exportId: existing.exportId };
+      }
+      if (current.status === "RUNNING") {
+        await client.query("COMMIT");
+        return { kind: "IN_PROGRESS" };
+      }
+
+      const reclaimed = await client.query(
+        `UPDATE render_jobs
+            SET status = 'RUNNING',
+                error_code = NULL,
+                recipe_version = $5,
+                trace_id = $6,
+                external_job_id = $1,
+                updated_at = now()
+          WHERE id = $1
+            AND project_id = $2
+            AND workflow_run_id = $3
+            AND selected_output_id = $4
+            AND status IN ('FAILED', 'CANCELLED')
+          RETURNING id`,
+        [
+          payload.jobId,
+          payload.projectId,
+          payload.workflowRunId,
+          payload.selectedOutputId,
+          this.renderer.recipeVersion,
+          payload.traceId ?? payload.workflowRunId,
+        ],
+      );
+      if (reclaimed.rowCount === 1) {
+        await client.query("COMMIT");
+        return { kind: "CLAIMED" };
+      }
+      throw new Error("RENDER_JOB_NOT_CLAIMABLE");
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  private async findRenderJob(
+    client: Pool | PoolClient,
+    jobId: string,
+  ): Promise<RenderJobRecord | null> {
+    const result = await client.query<{
+      project_id: string;
+      workflow_run_id: string | null;
+      selected_output_id: string;
+      status: RenderJobRecord["status"];
+    }>(
+      `SELECT project_id, workflow_run_id, selected_output_id, status
+         FROM render_jobs
+        WHERE id = $1::uuid
+        FOR UPDATE`,
+      [jobId],
+    );
+    const row = result.rows[0];
+    return row
+      ? {
+          projectId: row.project_id,
+          workflowRunId: row.workflow_run_id,
+          selectedOutputId: row.selected_output_id,
+          status: row.status,
+        }
+      : null;
+  }
+
+  private assertRenderJobScope(
+    row: RenderJobRecord,
+    payload: RenderRequestedPayload,
+  ): void {
+    if (
+      row.projectId !== payload.projectId ||
+      row.workflowRunId !== payload.workflowRunId ||
+      row.selectedOutputId !== payload.selectedOutputId
+    ) {
+      throw new Error("RENDER_JOB_SCOPE_MISMATCH");
+    }
+  }
+
   private async findExistingFromPool(
     payload: RenderRequestedPayload,
   ): Promise<ExportRecord | null> {
@@ -247,10 +388,23 @@ export class RenderService {
     try {
       await client.query("BEGIN");
       await this.insertCompletionSignal(client, payload, exportId);
-      await client.query(
-        "UPDATE render_jobs SET status = 'SUCCEEDED', updated_at = now() WHERE id = $1",
-        [payload.jobId],
+      const updated = await client.query(
+        `UPDATE render_jobs
+            SET status = 'SUCCEEDED', updated_at = now()
+          WHERE id = $1
+            AND project_id = $2
+            AND workflow_run_id = $3
+            AND selected_output_id = $4`,
+        [
+          payload.jobId,
+          payload.projectId,
+          payload.workflowRunId,
+          payload.selectedOutputId,
+        ],
       );
+      if (updated.rowCount === 0) {
+        throw new Error("RENDER_JOB_SCOPE_MISMATCH");
+      }
       await client.query("COMMIT");
     } catch (error) {
       await client.query("ROLLBACK").catch(() => undefined);
@@ -258,6 +412,30 @@ export class RenderService {
     } finally {
       client.release();
     }
+  }
+
+  private async releaseRenderClaim(
+    payload: RenderRequestedPayload,
+  ): Promise<void> {
+    await this.pool.query(
+      `DELETE FROM render_jobs r
+        WHERE r.id = $1
+          AND r.project_id = $2
+          AND r.workflow_run_id = $3
+          AND r.selected_output_id = $4
+          AND r.status = 'RUNNING'
+          AND NOT EXISTS (
+            SELECT 1
+              FROM export_packages p
+             WHERE p.render_job_id = r.id
+          )`,
+      [
+        payload.jobId,
+        payload.projectId,
+        payload.workflowRunId,
+        payload.selectedOutputId,
+      ],
+    );
   }
 
   private async insertCompletionSignal(

@@ -121,7 +121,7 @@ migration.
   fake renderer yields placeholder bytes with valid ZIP structure and stable
   hashes, sufficient for control-plane acceptance but not device-level media
   validation per the HEIC/Live Photo boundary in AGENTS.md.
-- [ ] Remove worker-owned project phase transitions on the Graph path.
+- [x] Remove worker-owned project phase transitions on the Graph path.
 - [x] 2026-08-23: Audited the remaining Graph-path phase ownership boundary.
   AI and Media Workers write domain results and correlated signals only; no
   direct `workflow_runs.current_phase` write is present in the current
@@ -218,6 +218,30 @@ migration.
   artifacts, while excluding CodeGraph and SpecNav session-local state. After
   the snapshot is stable, refresh system-executed receipts and regenerate task
   acceptance evidence; unsupported A3 capabilities remain blocked.
+- [~] 2026-08-23: Starting the independent-review repair implementation from
+  the stable snapshot. This pass addresses the concrete findings rather than
+  changing acceptance metadata: re-read workflow runs after acquiring the
+  per-run lock, make resume projection/event/consumed-marker writes replay-safe,
+  claim AI and Media jobs before external side effects, enforce asset/output
+  ownership, and add the API/Web export download boundary plus project/run and
+  task-action checks. Existing system receipts are invalid until the new
+  implementation HEAD is validated again.
+- [~] 2026-08-23: Starting the post-repair full validation pass. The focused
+  API, Web, AI Worker, Media Worker and Orchestrator checks have passed,
+  including PostgreSQL integration suites; this pass runs the repository gates,
+  migration replay, Graph demo, diff check and then refreshes task evidence on
+  the committed implementation snapshot. Live Redis, private object storage,
+  real provider/codec and iOS device checks remain external blockers.
+- [x] 2026-08-23: Completed the post-repair validation pass. Quoted the
+  `tsx` test glob in every package script so top-level and nested tests are
+  both collected. The full ordinary suite passed with Graph contracts 6,
+  Graph runtime 3, API 30, Web 13, AI Worker 3, Media Worker 4 and
+  Orchestrator 4 tests; PostgreSQL suites passed API 33, AI Worker 9, Media
+  Worker 13 and Orchestrator 11 tests. `pnpm graph:check`,
+  `pnpm graph:test`, `pnpm graph:demo`, frozen install, migration replay and
+  `git diff --check` also passed. One concurrent `graph:test` attempt exposed
+  an API test runner flake and failed; the isolated fixed-concurrency suite
+  and the subsequent full rerun passed, so no failure is suppressed.
 
 ## Surprises and discoveries
 
@@ -294,6 +318,22 @@ migration.
   task `acceptance.json`, review approval, or green handoff was fabricated at
   that time. The user later authorized a local checkpoint commit; push,
   deployment and production infrastructure changes remain prohibited.
+- 2026-08-23: The independent review found that a PostgreSQL advisory lock alone
+  is insufficient when the run projection is read before lock acquisition:
+  recovery must re-read the run using the lock-held transaction before deciding
+  whether a stale signal is still applicable. It also found that provider/
+  renderer idempotency requires a durable claim before the external call; a
+  deterministic output ID alone prevents duplicate rows, not duplicate paid or
+  expensive side effects.
+- 2026-08-23: The worker claim repair uses the existing generation/render job
+  rows and uniqueness constraints to prevent concurrent duplicate provider or
+  renderer calls. A process crash after an external side effect and before the
+  domain commit still requires a future claim lease/token protocol; this
+  remains a documented risk rather than an unverified acceptance claim.
+- 2026-08-23: The original package test command used an unquoted
+  `src/**/*.test.ts` glob. On this shell that omitted top-level test files from
+  ordinary package runs. Quoting the glob delegates recursive expansion to
+  `tsx` and restored complete collection without weakening or skipping tests.
 
 ## Decision log
 
@@ -372,6 +412,22 @@ migration.
   A2; operations/security contributes A3. The A3 parent remains failing until
   private storage, live Redis, real provider/codec and device checks are
   available.
+- [~] 2026-08-23: Starting an independent-review repair milestone after the
+  stable-snapshot review identified implementation gaps that cannot be closed
+  by lifecycle metadata alone. The repair scope is limited to lock-time run
+  revalidation and valid consumed-marker crash coverage, worker asset/output
+  ownership plus concurrent duplicate claims, and Web export/download,
+  project/run session validation and task-payload action gating. Existing
+  system receipts are invalidated by any implementation change and must be
+  regenerated on the new HEAD.
+- 2026-08-23: The repair keeps the existing Graph/BullMQ split. A worker claim
+  is a domain execution lease represented by the existing job row status and
+  uniqueness constraints; it does not move routing into BullMQ or LangGraph.
+  Export download returns a short-lived signed URL through an application port
+  and does not persist signed URLs or media bytes in PostgreSQL.
+- 2026-08-23: Treat the corrected package test scripts as part of the
+  repository verification contract. A passing root test command is not valid
+  evidence if the shell can silently omit top-level test files.
 
 ## Outcomes and retrospective
 
@@ -480,6 +536,36 @@ state is recorded below.
 - The checkpoint commit and the subsequent system-executed receipts are still
   pending in this pass. Handoff is not claimed until the owning SpecNav
   contract returns `ok:true`.
+
+2026-08-23 (Independent-review repair and final validation):
+
+- Implemented the reviewed repair slice: lock-time workflow-run reload,
+  replay-safe Graph projection/event/consumed-marker writes, durable
+  pre-side-effect claims for AI and Media jobs, asset/output scope checks,
+  export download boundary, project/run session validation and task-payload
+  action gating. Workers still emit facts and correlated signals only; they do
+  not write Graph-path project phases.
+- Fixed package test discovery by quoting `src/**/*.test.ts`. The final
+  ordinary suite passed 63 tests across the workspace: contracts 6, runtime 3,
+  API 30, Web 13, AI Worker 3, Media Worker 4 and Orchestrator 4. The final
+  PostgreSQL suites passed API 33, AI Worker 9, Media Worker 13 and
+  Orchestrator 11.
+- Final commands observed passing: `pnpm install --frozen-lockfile`,
+  `pnpm check`, `pnpm test`, `pnpm graph:check`, `pnpm graph:test`,
+  `pnpm graph:demo`, `DATABASE_URL=postgresql://postgres@localhost:5432/postgres
+  pnpm db:migrate` and `git diff --check`. Migration replay reported
+  `applied:[]` and `skipped:6`; the demo reached
+  `WAITING_GENERATION -> REVIEW_ANCHOR -> WAITING_RENDER -> COMPLETED`.
+- One concurrent `pnpm graph:test` attempt failed in an API cancellation test
+  with `400 !== 202`; the same complete API suite passed with
+  `--test-concurrency=1`, and the next full `pnpm graph:test` passed. This is
+  retained as a test-runner stability observation, not hidden.
+- Remaining risks/blockers: Node `v22.19.0` is below the declared `>=24`,
+  pnpm ignored the `sharp` build script, local Redis requires authentication,
+  the default download signer intentionally fails closed, and private
+  storage, signed-URL TTL, live Redis/BullMQ, real model/provider, FFmpeg/
+  ImageMagick/libheif/HEIC and iOS PhotoKit/device validation were not run.
+  A3 remains `failing`; no browser sensory E2E was executed.
 
 ## Repository context and orientation
 

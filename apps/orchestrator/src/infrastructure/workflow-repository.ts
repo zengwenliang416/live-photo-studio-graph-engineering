@@ -90,6 +90,52 @@ export class WorkflowRepository {
       : null;
   }
 
+  async findRunWithClient(
+    client: PoolClient,
+    id: string,
+  ): Promise<WorkflowRunRecord | null> {
+    const result = await client.query<{
+      id: string;
+      project_id: string;
+      user_id: string;
+      trace_id: string | null;
+      graph_key: string;
+      graph_version: string;
+      thread_id: string;
+      status: WorkflowRunStatus;
+      current_node: string | null;
+      current_node_version: number | null;
+      current_phase: string | null;
+      last_external_job_id: string | null;
+      provider_request_id: string | null;
+    }>(
+      `SELECT id, project_id, user_id, trace_id, graph_key, graph_version,
+              thread_id, status, current_node, current_node_version,
+              current_phase, last_external_job_id, provider_request_id
+         FROM workflow_runs
+        WHERE id = $1`,
+      [id],
+    );
+    const row = result.rows[0];
+    return row
+      ? {
+          id: row.id,
+          projectId: row.project_id,
+          userId: row.user_id,
+          traceId: row.trace_id,
+          graphKey: row.graph_key,
+          graphVersion: row.graph_version,
+          threadId: row.thread_id,
+          status: row.status,
+          currentNode: row.current_node,
+          currentNodeVersion: row.current_node_version,
+          currentPhase: row.current_phase,
+          externalJobId: row.last_external_job_id,
+          providerRequestId: row.provider_request_id,
+        }
+      : null;
+  }
+
   async updateProjection(input: {
     id: string;
     status: WorkflowRunStatus;
@@ -102,6 +148,54 @@ export class WorkflowRepository {
     traceId?: string | null;
   }): Promise<void> {
     await this.pool.query(
+      `UPDATE workflow_runs
+          SET status = $2,
+              current_node = COALESCE($3, current_node),
+              current_node_version = COALESCE($4, current_node_version),
+              current_phase = COALESCE($5, current_phase),
+              last_error_code = $6,
+              last_external_job_id = COALESCE($7, last_external_job_id),
+              provider_request_id = COALESCE($8, provider_request_id),
+              trace_id = COALESCE($9, trace_id),
+              started_at = CASE
+                WHEN started_at IS NULL AND $2 = 'RUNNING' THEN now()
+                ELSE started_at
+              END,
+              completed_at = CASE
+                WHEN $2 IN ('SUCCEEDED', 'FAILED', 'CANCELLED') THEN now()
+                ELSE completed_at
+              END,
+              updated_at = now()
+        WHERE id = $1`,
+      [
+        input.id,
+        input.status,
+        input.currentNode ?? null,
+        input.currentNodeVersion ?? null,
+        input.currentPhase ?? null,
+        input.lastErrorCode ?? null,
+        input.externalJobId ?? null,
+        input.providerRequestId ?? null,
+        input.traceId ?? null,
+      ],
+    );
+  }
+
+  async updateProjectionWithClient(
+    client: PoolClient,
+    input: {
+      id: string;
+      status: WorkflowRunStatus;
+      currentNode?: string | null;
+      currentNodeVersion?: number | null;
+      currentPhase?: string | null;
+      lastErrorCode?: string | null;
+      externalJobId?: string | null;
+      providerRequestId?: string | null;
+      traceId?: string | null;
+    },
+  ): Promise<void> {
+    await client.query(
       `UPDATE workflow_runs
           SET status = $2,
               current_node = COALESCE($3, current_node),
@@ -217,6 +311,17 @@ export class WorkflowRepository {
         WHERE id = $1`,
       [signalId, errorCode],
     );
+  }
+
+  async hasWorkflowEventIdWithClient(
+    client: PoolClient,
+    eventId: string,
+  ): Promise<boolean> {
+    const result = await client.query(
+      "SELECT 1 FROM workflow_events WHERE id = $1",
+      [eventId],
+    );
+    return result.rowCount === 1;
   }
 
   async findSignalStatus(
@@ -389,7 +494,25 @@ export class WorkflowRepository {
   }): Promise<void> {
     await this.pool.query(
       `INSERT INTO workflow_events (id, workflow_run_id, event_name, payload)
-       VALUES ($1, $2, $3, $4::jsonb)`,
+       VALUES ($1, $2, $3, $4::jsonb)
+       ON CONFLICT (id) DO NOTHING`,
+      [input.id, input.workflowRunId, input.eventName, JSON.stringify(input.payload)],
+    );
+  }
+
+  async appendWorkflowEventWithClient(
+    client: PoolClient,
+    input: {
+      id: string;
+      workflowRunId: string;
+      eventName: string;
+      payload: Record<string, unknown>;
+    },
+  ): Promise<void> {
+    await client.query(
+      `INSERT INTO workflow_events (id, workflow_run_id, event_name, payload)
+       VALUES ($1, $2, $3, $4::jsonb)
+       ON CONFLICT (id) DO NOTHING`,
       [input.id, input.workflowRunId, input.eventName, JSON.stringify(input.payload)],
     );
   }
@@ -402,6 +525,33 @@ export class WorkflowRepository {
     payload: Record<string, unknown>;
   }): Promise<void> {
     await this.pool.query(
+      `INSERT INTO human_tasks (
+         id, workflow_run_id, task_type, node_name, payload, status
+       ) VALUES ($1, $2, $3, $4, $5::jsonb, 'PENDING')
+       ON CONFLICT (workflow_run_id, node_name, status)
+       WHERE status = 'PENDING'
+       DO UPDATE SET payload = EXCLUDED.payload, updated_at = now()`,
+      [
+        input.id,
+        input.workflowRunId,
+        input.taskType,
+        input.nodeName,
+        JSON.stringify(input.payload),
+      ],
+    );
+  }
+
+  async upsertHumanTaskWithClient(
+    client: PoolClient,
+    input: {
+      id: string;
+      workflowRunId: string;
+      taskType: string;
+      nodeName: string;
+      payload: Record<string, unknown>;
+    },
+  ): Promise<void> {
+    await client.query(
       `INSERT INTO human_tasks (
          id, workflow_run_id, task_type, node_name, payload, status
        ) VALUES ($1, $2, $3, $4, $5::jsonb, 'PENDING')

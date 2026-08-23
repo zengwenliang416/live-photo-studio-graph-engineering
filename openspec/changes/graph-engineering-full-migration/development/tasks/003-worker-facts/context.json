@@ -26,11 +26,11 @@
     "openspec/changes/graph-engineering-full-migration/prototype/logic/harness.js"
   ],
   "allowed_files": [
-    "apps/worker-ai",
-    "apps/worker-media",
-    "packages/database",
-    "packages/graph-contracts",
-    "docs"
+    "apps/worker-ai/**",
+    "apps/worker-media/**",
+    "packages/database/**",
+    "packages/graph-contracts/**",
+    "docs/**"
   ],
   "test_paths": [
     "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/worker-ai test",

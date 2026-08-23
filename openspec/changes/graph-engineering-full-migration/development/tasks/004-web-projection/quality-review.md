@@ -45,3 +45,13 @@ needs-fix
 - Add and test the export boundary copy and mobile accessibility behavior.
 - Run refresh/reopen and duplicate-submit checks against a stable revision.
 - Attach verification-owned evidence before changing the verdict.
+
+## Stable Snapshot Revalidation (2026-08-23)
+
+Web/API unit and integration suites pass with complete test discovery. The
+server projection remains authoritative, stored runs are checked against the
+current project, and review/cancel actions are gated by the current task
+payload.
+
+**Verdict remains `needs-fix`** because browser sensory evidence and real
+private-storage download verification are unavailable.

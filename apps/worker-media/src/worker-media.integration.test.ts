@@ -5,7 +5,12 @@ import type { Pool } from "pg";
 import { createAppPool, runMigrations } from "@live-photo-studio/database";
 import { workflowSignalSchema } from "@live-photo-studio/graph-contracts";
 import { RenderService } from "./export-service.js";
-import { renderRequestedPayloadSchema, sha256Hex } from "./renderer.js";
+import {
+  FakeExportRenderer,
+  renderRequestedPayloadSchema,
+  sha256Hex,
+  type ExportRenderer,
+} from "./renderer.js";
 
 const RUN_PG_TESTS = process.env.RUN_PG_TESTS === "1";
 
@@ -32,13 +37,15 @@ after(async () => {
 
 async function seedOutput(
   client: Pool,
+  projectId: string = randomUUID(),
 ): Promise<{ projectId: string; outputId: string; workflowRunId: string }> {
-  const projectId = randomUUID();
   const workflowRunId = randomUUID();
   const batchId = randomUUID();
   const outputId = randomUUID();
   await client.query(
-    `INSERT INTO projects (id, user_id) VALUES ($1::uuid, $2::text)`,
+    `INSERT INTO projects (id, user_id)
+     VALUES ($1::uuid, $2::text)
+     ON CONFLICT (id) DO NOTHING`,
     [projectId, USER_ID],
   );
   await client.query(
@@ -108,6 +115,45 @@ function payload(input: {
     projectId: input.projectId,
     selectedOutputId: input.outputId,
   });
+}
+
+class CountingRenderer implements ExportRenderer {
+  readonly recipeVersion = "v1";
+  private readonly delegate = new FakeExportRenderer();
+  calls = 0;
+
+  render(input: Parameters<ExportRenderer["render"]>[0]) {
+    this.calls += 1;
+    return this.delegate.render(input);
+  }
+}
+
+class BlockingRenderer extends CountingRenderer {
+  readonly started: Promise<void>;
+  private readonly released: Promise<void>;
+  private resolveStarted: (() => void) | null = null;
+  private resolveReleased: (() => void) | null = null;
+
+  constructor() {
+    super();
+    this.started = new Promise<void>((resolve) => {
+      this.resolveStarted = () => resolve();
+    });
+    this.released = new Promise<void>((resolve) => {
+      this.resolveReleased = () => resolve();
+    });
+  }
+
+  override async render(input: Parameters<ExportRenderer["render"]>[0]) {
+    this.calls += 1;
+    this.resolveStarted?.();
+    await this.released;
+    return new FakeExportRenderer().render(input);
+  }
+
+  release(): void {
+    this.resolveReleased?.();
+  }
 }
 
 if (!RUN_PG_TESTS) {
@@ -201,6 +247,63 @@ if (!RUN_PG_TESTS) {
     assert.equal(counts.rows[0]?.signals, "1");
   });
 
+  test("concurrent duplicate delivery claims before rendering", async () => {
+    await harness();
+    const seeded = await seedOutput(pool!);
+    const job = payload(seeded);
+    const renderer = new BlockingRenderer();
+    const service = new RenderService(pool!, renderer);
+
+    const firstPromise = service.process(job);
+    await renderer.started;
+
+    const duplicate = await service.process(job);
+    assert.equal(duplicate.status, "IN_PROGRESS");
+    assert.equal(renderer.calls, 1);
+
+    renderer.release();
+    const first = await firstPromise;
+    assert.equal(first.status, "SUCCEEDED");
+  });
+
+  test("rejects a selected output from another project before rendering", async () => {
+    await harness();
+    const owner = await seedOutput(pool!);
+    const foreign = await seedOutput(pool!);
+    const renderer = new CountingRenderer();
+    const service = new RenderService(pool!, renderer);
+    const job = payload({
+      projectId: owner.projectId,
+      workflowRunId: owner.workflowRunId,
+      outputId: foreign.outputId,
+    });
+
+    await assert.rejects(
+      service.process(job),
+      /SELECTED_OUTPUT_NOT_FOUND/u,
+    );
+    assert.equal(renderer.calls, 0);
+  });
+
+  test("rejects a selected output from another workflow run before rendering", async () => {
+    await harness();
+    const owner = await seedOutput(pool!);
+    const otherRun = await seedOutput(pool!, owner.projectId);
+    const renderer = new CountingRenderer();
+    const service = new RenderService(pool!, renderer);
+    const job = payload({
+      projectId: owner.projectId,
+      workflowRunId: owner.workflowRunId,
+      outputId: otherRun.outputId,
+    });
+
+    await assert.rejects(
+      service.process(job),
+      /SELECTED_OUTPUT_NOT_FOUND/u,
+    );
+    assert.equal(renderer.calls, 0);
+  });
+
   test("rejects a job with an unknown workflow correlation", async () => {
     const service = await harness();
     const seeded = await seedOutput(pool!);
@@ -245,6 +348,46 @@ if (!RUN_PG_TESTS) {
     assert.equal(failedSignals.rows.length, 1);
     const signal = workflowSignalSchema.parse(failedSignals.rows[0]?.payload);
     assert.deepEqual(signal.payload["errorCode"], "RENDER_FAILED");
+  });
+
+  test("failure path rejects a selected output outside the workflow scope", async () => {
+    const service = await harness();
+    const owner = await seedOutput(pool!);
+    const foreign = await seedOutput(pool!);
+    const job = payload({
+      projectId: owner.projectId,
+      workflowRunId: owner.workflowRunId,
+      outputId: foreign.outputId,
+    });
+
+    await assert.rejects(
+      service.fail(job, "RENDER_FAILED"),
+      /SELECTED_OUTPUT_NOT_FOUND/u,
+    );
+    const rows = await pool!.query<{ count: string }>(
+      "SELECT COUNT(*)::text AS count FROM render_jobs WHERE id = $1",
+      [job.jobId],
+    );
+    assert.equal(rows.rows[0]?.count, "0");
+  });
+
+  test("failure path rejects a render job scope collision", async () => {
+    const service = await harness();
+    const owner = await seedOutput(pool!);
+    const foreign = await seedOutput(pool!);
+    const job = payload(owner);
+    await service.fail(job, "RENDER_FAILED");
+
+    const conflictingJob = renderRequestedPayloadSchema.parse({
+      jobId: job.jobId,
+      projectId: foreign.projectId,
+      workflowRunId: foreign.workflowRunId,
+      selectedOutputId: foreign.outputId,
+    });
+    await assert.rejects(
+      service.fail(conflictingJob, "RENDER_FAILED"),
+      /RENDER_JOB_SCOPE_MISMATCH/u,
+    );
   });
 
   test("unknown selected output fails fast without partial writes", async () => {

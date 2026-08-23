@@ -48,3 +48,13 @@ needs-fix
   the required codec/HEIC checks.
 - Bind the phase-ownership and duplicate/cross-project results to
   verification-owned receipts and complete the task checklist before approval.
+
+## Stable Snapshot Revalidation (2026-08-23)
+
+The worker suites now run with complete test discovery and pass their ordinary
+and PostgreSQL cases. The review confirms that concurrent delivery claims
+precede external provider/renderer calls and that ownership checks fail before
+those calls.
+
+**Verdict remains `needs-fix`** for real provider/codec/HEIC validation,
+supported runtime evidence, and the documented post-crash stale-claim risk.

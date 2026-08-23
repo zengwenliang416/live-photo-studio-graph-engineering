@@ -46,3 +46,12 @@ needs-fix
   actual 2.3-2.5 coverage.
 - Re-run restart, duplicate, stale, correlation, cancellation, and Outbox
   checks on a stable revision and obtain verification-owned runtime evidence.
+
+## Stable Snapshot Revalidation (2026-08-23)
+
+The Graph demo now reaches `COMPLETED`, and the orchestration acceptance
+scenarios pass locally on PostgreSQL. The prior demo failure is retained as
+historical evidence and is not reported as a current failure.
+
+**Verdict remains `needs-fix`;** live Redis/BullMQ, supported Node 24 and
+SpecNav acceptance evidence remain open.

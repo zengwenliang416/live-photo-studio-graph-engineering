@@ -46,3 +46,13 @@ needs-fix
 - Record system-executed evidence for the full orchestration matrix after the
   implementation snapshot is stable.
 - Do not close the task while 2.3-2.5 remain unchecked or A1 remains failing.
+
+## Stable Snapshot Revalidation (2026-08-23)
+
+The human-review correlation defect described above is fixed in the current
+snapshot, and the full ordinary/PostgreSQL orchestration suites plus demo
+pass. Lock-time run reload and replay-safe consumed-marker handling are now
+covered by the crash-window tests.
+
+**Verdict remains `needs-fix`** because live queue publication and
+verification-owned task evidence are still absent.

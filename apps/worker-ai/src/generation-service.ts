@@ -9,6 +9,16 @@ import {
 } from "./provider.js";
 import type { GenerationRequestedPayload } from "./provider.js";
 
+type BatchRecord = {
+  status: string;
+  outputIds: string[];
+};
+
+type ClaimResult =
+  | { kind: "CLAIMED" }
+  | { kind: "TERMINAL"; outputIds: string[] }
+  | { kind: "IN_PROGRESS"; outputIds: string[] };
+
 export class GenerationService {
   constructor(
     private readonly pool: Pool,
@@ -23,19 +33,21 @@ export class GenerationService {
    * deliveries return the existing outputs and emit nothing.
    */
   async process(payload: GenerationRequestedPayload): Promise<{
-    status: "SUCCEEDED" | "ALREADY_DONE" | "FAILED";
+    status: "SUCCEEDED" | "ALREADY_DONE" | "IN_PROGRESS" | "FAILED";
     outputIds: readonly string[];
   }> {
-    await this.assertWorkflowProject(payload);
-    const existing = await this.loadBatch(payload);
-    if (existing?.status === "SUCCEEDED" || existing?.status === "FAILED") {
-      return { status: "ALREADY_DONE", outputIds: existing.outputIds };
+    await this.assertWorkflowInput(payload);
+    const claim = await this.claimBatch(payload);
+    if (claim.kind === "TERMINAL") {
+      return { status: "ALREADY_DONE", outputIds: claim.outputIds };
+    }
+    if (claim.kind === "IN_PROGRESS") {
+      return { status: "IN_PROGRESS", outputIds: claim.outputIds };
     }
 
     // Provider work must not run inside a database transaction. The job id and
-    // deterministic output ids make a replay safe if the process crashes after
-    // the provider call but before the domain transaction commits.
-    const estimatedCostMicros = this.provider.estimatedCostMicros ?? 0;
+    // durable RUNNING claim prevent duplicate deliveries from invoking the
+    // provider concurrently.
     try {
       assertProviderBudget(this.provider, this.maxCostMicros);
     } catch (error) {
@@ -43,6 +55,7 @@ export class GenerationService {
         await this.fail(payload, error.code);
         return { status: "FAILED", outputIds: [] };
       }
+      await this.releaseClaim(payload);
       throw error;
     }
 
@@ -60,39 +73,24 @@ export class GenerationService {
         await this.fail(payload, error.code);
         return { status: "FAILED", outputIds: [] };
       }
+      await this.releaseClaim(payload);
       throw error;
     }
 
     const client = await this.pool.connect();
     try {
       await client.query("BEGIN");
-      const inserted = await client.query(
-        `INSERT INTO generation_batches (
-           id, project_id, workflow_run_id, revision, status, provider,
-           trace_id, provider_request_id, cost_micros
-         ) VALUES ($1, $2, $3, $4, 'RUNNING', $5, $6, $7, $8)
-         ON CONFLICT (id) DO NOTHING
-         RETURNING id`,
-        [
-          payload.jobId,
-          payload.projectId,
-          payload.workflowRunId,
-          payload.revision,
-          this.provider.name,
-          payload.traceId ?? payload.workflowRunId,
-          candidates[0]?.providerRequestId ?? null,
-          estimatedCostMicros,
-        ],
-      );
-      if (inserted.rowCount === 0) {
-        const current = await this.loadBatchWithClient(client, payload);
-        if (
-          current?.status === "SUCCEEDED" ||
-          current?.status === "FAILED"
-        ) {
-          await client.query("COMMIT");
-          return { status: "ALREADY_DONE", outputIds: current.outputIds };
-        }
+      const current = await this.loadBatchWithClient(client, payload);
+      if (!current) {
+        throw new Error("GENERATION_JOB_CLAIM_LOST");
+      }
+      if (current.status === "SUCCEEDED" || current.status === "FAILED") {
+        await client.query("COMMIT");
+        return { status: "ALREADY_DONE", outputIds: current.outputIds };
+      }
+      if (current.status !== "RUNNING") {
+        await client.query("COMMIT");
+        return { status: "IN_PROGRESS", outputIds: current.outputIds };
       }
       const outputIds: string[] = [];
       for (const [index, candidate] of candidates.entries()) {
@@ -132,8 +130,12 @@ export class GenerationService {
       };
       await this.insertOutboxSignal(client, payload.workflowRunId, signal);
       await client.query(
-        "UPDATE generation_batches SET status = 'SUCCEEDED', updated_at = now() WHERE id = $1",
-        [payload.jobId],
+        `UPDATE generation_batches
+            SET status = 'SUCCEEDED',
+                provider_request_id = COALESCE($2, provider_request_id),
+                updated_at = now()
+          WHERE id = $1`,
+        [payload.jobId, candidates[0]?.providerRequestId ?? null],
       );
 
       await client.query("COMMIT");
@@ -216,21 +218,104 @@ export class GenerationService {
     }
   }
 
-  private async loadBatch(
+  private async assertWorkflowInput(
     payload: GenerationRequestedPayload,
-  ): Promise<{ status: string; outputIds: string[] } | null> {
+  ): Promise<void> {
+    await this.assertWorkflowProject(payload);
+    const requestedAssetIds = [
+      ...new Set([...payload.sourceAssetIds, payload.coverAssetId]),
+    ];
+    const result = await this.pool.query<{ asset_id: string }>(
+      `SELECT asset_id::text AS asset_id
+         FROM asset_roles
+        WHERE project_id = $1::uuid
+          AND asset_id = ANY($2::uuid[])
+       UNION
+       SELECT cover_asset_id::text AS asset_id
+         FROM projects
+        WHERE id = $1::uuid
+          AND cover_asset_id IS NOT NULL
+          AND cover_asset_id = ANY($2::uuid[])`,
+      [payload.projectId, requestedAssetIds],
+    );
+    const ownedAssetIds = new Set(
+      result.rows.map((row) => row.asset_id),
+    );
+    if (
+      requestedAssetIds.some((assetId) => !ownedAssetIds.has(assetId))
+    ) {
+      throw new Error("ASSET_PROJECT_MISMATCH");
+    }
+  }
+
+  private async claimBatch(
+    payload: GenerationRequestedPayload,
+  ): Promise<ClaimResult> {
     const client = await this.pool.connect();
     try {
-      return await this.loadBatchWithClient(client, payload);
+      await client.query("BEGIN");
+      const inserted = await client.query(
+        `INSERT INTO generation_batches (
+           id, project_id, workflow_run_id, revision, status, provider,
+           trace_id, provider_request_id, cost_micros
+         ) VALUES ($1, $2, $3, $4, 'RUNNING', $5, $6, NULL, $7)
+         ON CONFLICT (id) DO NOTHING
+         RETURNING id`,
+        [
+          payload.jobId,
+          payload.projectId,
+          payload.workflowRunId,
+          payload.revision,
+          this.provider.name,
+          payload.traceId ?? payload.workflowRunId,
+          this.provider.estimatedCostMicros ?? 0,
+        ],
+      );
+      if ((inserted.rowCount ?? 0) > 0) {
+        await client.query("COMMIT");
+        return { kind: "CLAIMED" };
+      }
+
+      const current = await this.loadBatchWithClient(client, payload);
+      if (!current) {
+        throw new Error("GENERATION_JOB_CLAIM_LOST");
+      }
+      await client.query("COMMIT");
+      if (current.status === "SUCCEEDED" || current.status === "FAILED") {
+        return { kind: "TERMINAL", outputIds: current.outputIds };
+      }
+      return { kind: "IN_PROGRESS", outputIds: current.outputIds };
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw error;
     } finally {
       client.release();
     }
   }
 
+  private async releaseClaim(
+    payload: GenerationRequestedPayload,
+  ): Promise<void> {
+    await this.pool.query(
+      `DELETE FROM generation_batches
+        WHERE id = $1::uuid
+          AND project_id = $2::uuid
+          AND workflow_run_id = $3::uuid
+          AND revision = $4
+          AND status = 'RUNNING'`,
+      [
+        payload.jobId,
+        payload.projectId,
+        payload.workflowRunId,
+        payload.revision,
+      ],
+    );
+  }
+
   private async loadBatchWithClient(
     client: PoolClient,
     payload: GenerationRequestedPayload,
-  ): Promise<{ status: string; outputIds: string[] } | null> {
+  ): Promise<BatchRecord | null> {
     const result = await client.query<{
       status: string;
       project_id: string;

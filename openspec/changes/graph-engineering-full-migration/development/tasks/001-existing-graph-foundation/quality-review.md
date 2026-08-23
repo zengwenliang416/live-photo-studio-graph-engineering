@@ -49,3 +49,13 @@ needs-fix
 - Repeat the review against a stable implementation snapshot.
 - Execute migration validation and supported-runtime checks, then attach
   verification-owned evidence before changing the verdict.
+
+## Stable Snapshot Revalidation (2026-08-23)
+
+The implementation and test snapshot is now stable enough for local
+revalidation. Graph contracts, Graph runtime, API unit/contract tests,
+repository checks and migration replay passed, including the corrected test
+glob that collects top-level and nested test files.
+
+**Verdict remains `needs-fix`.** Supported Node 24 execution, Verification 2.0
+task receipts and the remaining external A3 checks are still unavailable.

@@ -60,3 +60,15 @@ DONE_WITH_CONCERNS
 
 Passing focused and PostgreSQL tests do not override the failed demo or the
 missing verification receipt; the task remains needs-fix.
+
+## Stable Snapshot Revalidation (2026-08-23)
+
+The durable orchestration repair passed the complete Orchestrator suite:
+4/4 ordinary tests and 11/11 PostgreSQL tests. The PostgreSQL matrix includes
+restart at every interrupt, duplicate START and signal delivery, concurrent
+signals, wrong correlation, late cancellation signals, consumed-marker crash
+recovery, old graph-version resolution and bounded regeneration. The Graph
+demo also reached `COMPLETED`.
+
+The report remains `DONE_WITH_CONCERNS`: live Redis/BullMQ publication,
+supported Node 24 execution and SpecNav task acceptance are not verified.

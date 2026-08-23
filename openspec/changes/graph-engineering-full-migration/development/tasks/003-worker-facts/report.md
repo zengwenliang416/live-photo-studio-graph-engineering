@@ -57,3 +57,15 @@ DONE_WITH_CONCERNS
 
 The worker behavior has strong local PostgreSQL evidence but remains
 needs-fix for external runtime and signed acceptance gaps.
+
+## Stable Snapshot Revalidation (2026-08-23)
+
+AI Worker passed 3/3 ordinary tests and 9/9 PostgreSQL tests. Media Worker
+passed 4/4 ordinary tests and 13/13 PostgreSQL tests. The suites cover
+deterministic mock output, concurrent pre-provider/pre-render claims,
+cross-project and cross-run asset/output rejection, correlated signals,
+deterministic export hashes and phase-ownership preservation.
+
+The report remains `DONE_WITH_CONCERNS`. Real provider calls, FFmpeg/
+ImageMagick/libheif/HEIC support, stale claim lease recovery after a process
+crash, supported Node 24 and device-level media checks are not verified.

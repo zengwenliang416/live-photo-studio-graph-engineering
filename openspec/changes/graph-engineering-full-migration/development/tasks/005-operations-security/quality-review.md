@@ -46,3 +46,12 @@ needs-fix
 - Verify that the shared helper is used at every required log/state boundary.
 - Obtain stable-snapshot, verification-owned evidence before changing the
   verdict.
+
+## Stable Snapshot Revalidation (2026-08-23)
+
+Bounded triage, audited replay/denial, PostgreSQL operations ordering and
+redaction tests now pass on the current snapshot. These local checks do not
+prove private object storage, live queue credentials, or production provider
+cost behavior.
+
+**Verdict remains `needs-fix`;** A3 is intentionally not promoted.

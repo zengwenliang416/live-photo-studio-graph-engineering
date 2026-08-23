@@ -26,10 +26,10 @@
     "openspec/changes/graph-engineering-full-migration/prototype/logic/harness.js"
   ],
   "allowed_files": [
-    "apps/orchestrator",
-    "apps/api",
-    "packages/graph-contracts",
-    "docs"
+    "apps/orchestrator/**",
+    "apps/api/**",
+    "packages/graph-contracts/**",
+    "docs/**"
   ],
   "test_paths": [
     "pnpm --filter @live-photo-studio/orchestrator test",

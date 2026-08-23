@@ -25,12 +25,12 @@
     "openspec/changes/graph-engineering-full-migration/prototype/logic/harness.js"
   ],
   "allowed_files": [
-    "apps/api",
-    "apps/orchestrator",
-    "apps/worker-ai",
-    "apps/worker-media",
-    "packages/graph-contracts",
-    "docs"
+    "apps/api/**",
+    "apps/orchestrator/**",
+    "apps/worker-ai/**",
+    "apps/worker-media/**",
+    "packages/graph-contracts/**",
+    "docs/**"
   ],
   "test_paths": [
     "pnpm test",

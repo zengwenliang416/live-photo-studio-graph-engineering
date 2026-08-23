@@ -49,3 +49,12 @@ needs-fix
   environment, and capture supported-runtime results.
 - Obtain verification-owned runtime status and task acceptance evidence before
   handoff approval.
+
+## Stable Snapshot Revalidation (2026-08-23)
+
+The repository validation set and Graph demo now pass, and the old migration/
+demo failures are historical rather than current. The test runner glob was
+corrected without weakening tests.
+
+**Verdict remains `needs-fix`;** canary/rollback execution, supported runtime,
+external services and SpecNav handoff evidence remain open.

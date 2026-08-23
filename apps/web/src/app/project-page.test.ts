@@ -20,6 +20,8 @@ test("project page states the Web ZIP and Photos-library boundary", () => {
 test("project page keeps workflow authority on the server", () => {
   assert.match(pageSource, /server projection/u);
   assert.match(pageSource, /resolveWorkflowRunId/u);
+  assert.match(pageSource, /getLatestExportDownload/u);
+  assert.match(pageSource, /allowedActions\.includes\("CANCEL"\)/u);
   assert.doesNotMatch(pageSource, /mockWorkflowOrchestrator|DemoZipBuilder|indexedDB/u);
 });
 

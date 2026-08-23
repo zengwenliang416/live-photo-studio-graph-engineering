@@ -45,3 +45,13 @@ needs-fix
   available.
 - Complete the canary/rollback and evidence surfaces in their owning files,
   then rerun the full command set on a stable revision.
+
+## Stable Snapshot Revalidation (2026-08-23)
+
+The final repository/install/Graph/migration/diff command set now passes on the
+current snapshot, and the test glob correction restored complete package test
+collection. The one observed concurrent API test failure was followed by a
+fixed-concurrency pass and a successful full rerun; it is not hidden.
+
+**Verdict remains `needs-fix`** because no live canary, rollback, supported
+Node 24, or external provider/storage/device verification was executed.

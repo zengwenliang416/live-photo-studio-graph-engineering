@@ -62,3 +62,15 @@ DONE_WITH_CONCERNS
 The current metadata and redaction work is useful partial evidence, but the
 task remains needs-fix because its operational and red-team acceptance is not
 complete.
+
+## Stable Snapshot Revalidation (2026-08-23)
+
+The complete API suite passed 30/30 and the PostgreSQL-backed operations suite
+passed within the API total of 33/33. Graph contracts passed 6/6, including
+malformed-signal and sensitive-field redaction matrices. The repair also
+preserves project ownership, fail-closed signed-download behavior and task
+action authorization.
+
+The report remains `DONE_WITH_CONCERNS`: private bucket/signed-URL TTL,
+credentialed Redis/BullMQ, real provider cost behavior and production media
+checks are unavailable. Parent A3 remains `failing`.

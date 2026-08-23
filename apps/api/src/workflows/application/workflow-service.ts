@@ -328,6 +328,21 @@ export class WorkflowService {
             "The workflow run already reached a terminal state.",
           );
         }
+        const pendingTask =
+          run.pendingHumanTaskId === null
+            ? undefined
+            : (await tx.listHumanTasksForRun(run.id)).find(
+                (task) => task.id === run.pendingHumanTaskId,
+              );
+        if (
+          pendingTask?.status !== "PENDING" ||
+          !pendingTask.allowedActions.includes("CANCEL")
+        ) {
+          throw conflict(
+            "WORKFLOW_CANCEL_NOT_ALLOWED",
+            "Cancellation is not allowed by the current task.",
+          );
+        }
         const envelope: Extract<WorkflowCommand, { type: "CANCEL_WORKFLOW" }> =
           {
             type: "CANCEL_WORKFLOW",

@@ -48,3 +48,12 @@ needs-fix
   environment, recording unavailable checks as blocked rather than passed.
 - Obtain verification-owned runtime and task acceptance evidence before
   changing the verdict.
+
+## Stable Snapshot Revalidation (2026-08-23)
+
+The current worker implementation satisfies the locally testable fact/signal
+and ownership boundaries. It does not establish real storage/provider/codec
+behavior or process-crash claim recovery.
+
+**Verdict remains `needs-fix`;** no production media or cost claim is
+promoted.

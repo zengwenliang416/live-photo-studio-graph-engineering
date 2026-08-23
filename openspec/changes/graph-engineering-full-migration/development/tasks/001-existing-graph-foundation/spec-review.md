@@ -51,3 +51,13 @@ needs-fix
   ids.
 - Re-run the foundation contract and focused tests after the source owner
   stops changing the reviewed snapshot.
+
+## Stable Snapshot Revalidation (2026-08-23)
+
+The corrected snapshot passes the foundation contract/runtime checks, the
+complete API suite and migration replay. The earlier dirty-worktree and
+missing-database observations are superseded for local validation, but the
+review still cannot claim supported-runtime behavior or a SpecNav acceptance
+receipt.
+
+**Verdict remains `needs-fix`; no acceptance assertion is promoted.**

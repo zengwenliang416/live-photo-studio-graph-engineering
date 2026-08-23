@@ -8,6 +8,7 @@ import {
   generationRequestedPayloadSchema,
   MockImageGenerationProvider,
 } from "./provider.js";
+import type { ImageGenerationProvider } from "./provider.js";
 import { GenerationService } from "./generation-service.js";
 
 const RUN_PG_TESTS = process.env.RUN_PG_TESTS === "1";
@@ -36,6 +37,39 @@ after(async () => {
 });
 
 let shared: { service: GenerationService; projectId: string } | null = null;
+
+class BlockingProvider implements ImageGenerationProvider {
+  readonly name = "blocking-test";
+  readonly estimatedCostMicros = 0;
+  readonly started: Promise<void>;
+  private readonly released: Promise<void>;
+  private resolveStarted: () => void = () => undefined;
+  private resolveReleased: () => void = () => undefined;
+  private readonly delegate = new MockImageGenerationProvider();
+  calls = 0;
+
+  constructor() {
+    this.started = new Promise<void>((resolve) => {
+      this.resolveStarted = resolve;
+    });
+    this.released = new Promise<void>((resolve) => {
+      this.resolveReleased = resolve;
+    });
+  }
+
+  async generate(
+    input: Parameters<ImageGenerationProvider["generate"]>[0],
+  ) {
+    this.calls += 1;
+    this.resolveStarted();
+    await this.released;
+    return this.delegate.generate(input);
+  }
+
+  release(): void {
+    this.resolveReleased();
+  }
+}
 
 async function harness(): Promise<{
   service: GenerationService;
@@ -92,6 +126,24 @@ function payload(projectId: string) {
   });
 }
 
+async function seedAssets(
+  job: ReturnType<typeof payload>,
+): Promise<void> {
+  const sourceAssetId = job.sourceAssetIds[0];
+  assert.ok(sourceAssetId);
+  await pool!.query(
+    `INSERT INTO asset_roles (project_id, asset_id, role)
+     VALUES ($1::uuid, $2::uuid, 'CONTENT'),
+            ($1::uuid, $3::uuid, 'COVER')
+     ON CONFLICT DO NOTHING`,
+    [job.projectId, sourceAssetId, job.coverAssetId],
+  );
+  await pool!.query(
+    "UPDATE projects SET cover_asset_id = $2::uuid WHERE id = $1::uuid",
+    [job.projectId, job.coverAssetId],
+  );
+}
+
 async function seedWorkflowRun(
   projectId: string,
   workflowRunId: string,
@@ -142,6 +194,7 @@ if (!RUN_PG_TESTS) {
     const { service, projectId } = await harness();
     const job = payload(projectId);
     await seedWorkflowRun(projectId, job.workflowRunId);
+    await seedAssets(job);
     const phaseBefore = await workflowPhase(job.workflowRunId);
 
     const result = await service.process(job);
@@ -170,6 +223,7 @@ if (!RUN_PG_TESTS) {
     const { service, projectId } = await harness();
     const job = payload(projectId);
     await seedWorkflowRun(projectId, job.workflowRunId);
+    await seedAssets(job);
 
     const first = await service.process(job);
     const replay = await service.process(job);
@@ -193,6 +247,53 @@ if (!RUN_PG_TESTS) {
     assert.equal(counts.rows[0]?.batches, "1");
     assert.equal(counts.rows[0]?.outputs, "4");
     assert.equal(counts.rows[0]?.signals, "1");
+  });
+
+  test("concurrent duplicate delivery claims the batch before one provider call", async () => {
+    const { projectId } = await harness();
+    const provider = new BlockingProvider();
+    const service = new GenerationService(pool!, provider);
+    const job = payload(projectId);
+    await seedWorkflowRun(projectId, job.workflowRunId);
+    await seedAssets(job);
+
+    const first = service.process(job);
+    await provider.started;
+    const duplicate = service.process(job);
+    const duplicateResult = await duplicate;
+    provider.release();
+    const firstResult = await first;
+
+    assert.equal(provider.calls, 1);
+    assert.equal(duplicateResult.status, "IN_PROGRESS");
+    assert.equal(firstResult.status, "SUCCEEDED");
+    assert.equal(firstResult.outputIds.length, 4);
+  });
+
+  test("rejects an asset from another project before calling the provider", async () => {
+    const { projectId } = await harness();
+    const provider = new BlockingProvider();
+    const service = new GenerationService(pool!, provider);
+    const foreignJob = payload(otherProjectId());
+    const job = payload(projectId);
+    await seedWorkflowRun(projectId, job.workflowRunId);
+    await seedAssets(foreignJob);
+
+    await assert.rejects(
+      service.process({
+        ...job,
+        sourceAssetIds: foreignJob.sourceAssetIds,
+        coverAssetId: foreignJob.coverAssetId,
+      }),
+      /ASSET_PROJECT_MISMATCH/u,
+    );
+
+    assert.equal(provider.calls, 0);
+    const batches = await pool!.query(
+      "SELECT 1 FROM generation_batches WHERE id = $1::uuid",
+      [job.jobId],
+    );
+    assert.equal(batches.rowCount, 0);
   });
 
   test("rejects a job whose workflow run belongs to another project", async () => {

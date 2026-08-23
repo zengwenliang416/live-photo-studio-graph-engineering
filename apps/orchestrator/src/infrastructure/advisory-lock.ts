@@ -3,6 +3,28 @@ import type { Pool, PoolClient } from "pg";
 export class PostgresAdvisoryLock {
   constructor(private readonly pool: Pool) {}
 
+  async withWorkflowSessionLock<T>(
+    workflowRunId: string,
+    callback: (client: PoolClient) => Promise<T>,
+  ): Promise<T> {
+    const client = await this.pool.connect();
+    try {
+      await client.query(
+        "SELECT pg_advisory_lock(hashtextextended($1, 0))",
+        [workflowRunId],
+      );
+      return await callback(client);
+    } finally {
+      await client
+        .query(
+          "SELECT pg_advisory_unlock(hashtextextended($1, 0))",
+          [workflowRunId],
+        )
+        .catch(() => undefined);
+      client.release();
+    }
+  }
+
   async withWorkflowLock<T>(
     workflowRunId: string,
     callback: (client: PoolClient) => Promise<T>,

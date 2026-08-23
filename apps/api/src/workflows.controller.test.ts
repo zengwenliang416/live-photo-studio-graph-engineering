@@ -109,7 +109,7 @@ function expectProblem(
   assert.equal(response.body["code"], code);
 }
 
-test("openapi document publishes the five workflow paths", async () => {
+test("openapi document publishes workflow and export download paths", async () => {
   const { app } = await createApp();
   const response = await request(app.getHttpServer())
     .get("/v1/openapi.json")
@@ -122,6 +122,7 @@ test("openapi document publishes the five workflow paths", async () => {
     "/v1/workflow-runs/{workflowRunId}/human-tasks",
     "/v1/human-tasks/{humanTaskId}/decisions",
     "/v1/workflow-runs/{workflowRunId}/cancel",
+    "/v1/projects/{projectId}/export-packages/latest/download",
   ]) {
     assert.ok(paths.includes(expected), `missing ${expected}`);
   }
@@ -251,6 +252,25 @@ test("cancel enqueues through the projection boundary", async () => {
     .set("Idempotency-Key", "contract-key-cancel-02")
     .send({});
   expectProblem(notFound, 404, "WORKFLOW_RUN_NOT_FOUND");
+  await app.close();
+});
+
+test("cancel is rejected when the current task payload omits CANCEL", async () => {
+  const { app, unit } = await createApp();
+  const seeded = unit.tasks.get(TASK_ID);
+  assert.ok(seeded);
+  unit.tasks.set(TASK_ID, {
+    ...seeded,
+    task: { ...seeded.task, allowedActions: ["SELECT"] },
+  });
+
+  const response = await request(app.getHttpServer())
+    .post(`/v1/workflow-runs/${RUN_ID}/cancel`)
+    .set("x-user-id", USER)
+    .set("Idempotency-Key", "contract-key-cancel-03")
+    .send({});
+  expectProblem(response, 409, "WORKFLOW_CANCEL_NOT_ALLOWED");
+  assert.equal(unit.outbox.length, 0);
   await app.close();
 });
 

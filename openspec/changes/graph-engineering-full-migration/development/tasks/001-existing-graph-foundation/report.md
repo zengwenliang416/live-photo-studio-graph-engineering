@@ -60,3 +60,17 @@ DONE_WITH_CONCERNS
 The foundation slice has useful passing focused evidence but is not eligible
 for verification handoff approval until the acceptance and runtime blockers
 are resolved.
+
+## Stable Snapshot Revalidation (2026-08-23)
+
+The repair snapshot was revalidated without changing this report to an
+approval. Graph contracts passed 6/6, Graph runtime passed 3/3, the complete
+API suite passed 30/30, and the PostgreSQL-backed API suite passed 33/33.
+`pnpm check` and migration replay passed; the migration command reported
+`applied:[]` and `skipped:6`.
+
+The task remains `DONE_WITH_CONCERNS`: the run used Node `v22.19.0` against the
+declared `>=24` engine, `sharp` installation was not built, and SpecNav task
+acceptance must still be regenerated on the committed snapshot. These
+concerns do not invalidate the local focused results, but they prevent a
+verification handoff approval.
