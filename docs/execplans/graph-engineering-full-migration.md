@@ -1090,6 +1090,11 @@ responses.
   Basic Auth-protected, Mock Provider canary on the designated server and still
   excludes a general-public production launch, chargeable provider activation
   and PhotoKit persistence. Requirements and strict OpenSpec validation pass.
+- [x] 2026-08-25: Extended the deployment smoke gate to require public
+  unauthenticated `401`, authenticated Web and same-origin API `200`, and the
+  exact RustFS CORS origin. Basic Auth material is loaded from a separate
+  operator-only `0600` file and is not injected through the application
+  Compose environment.
 
 ## Deployment decision addendum
 
