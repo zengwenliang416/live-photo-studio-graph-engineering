@@ -59,17 +59,19 @@ OPENAI_IMAGE_MODEL=gpt-image-2-2026-04-21
 
 ## 主流程
 
+网页入口：`/` 重定向到 `/projects`（项目列表/创建）→ `/projects/[id]/upload`（上传原图、选封面）→ `/projects/[id]`(Graph 工作流投影页：生成、选择 anchor、渲染、下载导出包）。
+
 ```text
-创建项目
-→ 获取预签名 URL
-→ 浏览器直传原图到 RustFS S3-compatible endpoint
-→ API 完成上传并写 Outbox
-→ Media Worker 标准化素材
-→ 创建批量生成任务并写 Outbox
-→ AI Worker 调用 Mock/OpenAI Provider
-→ 用户选择候选
+创建项目(POST /v1/projects,幂等)
+→ 获取预签名 URL(POST /v1/projects/:id/upload-intents)
+→ 浏览器直传原图到 S3 兼容端点
+→ API 校验大小与 Magic Bytes 并完成上传(POST /v1/assets/:id/confirm)
+→ 设置封面(POST /v1/projects/:id/cover)
+→ 启动 Graph 工作流(POST /v1/projects/:id/workflow-runs,同事务写 Outbox)
+→ AI Worker 调用 Mock/OpenAI Provider 生成候选
+→ 用户在工作流页选择 anchor
 → Media Worker 渲染 MOV 与导出包
-→ 网页下载 ZIP
+→ 网页下载 ZIP(短期签名 URL)
 ```
 
 ## 常用命令

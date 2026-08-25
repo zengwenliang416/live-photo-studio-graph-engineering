@@ -22,11 +22,35 @@ export interface SignedObjectDownload {
   readonly expiresAt: string;
 }
 
+export interface SignedObjectUploadRequest {
+  readonly objectKey: string;
+  readonly contentType: string;
+  readonly expiresInSeconds: number;
+}
+
+export interface SignedObjectUpload {
+  readonly url: string;
+  readonly expiresAt: string;
+  // Headers the client must send on the PUT (at minimum content-type).
+  readonly headers: Record<string, string>;
+}
+
+export interface ObjectStat {
+  readonly objectKey: string;
+  readonly bytes: number;
+  readonly contentType?: string;
+}
+
 export interface ObjectStoragePort {
   putObject(input: PutObjectRequest): Promise<StoredObject>;
   createSignedDownload(
     input: SignedObjectDownloadRequest,
   ): Promise<SignedObjectDownload>;
+  createSignedUpload(
+    input: SignedObjectUploadRequest,
+  ): Promise<SignedObjectUpload>;
+  statObject(objectKey: string): Promise<ObjectStat | null>;
+  readObjectPrefix(objectKey: string, maxBytes: number): Promise<Uint8Array>;
 }
 
 export class ObjectStorageUnavailableError extends Error {

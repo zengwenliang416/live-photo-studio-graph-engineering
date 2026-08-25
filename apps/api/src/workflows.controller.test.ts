@@ -82,6 +82,7 @@ async function createApp(input?: { graphWorkflowEnabled?: string }) {
         | "false",
       GRAPH_WORKFLOW_CANARY_USER_IDS: "",
       GRAPH_ADMIN_USER_IDS: "operator-user",
+      UPLOAD_MAX_BYTES: 20971520,
     } satisfies ApiConfig)
     .overrideProvider(WORKFLOW_TOKENS.pool)
     .useValue({})

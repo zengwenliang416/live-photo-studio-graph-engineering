@@ -43,8 +43,76 @@ const exportDownloadResponseSchema = z.object({
     bytes: z.number().int().positive(),
   }),
 });
+const projectSummarySchema = z.object({
+  projectId: z.string().uuid(),
+  title: z.string(),
+  createdAt: z.string().min(1),
+  coverAssetId: z.string().uuid().nullable(),
+});
+const createProjectResponseSchema = z.object({
+  data: z.object({
+    projectId: z.string().uuid(),
+    title: z.string(),
+    createdAt: z.string().min(1),
+  }),
+});
+const listProjectsResponseSchema = z.object({
+  data: z.object({
+    items: z.array(projectSummarySchema),
+    nextCursor: z.string().nullable(),
+  }),
+});
+const projectAssetSchema = z.object({
+  assetId: z.string().uuid(),
+  contentType: z.string().min(1),
+  bytes: z.number().int().nonnegative().nullable(),
+  status: z.enum(["UPLOADING", "READY", "REJECTED"]),
+  createdAt: z.string().min(1),
+});
+const projectDetailResponseSchema = z.object({
+  data: projectSummarySchema.extend({
+    assets: z.array(projectAssetSchema),
+  }),
+});
+const uploadIntentResponseSchema = z.object({
+  data: z.object({
+    assetId: z.string().uuid(),
+    uploadUrl: z.string().url(),
+    uploadHeaders: z.record(z.string()),
+    expiresAt: z.string().min(1),
+  }),
+});
+const confirmAssetResponseSchema = z.object({
+  data: z.object({
+    assetId: z.string().uuid(),
+    status: z.literal("READY"),
+  }),
+});
+const setCoverResponseSchema = z.object({
+  data: z.object({
+    projectId: z.string().uuid(),
+    coverAssetId: z.string().uuid(),
+  }),
+});
 
 export type WorkflowAction = "SELECT" | "REGENERATE" | "CANCEL";
+
+export type ProjectAssetStatus = "UPLOADING" | "READY" | "REJECTED";
+
+export interface ProjectSummary {
+  readonly projectId: string;
+  readonly title: string;
+  readonly createdAt: string;
+  readonly coverAssetId: string | null;
+}
+
+export interface ProjectAsset {
+  readonly assetId: string;
+  readonly contentType: string;
+  readonly bytes: number | null;
+  readonly status: ProjectAssetStatus;
+  readonly createdAt: string;
+}
 
 export class ApiProblemError extends Error {
   constructor(
@@ -253,6 +321,119 @@ export class WorkflowApiClient {
       `/v1/projects/${projectId}/export-packages/latest/download`,
       exportDownloadResponseSchema,
     );
+  }
+
+  createProject(
+    title: string | undefined,
+    actionId: string,
+  ): Promise<{
+    data: { projectId: string; title: string; createdAt: string };
+  }> {
+    return this.request(
+      "POST",
+      "/v1/projects",
+      createProjectResponseSchema,
+      { title },
+      actionId,
+    );
+  }
+
+  listProjects(
+    options: { limit?: number; cursor?: string } = {},
+  ): Promise<{
+    data: { items: ProjectSummary[]; nextCursor: string | null };
+  }> {
+    const params = new URLSearchParams();
+    if (options.limit !== undefined) params.set("limit", String(options.limit));
+    if (options.cursor !== undefined && options.cursor.length > 0) {
+      params.set("cursor", options.cursor);
+    }
+    const query = params.toString();
+    return this.request(
+      "GET",
+      `/v1/projects${query.length > 0 ? `?${query}` : ""}`,
+      listProjectsResponseSchema,
+    );
+  }
+
+  getProject(projectId: string): Promise<{
+    data: ProjectSummary & { assets: ProjectAsset[] };
+  }> {
+    return this.request(
+      "GET",
+      `/v1/projects/${projectId}`,
+      projectDetailResponseSchema,
+    );
+  }
+
+  createUploadIntent(
+    projectId: string,
+    input: { contentType: string; bytes: number; fileName: string },
+  ): Promise<{
+    data: {
+      assetId: string;
+      uploadUrl: string;
+      uploadHeaders: Record<string, string>;
+      expiresAt: string;
+    };
+  }> {
+    return this.request(
+      "POST",
+      `/v1/projects/${projectId}/upload-intents`,
+      uploadIntentResponseSchema,
+      { contentType: input.contentType, bytes: input.bytes },
+      `intent:${projectId}:${input.fileName}:${input.bytes}`,
+    );
+  }
+
+  confirmAsset(
+    assetId: string,
+    input: { bytes: number; sha256: string },
+  ): Promise<{ data: { assetId: string; status: "READY" } }> {
+    return this.request(
+      "POST",
+      `/v1/assets/${assetId}/confirm`,
+      confirmAssetResponseSchema,
+      input,
+      `confirm:${assetId}`,
+    );
+  }
+
+  setProjectCover(
+    projectId: string,
+    assetId: string,
+  ): Promise<{ data: { projectId: string; coverAssetId: string } }> {
+    return this.request(
+      "POST",
+      `/v1/projects/${projectId}/cover`,
+      setCoverResponseSchema,
+      { assetId },
+      `cover:${projectId}`,
+    );
+  }
+
+  /**
+   * Direct PUT to the short-lived signed URL. This bypasses the JSON/zod
+   * pipeline and the API idempotency-key store on purpose; the storage
+   * backend only accepts the headers issued by the upload intent.
+   */
+  async uploadToSignedUrl(
+    uploadUrl: string,
+    headers: Record<string, string>,
+    file: Blob,
+  ): Promise<void> {
+    const response = await this.impl(uploadUrl, {
+      method: "PUT",
+      headers,
+      body: file,
+    });
+    if (!response.ok) {
+      throw new ApiProblemError(
+        response.status,
+        `HTTP_${response.status}`,
+        "Signed upload failed.",
+      );
+    }
   }
 
   eventsUrl(workflowRunId: string): string {

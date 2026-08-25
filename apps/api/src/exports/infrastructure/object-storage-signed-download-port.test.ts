@@ -25,6 +25,18 @@ class FakeObjectStorage implements ObjectStoragePort {
       expiresAt: new Date(Date.now() + input.expiresInSeconds * 1000).toISOString(),
     };
   }
+
+  async createSignedUpload(): Promise<never> {
+    throw new Error("not used");
+  }
+
+  async statObject(): Promise<never> {
+    throw new Error("not used");
+  }
+
+  async readObjectPrefix(): Promise<never> {
+    throw new Error("not used");
+  }
 }
 
 test("object-storage download adapter forwards only the object key and TTL", async () => {
