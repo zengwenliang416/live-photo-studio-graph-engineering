@@ -38,6 +38,26 @@
 - Reusable components, hooks, utilities, or services named in
   `component-impact-map.json` are extracted instead of duplicated.
 
+## Protected Canary Criteria
+
+- A `main` push is accepted only by the repository-scoped trusted Woodpecker
+  agent. The pipeline builds a Node 24 image tagged from the commit SHA, runs
+  application migrations and LangGraph checkpoint setup, replaces the API,
+  Web, Orchestrator and both Workers, then records the current and previous
+  image tags.
+- PostgreSQL and Redis use dedicated persistent volumes. Application rollback
+  switches only the five application services to the previous image and does
+  not delete database, checkpoint, Outbox, Redis or object-storage data.
+- `livephoto.motion-cover.com` is proxied through Cloudflare to Nginx. An
+  unauthenticated request returns `401`; an authenticated request reaches the
+  Web and same-origin `/v1` API. Web/API container ports remain loopback-only.
+- Shared RustFS CORS adds only `https://livephoto.motion-cover.com`; credentials,
+  signed URLs and encryption keys remain server-side and absent from repository
+  files, CI logs and browser bundles.
+- The deployed service is visibly and operationally a protected canary using
+  `AI_PROVIDER=mock`. It must not claim public-production readiness, real model
+  output, PhotoKit persistence or a Photos-library Live Photo.
+
 ## Verification Surfaces
 
 - Facticity: inspect the current repository, migrations, contracts and runbook
@@ -47,9 +67,10 @@
 - Unit: package tests plus Graph, Outbox, API, web and worker tests.
 - Redteam: cross-project access, malformed signal, replayed command, log/state
   leakage and retry multiplication tests.
-- E2E: PostgreSQL restart/duplicate-signal suites and operator-gated Redis
-  smoke where credentials are available.
-- Sensory: mobile workflow review at 390px and explicit export boundary copy.
+- E2E: PostgreSQL restart/duplicate-signal suites, the protected public
+  hostname, authenticated same-origin API, RustFS CORS and rollback exercise.
+- Sensory: authenticated mobile workflow review at 390px, explicit export
+  boundary copy and visible protected-canary positioning.
 
 ## Unresolved Gaps
 

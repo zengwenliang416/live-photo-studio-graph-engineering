@@ -18,7 +18,7 @@
     },
     {
       "id": "A3",
-      "statement": "The Graph path preserves private media storage, ownership checks, redacted logs and mock-provider cost safety.",
+      "statement": "The protected canary preserves private media storage, ownership checks, redacted logs, mock-provider cost safety, authenticated ingress and data-preserving rollback.",
       "verify_via": "redteam",
       "status": "failing",
       "evidence_ref": "docs/graph-engineering/evidence/security-cost-controls.json"

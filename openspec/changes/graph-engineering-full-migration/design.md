@@ -20,12 +20,15 @@ direct PhotoKit persistence.
   mock-provider cost safety.
 - Provide testable canary, triage and rollback procedures while the legacy path
   remains available.
+- Deploy the authorized canary through the designated server's Woodpecker CI
+  service with Basic Auth, same-origin Nginx routing and Cloudflare proxying.
 
 **Non-Goals:**
 
 - Replace BullMQ with Graph scheduling.
 - Add real iOS PhotoKit import or require chargeable model calls.
-- Rewrite unrelated product modules or alter production infrastructure.
+- Rewrite unrelated product modules or perform a general-public production
+  launch.
 - Remove old graph factories or legacy phase writes before the cutover gate.
 
 ## Decisions
@@ -60,6 +63,11 @@ direct PhotoKit persistence.
    Canary evidence compares success, latency, cost and support incidents; the
    rollback path stops new Graph starts and routes new work to legacy without
    deleting checkpoints or old graph factories.
+8. **Protected canary deployment.** Woodpecker builds one Node 24 image named
+   from the Git commit, runs additive migrations and checkpoint setup, then
+   replaces the five application processes through Compose. Nginx exposes only
+   a Basic Auth-protected same-origin hostname through Cloudflare; PostgreSQL,
+   Redis and object-storage data survive application rollback.
 
 ## Risks / Trade-offs
 
@@ -77,6 +85,10 @@ direct PhotoKit persistence.
   commands and honest blocked evidence.
 - [Legacy divergence] The flag can expose two paths during canary -> record
   rollout criteria and rollback ownership in the operations runbook.
+- [Canary exposure] The application still uses demo `x-user-id` identity and a
+  deterministic placeholder media renderer -> require Basic Auth, mock
+  provider mode and explicit canary copy; do not present it as a public
+  production service or real PhotoKit output.
 
 ## Migration Plan
 
@@ -90,7 +102,10 @@ direct PhotoKit persistence.
    evidence under `docs/graph-engineering/evidence/`.
 5. Enable the Graph flag for a canary cohort, compare the documented metrics,
    and keep legacy routing available.
-6. If rollback criteria trigger, stop new Graph starts, route new projects to
+6. Deploy the protected canary through Woodpecker, verify unauthenticated
+   denial, authenticated Web/API health, private storage CORS and commit-image
+   release records.
+7. If rollback criteria trigger, stop new Graph starts, route new projects to
    legacy, let active Graph runs finish or cancel through audited commands, and
    retain old graph versions.
 

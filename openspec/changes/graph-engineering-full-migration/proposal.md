@@ -21,6 +21,9 @@ the repository.
   Graph-path phase transitions.
 - Add observability, privacy, security, cost, canary and rollback evidence and
   runbooks without requiring chargeable providers or production credentials.
+- Deploy an explicitly authorized, Basic Auth-protected production canary on
+  the designated server through its Woodpecker CI service. The canary uses the
+  mock image provider, private object storage and commit-addressed local images.
 - Preserve the legacy path behind a feature flag until canary acceptance;
   remove obsolete phase writes only after the documented rollback gate.
 
@@ -49,4 +52,4 @@ Affected areas are `apps/orchestrator`, `apps/api`, `apps/worker-ai`,
 `packages/graph-runtime`, `packages/database`, the additive migrations and
 Graph engineering documentation. The change does not add a second scheduler,
 move binaries into PostgreSQL, expose provider credentials, or require a
-production service.
+general-public production launch.

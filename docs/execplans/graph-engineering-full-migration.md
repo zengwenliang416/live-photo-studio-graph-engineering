@@ -1085,6 +1085,11 @@ responses.
   trusted Woodpecker repository activation, dedicated Basic Auth installation,
   shared RustFS CORS expansion, Cloudflare DNS creation, a scoped commit/push,
   CI observation and authenticated public smoke verification.
+- [x] 2026-08-25: Reconciled the active OpenSpec requirements with the
+  explicitly authorized deployment. The change now includes only a
+  Basic Auth-protected, Mock Provider canary on the designated server and still
+  excludes a general-public production launch, chargeable provider activation
+  and PhotoKit persistence. Requirements and strict OpenSpec validation pass.
 
 ## Deployment decision addendum
 

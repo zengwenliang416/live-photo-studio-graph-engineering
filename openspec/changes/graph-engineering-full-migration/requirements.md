@@ -30,14 +30,19 @@ transitions.
   invalidation.
 - Observability fields/metrics, security and privacy checks, cost-safe mock
   tests, canary feature flag and rollback runbook.
+- An explicitly authorized protected canary deployment on the designated
+  server, triggered by the server Woodpecker CI service from `main`, using
+  commit-addressed Node 24 images, dedicated PostgreSQL/Redis data, private
+  object storage, Basic Auth and a proxied Cloudflare hostname.
 
 ## Out of Scope
 
 - Real iOS PhotoKit importing and saving to the Photos library.
 - Chargeable model calls in ordinary CI or tests.
 - Replacing BullMQ with LangGraph scheduling.
-- Production deployment, credential provisioning, infrastructure changes or
-  deletion of old graph versions while active runs exist.
+- A general-public production launch, chargeable provider activation,
+  unrestricted credential provisioning, or deletion of old graph versions
+  while active runs exist.
 - Full legacy product reconstruction outside the current repository snapshot.
 
 ## UI Design Impact
@@ -65,6 +70,9 @@ transitions.
 - Store media in private object storage and IDs/metadata in PostgreSQL.
 - Additive migrations, immutable graph binding, transactional idempotency,
   project ownership checks and audited repair operations are required.
+- Canary deployment must run application migrations and LangGraph checkpoint
+  setup before replacing application containers, retain persistent data during
+  rollback and keep Web/API ports bound to loopback behind Nginx.
 
 ## Frontend-Backend Data Flow Impact
 
