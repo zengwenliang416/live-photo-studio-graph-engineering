@@ -24,33 +24,25 @@ read_env_value() {
   printf '%s' "$value"
 }
 
-api_bind_port="$(read_env_value "$env_file" API_BIND_PORT)"
-web_bind_port="$(read_env_value "$env_file" WEB_BIND_PORT)"
 public_url="$(read_env_value "$env_file" PUBLIC_URL)"
 auth_env_file="$(read_env_value "$env_file" CANARY_AUTH_ENV_FILE)"
 object_storage_endpoint="$(read_env_value "$env_file" OBJECT_STORAGE_ENDPOINT)"
 object_storage_bucket="$(read_env_value "$env_file" OBJECT_STORAGE_BUCKET)"
 
-api_bind_port="${api_bind_port:-4040}"
-web_bind_port="${web_bind_port:-3030}"
 auth_env_file="${auth_env_file:-/opt/live-photo-studio/canary-auth.env}"
 
 docker compose --env-file "$env_file" -f "$compose_file" ps
 
-api_status="$(
-  curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
-    --header 'x-user-id: health-check' \
-    --retry 12 --retry-delay 5 --retry-all-errors \
-    "http://127.0.0.1:${api_bind_port}/v1/stream-health"
-)"
-[ "$api_status" = "200" ]
+docker compose --env-file "$env_file" -f "$compose_file" exec -T api \
+  node -e "fetch('http://127.0.0.1:4000/v1/stream-health',{headers:{'x-user-id':'health-check'}}).then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
 
-web_status="$(
-  curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
-    --retry 12 --retry-delay 5 --retry-all-errors \
-    "http://127.0.0.1:${web_bind_port}/projects"
-)"
-[ "$web_status" = "200" ]
+docker compose --env-file "$env_file" -f "$compose_file" exec -T web \
+  node -e "fetch('http://127.0.0.1:3000/projects').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
+
+docker compose --env-file "$env_file" -f "$compose_file" port api 4000 |
+  grep -Eq '^127\.0\.0\.1:'
+docker compose --env-file "$env_file" -f "$compose_file" port web 3000 |
+  grep -Eq '^127\.0\.0\.1:'
 
 if [ -n "$public_url" ]; then
   if [ ! -r "$auth_env_file" ]; then
