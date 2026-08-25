@@ -1057,3 +1057,58 @@ responses.
   API start schema needed no change because `input` is already a free-form
   record. Decision recorded in ADR 0011. Verified: graph-contracts and
   orchestrator tests/checks pass, `pnpm graph:demo` unchanged.
+- [~] 2026-08-25: Started the authorized 80-server deployment slice. The
+  repository previously had no GitHub Actions or Woodpecker pipeline, only an
+  Orchestrator development Dockerfile and an incomplete Compose fragment.
+  This slice adds one Node 24 application image shared by Web, API,
+  Orchestrator and both Workers; a dedicated PostgreSQL/Redis production
+  Compose stack; one-shot business migration and LangGraph checkpoint setup;
+  Woodpecker deployment, smoke and rollback scripts; a repository-scoped
+  production-80 agent definition; and an Nginx same-origin route for
+  `livephoto.motion-cover.com`. The public route is intentionally protected by
+  HTTP Basic Auth because the current API still uses demo `x-user-id`
+  authentication. Deployment, CI repository activation, Cloudflare DNS and
+  server changes remain pending current validation and the required
+  security-sensitive activation approval.
+- [x] 2026-08-25: Validated the deployment artifact locally and on an isolated
+  server-side stack. `pnpm check` and `pnpm test` passed; the target host built
+  the Node `24.19.0` image, applied all eight application migrations, initialized
+  the LangGraph PostgreSQL checkpoint schema, started PostgreSQL `16.11`, Redis
+  `7.4`, API, Web, Orchestrator and both Workers, and passed
+  `infra/deploy/smoke-test.sh`. The isolated containers, network, volumes and
+  temporary secret-bearing directory were removed afterward. Final shell
+  syntax, Compose configuration and `git diff --check` also pass. Woodpecker
+  lint passed before the image-retention adjustment and still requires one
+  final `v3.17.0` lint on the target host because no local CLI is installed.
+- [ ] 2026-08-25: Activate the protected production canary. Remaining gates are
+  explicit human approval of the current Verification 2.0 case snapshot,
+  trusted Woodpecker repository activation, dedicated Basic Auth installation,
+  shared RustFS CORS expansion, Cloudflare DNS creation, a scoped commit/push,
+  CI observation and authenticated public smoke verification.
+
+## Deployment decision addendum
+
+- 2026-08-25: Treat this release as a protected production canary, not a
+  general-public production launch. The current renderer produces deterministic
+  control-plane test bytes and the Web/API identity remains demo-grade.
+- 2026-08-25: Build one immutable image per Git commit on the 80-server
+  Woodpecker Docker agent and reuse it across the five application processes.
+  This minimizes disk consumption on a host that currently has about 21 GiB
+  free and avoids registry credentials.
+- 2026-08-25: Run PostgreSQL and Redis as dedicated Compose services with
+  persistent named volumes. Reuse the existing private RustFS service only
+  through the documented `live-photo-studio/` object-key prefix and server-side
+  app credential; never publish the credential through CI logs or Web
+  environment variables.
+- 2026-08-25: Use a same-origin Nginx route so the Web build can use an empty
+  `NEXT_PUBLIC_API_BASE`; `/v1/` is proxied to the API and all other paths to
+  Next.js. This avoids cross-origin credentials and keeps deployment domains
+  out of the client bundle.
+- 2026-08-25: Database migrations and LangGraph checkpoint schema setup are
+  explicit one-shot CI services before application replacement. Rollback
+  switches application containers to a previous local image and preserves
+  PostgreSQL, Redis, checkpoint, Outbox and object-storage data.
+- 2026-08-25: Keep the canary on loopback ports `3030` and `4040`; port `3000`
+  is already occupied on the target host. At the final preflight the root
+  filesystem had about 17 GiB free, so release image retention is limited to the
+  current and immediately previous application images.

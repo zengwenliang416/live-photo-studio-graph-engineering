@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3000",
+    "start": "next start -p 3000",
     "build": "next build",
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "tsx --test \"src/**/*.test.ts\""

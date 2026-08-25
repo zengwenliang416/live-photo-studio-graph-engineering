@@ -3,9 +3,12 @@
   "change_id": "graph-engineering-full-migration",
   "stage": "development",
   "allowed_roots": [
+    ".dockerignore",
+    ".woodpecker",
     "apps",
     "packages",
     "docs",
+    "infra",
     "README.md",
     "DELIVERY_NOTES.md",
     "GRAPH_EDITION_DELIVERY_NOTES.md",

@@ -1,0 +1,25 @@
+labels:
+  location: production-80
+  repo: zengwenliang416/live-photo-studio-graph-engineering
+
+when:
+  - event: push
+    branch: main
+  - event: manual
+
+steps:
+  deploy:
+    image: docker:28-cli
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/live-photo-studio:/opt/live-photo-studio
+    commands:
+      - apk add --no-cache curl
+      - export DEPLOY_SHA="$(printf '%s' "$CI_COMMIT_SHA" | cut -c1-12)"
+      - export APP_IMAGE="live-photo-studio:${DEPLOY_SHA}"
+      - docker build --pull --label "org.opencontainers.image.revision=${CI_COMMIT_SHA}" --build-arg NEXT_PUBLIC_API_BASE= --build-arg NEXT_PUBLIC_GRAPH_WORKFLOW_ENABLED=true -t "$APP_IMAGE" -f infra/docker/app.Dockerfile .
+      - docker compose --env-file /opt/live-photo-studio/.env -f infra/deploy/docker-compose.production.yml run --rm migrate
+      - docker compose --env-file /opt/live-photo-studio/.env -f infra/deploy/docker-compose.production.yml run --rm checkpoint-setup
+      - docker compose --env-file /opt/live-photo-studio/.env -f infra/deploy/docker-compose.production.yml up -d --remove-orphans
+      - COMPOSE_FILE=infra/deploy/docker-compose.production.yml DEPLOY_ENV_FILE=/opt/live-photo-studio/.env infra/deploy/smoke-test.sh
+      - DEPLOY_STATE_DIR=/opt/live-photo-studio infra/deploy/record-release.sh "$APP_IMAGE"

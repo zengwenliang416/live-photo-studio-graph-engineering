@@ -1,0 +1,21 @@
+services:
+  live-photo-agent:
+    image: woodpeckerci/woodpecker-agent:v3.17.0
+    command: agent
+    restart: unless-stopped
+    depends_on:
+      server:
+        condition: service_healthy
+    volumes:
+      - ./live-photo-agent:/etc/woodpecker
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      WOODPECKER_SERVER: server:9000
+      WOODPECKER_AGENT_SECRET: ${WOODPECKER_AGENT_SECRET}
+      WOODPECKER_HOSTNAME: live-photo-studio-production-80
+      WOODPECKER_MAX_WORKFLOWS: "1"
+      WOODPECKER_AGENT_LABELS: location=production-80,repo=zengwenliang416/live-photo-studio-graph-engineering
+      WOODPECKER_BACKEND: docker
+      WOODPECKER_LOG_LEVEL: info
+    networks:
+      - woodpecker

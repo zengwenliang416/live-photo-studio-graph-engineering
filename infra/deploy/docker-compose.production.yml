@@ -1,0 +1,140 @@
+name: live-photo-studio
+
+x-app-service: &app-service
+  image: ${APP_IMAGE}
+  env_file:
+    - ${DEPLOY_ENV_FILE:-/opt/live-photo-studio/.env}
+  networks:
+    - backend
+  restart: unless-stopped
+
+services:
+  postgres:
+    image: postgres:16.11-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    networks:
+      - backend
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.4-alpine
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    command:
+      - sh
+      - -c
+      - exec redis-server --appendonly yes --requirepass "$${REDIS_PASSWORD}"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$${REDIS_PASSWORD}\" ping | grep -q PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    networks:
+      - backend
+    restart: unless-stopped
+
+  migrate:
+    <<: *app-service
+    command: pnpm --filter @live-photo-studio/database migrate
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  checkpoint-setup:
+    <<: *app-service
+    command: pnpm --filter @live-photo-studio/orchestrator checkpoint:setup
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    <<: *app-service
+    command: pnpm --filter @live-photo-studio/api start
+    ports:
+      - "127.0.0.1:${API_BIND_PORT:-4040}:4000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      checkpoint-setup:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:4000/v1/stream-health',{headers:{'x-user-id':'health-check'}}).then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  orchestrator:
+    <<: *app-service
+    command: pnpm --filter @live-photo-studio/orchestrator start
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      checkpoint-setup:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+  worker-ai:
+    <<: *app-service
+    command: pnpm --filter @live-photo-studio/worker-ai start
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+  worker-media:
+    <<: *app-service
+    command: pnpm --filter @live-photo-studio/worker-media start
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+  web:
+    <<: *app-service
+    command: pnpm --filter @live-photo-studio/web start
+    ports:
+      - "127.0.0.1:${WEB_BIND_PORT:-3030}:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:3000/projects').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+networks:
+  backend:
+
+volumes:
+  postgres-data:
+  redis-data:

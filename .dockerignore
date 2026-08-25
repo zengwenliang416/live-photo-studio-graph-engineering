@@ -1,0 +1,17 @@
+.git
+.github
+.codegraph
+.codex
+.claude
+.specnav
+node_modules
+**/node_modules
+**/dist
+**/.next
+coverage
+*.log
+.env
+.env.*
+!.env.example
+openspec/changes/**/development/evidence
+openspec/changes/**/verify/reports
