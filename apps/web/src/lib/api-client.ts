@@ -249,7 +249,7 @@ export class WorkflowApiClient {
   private readonly userId: string;
 
   constructor(options: ApiClientOptions = {}) {
-    this.impl = options.fetchImpl ?? fetch;
+    this.impl = options.fetchImpl ?? globalThis.fetch.bind(globalThis);
     this.base = (options.baseUrl ?? API_BASE).replace(/\/$/u, "");
     this.keys = options.keyStore ?? defaultKeyStore;
     this.userId = options.userId ?? "demo-user";

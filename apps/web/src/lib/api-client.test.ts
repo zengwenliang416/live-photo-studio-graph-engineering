@@ -236,6 +236,25 @@ test("listProjects builds limit/cursor query params", async () => {
   assert.equal(result.data.nextCursor, "next-page");
 });
 
+test("default fetch keeps the browser global receiver", async () => {
+  const originalFetch = globalThis.fetch;
+  const calls: string[] = [];
+  globalThis.fetch = async function (input): Promise<Response> {
+    assert.equal(this, globalThis);
+    calls.push(String(input));
+    return jsonResponse({ data: { items: [], nextCursor: null } });
+  };
+
+  try {
+    const client = new WorkflowApiClient({ baseUrl: "", userId: "u" });
+    await client.listProjects({ limit: 50 });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+
+  assert.deepEqual(calls, ["/v1/projects?limit=50"]);
+});
+
 test("getProject parses the asset list with nullable fields", async () => {
   const { client, calls } = projectRecordingClient(() => ({
     data: {
