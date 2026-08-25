@@ -33,11 +33,25 @@ auth_env_file="${auth_env_file:-/opt/live-photo-studio/canary-auth.env}"
 
 docker compose --env-file "$env_file" -f "$compose_file" ps
 
-docker compose --env-file "$env_file" -f "$compose_file" exec -T api \
-  node -e "fetch('http://127.0.0.1:4000/v1/stream-health',{headers:{'x-user-id':'health-check'}}).then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
+wait_for_service() {
+  service="$1"
+  probe="$2"
+  attempt=1
+  while [ "$attempt" -le 12 ]; do
+    if docker compose --env-file "$env_file" -f "$compose_file" exec -T "$service" \
+      node -e "$probe"; then
+      return 0
+    fi
+    attempt=$((attempt + 1))
+    sleep 5
+  done
+  return 1
+}
 
-docker compose --env-file "$env_file" -f "$compose_file" exec -T web \
-  node -e "fetch('http://127.0.0.1:3000/projects').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
+wait_for_service api \
+  "fetch('http://127.0.0.1:4000/v1/stream-health',{headers:{'x-user-id':'health-check'}}).then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
+wait_for_service web \
+  "fetch('http://127.0.0.1:3000/projects').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
 
 docker compose --env-file "$env_file" -f "$compose_file" port api 4000 |
   grep -Eq '^127\.0\.0\.1:'
