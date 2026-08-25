@@ -8,6 +8,7 @@ export const generationRequestedPayloadSchema = z.object({
   sourceAssetIds: z.array(z.string().uuid()).min(1),
   coverAssetId: z.string().uuid(),
   revision: z.number().int().min(0),
+  styleKey: z.string().min(1).max(64).optional(),
 }).merge(workflowExecutionMetadataSchema);
 
 export type GenerationRequestedPayload = z.infer<

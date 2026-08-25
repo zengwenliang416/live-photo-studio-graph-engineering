@@ -1,18 +1,36 @@
 import { createHash } from "node:crypto";
 import type { Pool, PoolClient } from "pg";
 import type { WorkflowSignal } from "@live-photo-studio/graph-contracts";
+import { compilePrompt, findStylePreset } from "@live-photo-studio/prompt-kit";
+import type { ObjectStoragePort } from "@live-photo-studio/storage";
 import {
   ProviderFailureError,
   assertProviderBudget,
   type GeneratedCandidate,
   type ImageGenerationProvider,
+  type ReferenceImageInput,
 } from "./provider.js";
 import type { GenerationRequestedPayload } from "./provider.js";
+
+const DEFAULT_STYLE_KEY = "cinematic-portrait";
+const MAX_REFERENCE_IMAGES = 6;
 
 type BatchRecord = {
   status: string;
   outputIds: string[];
 };
+
+type GenerationPlan = {
+  prompt: string;
+  referenceImages: ReferenceImageInput[];
+  promptVersion: string | null;
+  promptHash: string | null;
+};
+
+export interface GenerationServiceDeps {
+  readonly resolveProvider: (userId: string) => Promise<ImageGenerationProvider>;
+  readonly storage: ObjectStoragePort;
+}
 
 type ClaimResult =
   | { kind: "CLAIMED" }
@@ -22,9 +40,10 @@ type ClaimResult =
 export class GenerationService {
   constructor(
     private readonly pool: Pool,
-    private readonly provider: ImageGenerationProvider,
+    private readonly fallbackProvider: ImageGenerationProvider,
     private readonly candidatesPerBatch = 4,
     private readonly maxCostMicros = 0,
+    private readonly deps?: GenerationServiceDeps,
   ) {}
 
   /**
@@ -36,8 +55,23 @@ export class GenerationService {
     status: "SUCCEEDED" | "ALREADY_DONE" | "IN_PROGRESS" | "FAILED";
     outputIds: readonly string[];
   }> {
-    await this.assertWorkflowInput(payload);
-    const claim = await this.claimBatch(payload);
+    const userId = await this.assertWorkflowInput(payload);
+    const provider = this.deps
+      ? await this.deps.resolveProvider(userId)
+      : this.fallbackProvider;
+
+    let plan: GenerationPlan;
+    try {
+      plan = await this.buildPlan(payload, provider);
+    } catch (error) {
+      if (error instanceof ProviderFailureError && !error.retryable) {
+        await this.fail(payload, error.code, provider.name);
+        return { status: "FAILED", outputIds: [] };
+      }
+      throw error;
+    }
+
+    const claim = await this.claimBatch(payload, provider, plan);
     if (claim.kind === "TERMINAL") {
       return { status: "ALREADY_DONE", outputIds: claim.outputIds };
     }
@@ -49,10 +83,10 @@ export class GenerationService {
     // durable RUNNING claim prevent duplicate deliveries from invoking the
     // provider concurrently.
     try {
-      assertProviderBudget(this.provider, this.maxCostMicros);
+      assertProviderBudget(provider, this.maxCostMicros);
     } catch (error) {
       if (error instanceof ProviderFailureError && !error.retryable) {
-        await this.fail(payload, error.code);
+        await this.fail(payload, error.code, provider.name);
         return { status: "FAILED", outputIds: [] };
       }
       await this.releaseClaim(payload);
@@ -61,16 +95,16 @@ export class GenerationService {
 
     let candidates: readonly GeneratedCandidate[];
     try {
-      candidates = await this.provider.generate({
+      candidates = await provider.generate({
         projectId: payload.projectId,
-        sourceAssetIds: payload.sourceAssetIds,
-        coverAssetId: payload.coverAssetId,
         revision: payload.revision,
         count: this.candidatesPerBatch,
+        prompt: plan.prompt,
+        referenceImages: plan.referenceImages,
       });
     } catch (error) {
       if (error instanceof ProviderFailureError && !error.retryable) {
-        await this.fail(payload, error.code);
+        await this.fail(payload, error.code, provider.name);
         return { status: "FAILED", outputIds: [] };
       }
       await this.releaseClaim(payload);
@@ -155,6 +189,7 @@ export class GenerationService {
   async fail(
     payload: GenerationRequestedPayload,
     errorCode: string,
+    providerName?: string,
   ): Promise<void> {
     await this.assertWorkflowProject(payload);
     const client = await this.pool.connect();
@@ -174,7 +209,7 @@ export class GenerationService {
           payload.projectId,
           payload.workflowRunId,
           payload.revision,
-          this.provider.name,
+          providerName ?? this.fallbackProvider.name,
           errorCode,
         ],
       );
@@ -206,22 +241,24 @@ export class GenerationService {
 
   private async assertWorkflowProject(
     payload: GenerationRequestedPayload,
-  ): Promise<void> {
-    const result = await this.pool.query(
-      `SELECT 1
+  ): Promise<string> {
+    const result = await this.pool.query<{ user_id: string }>(
+      `SELECT user_id
          FROM workflow_runs
         WHERE id = $1::uuid AND project_id = $2::uuid`,
       [payload.workflowRunId, payload.projectId],
     );
-    if (result.rowCount === 0) {
+    const row = result.rows[0];
+    if (!row) {
       throw new Error("WORKFLOW_PROJECT_MISMATCH");
     }
+    return row.user_id;
   }
 
   private async assertWorkflowInput(
     payload: GenerationRequestedPayload,
-  ): Promise<void> {
-    await this.assertWorkflowProject(payload);
+  ): Promise<string> {
+    const userId = await this.assertWorkflowProject(payload);
     const requestedAssetIds = [
       ...new Set([...payload.sourceAssetIds, payload.coverAssetId]),
     ];
@@ -246,10 +283,123 @@ export class GenerationService {
     ) {
       throw new Error("ASSET_PROJECT_MISMATCH");
     }
+    return userId;
+  }
+
+  /**
+   * Compiles the prompt and loads reference bytes only for providers that
+   * declare usesPromptPlan. Mock and test-double providers skip both, so CI
+   * never touches storage or prompt compilation.
+   */
+  private async buildPlan(
+    payload: GenerationRequestedPayload,
+    provider: ImageGenerationProvider,
+  ): Promise<GenerationPlan> {
+    if (provider.usesPromptPlan !== true) {
+      return {
+        prompt: "",
+        referenceImages: [],
+        promptVersion: null,
+        promptHash: null,
+      };
+    }
+    const referenceImages = await this.loadReferenceImages(payload);
+    const preset =
+      findStylePreset(payload.styleKey ?? DEFAULT_STYLE_KEY) ??
+      findStylePreset(DEFAULT_STYLE_KEY);
+    if (!preset) {
+      throw new ProviderFailureError("STYLE_PRESET_MISSING", false);
+    }
+    const compiled = compilePrompt({
+      preset,
+      referenceImageCount: referenceImages.length,
+    });
+    return {
+      prompt: compiled.prompt,
+      referenceImages,
+      promptVersion: compiled.promptVersion,
+      promptHash: compiled.promptHash,
+    };
+  }
+
+  /**
+   * Reference order is part of the model contract: cover first, then the
+   * remaining content assets by creation time, capped at the provider limit.
+   */
+  private async loadReferenceImages(
+    payload: GenerationRequestedPayload,
+  ): Promise<ReferenceImageInput[]> {
+    if (!this.deps) {
+      throw new ProviderFailureError("MODEL_PROVIDER_UNCONFIGURED", false);
+    }
+    const requestedAssetIds = [
+      ...new Set([payload.coverAssetId, ...payload.sourceAssetIds]),
+    ];
+    const result = await this.pool.query<{
+      asset_id: string;
+      object_key: string;
+      content_type: string;
+      created_at: string;
+    }>(
+      `SELECT id::text AS asset_id, object_key, content_type, created_at
+         FROM project_assets
+        WHERE project_id = $1::uuid
+          AND id = ANY($2::uuid[])`,
+      [payload.projectId, requestedAssetIds],
+    );
+    const rows = new Map(result.rows.map((row) => [row.asset_id, row]));
+    if (requestedAssetIds.some((assetId) => !rows.has(assetId))) {
+      throw new ProviderFailureError("ASSET_OBJECT_MISSING", false);
+    }
+    const orderedAssetIds = [
+      payload.coverAssetId,
+      ...requestedAssetIds
+        .filter((assetId) => assetId !== payload.coverAssetId)
+        .sort((left, right) => {
+          const leftRow = rows.get(left);
+          const rightRow = rows.get(right);
+          return String(leftRow?.created_at).localeCompare(
+            String(rightRow?.created_at),
+          );
+        }),
+    ].slice(0, MAX_REFERENCE_IMAGES);
+
+    const images: ReferenceImageInput[] = [];
+    for (const assetId of orderedAssetIds) {
+      const row = rows.get(assetId);
+      if (!row) {
+        throw new ProviderFailureError("ASSET_OBJECT_MISSING", false);
+      }
+      images.push({
+        bytes: await this.readAssetBytes(row.object_key),
+        contentType: row.content_type,
+      });
+    }
+    return images;
+  }
+
+  private async readAssetBytes(objectKey: string): Promise<Uint8Array> {
+    if (!this.deps) {
+      throw new ProviderFailureError("MODEL_PROVIDER_UNCONFIGURED", false);
+    }
+    try {
+      return await this.deps.storage.getObject(objectKey);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "";
+      if (message === "OBJECT_STORAGE_NOT_FOUND") {
+        throw new ProviderFailureError("ASSET_OBJECT_MISSING", false);
+      }
+      if (message === "OBJECT_STORAGE_TOO_LARGE") {
+        throw new ProviderFailureError("ASSET_OBJECT_TOO_LARGE", false);
+      }
+      throw error;
+    }
   }
 
   private async claimBatch(
     payload: GenerationRequestedPayload,
+    provider: ImageGenerationProvider,
+    plan: GenerationPlan,
   ): Promise<ClaimResult> {
     const client = await this.pool.connect();
     try {
@@ -257,8 +407,8 @@ export class GenerationService {
       const inserted = await client.query(
         `INSERT INTO generation_batches (
            id, project_id, workflow_run_id, revision, status, provider,
-           trace_id, provider_request_id, cost_micros
-         ) VALUES ($1, $2, $3, $4, 'RUNNING', $5, $6, NULL, $7)
+           prompt_version, prompt_hash, trace_id, provider_request_id, cost_micros
+         ) VALUES ($1, $2, $3, $4, 'RUNNING', $5, $6, $7, $8, NULL, $9)
          ON CONFLICT (id) DO NOTHING
          RETURNING id`,
         [
@@ -266,9 +416,11 @@ export class GenerationService {
           payload.projectId,
           payload.workflowRunId,
           payload.revision,
-          this.provider.name,
+          provider.name,
+          plan.promptVersion,
+          plan.promptHash,
           payload.traceId ?? payload.workflowRunId,
-          this.provider.estimatedCostMicros ?? 0,
+          provider.estimatedCostMicros ?? 0,
         ],
       );
       if ((inserted.rowCount ?? 0) > 0) {

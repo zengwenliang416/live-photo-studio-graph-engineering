@@ -5,9 +5,11 @@ import { Command } from "@langchain/langgraph";
 import { createMemoryCheckpointer } from "../../checkpointer.js";
 import {
   buildDeterministicUuid,
+  buildNodeEffectKey,
   WorkflowSignalMismatchError,
 } from "@live-photo-studio/graph-runtime";
 import { buildLivePhotoProjectGraphV1 } from "./live-photo-project.graph.js";
+import { livePhotoProjectStartInputSchema } from "./live-photo-project.state.js";
 import type { WorkflowEffectPort } from "./ports.js";
 
 test("the v1 happy path pauses, resumes and completes", async () => {
@@ -216,5 +218,111 @@ test("a generation resume with the wrong correlation is rejected", async () => {
       outputIds: [randomUUID()],
     }}), config),
     (error: unknown) => error instanceof WorkflowSignalMismatchError,
+  );
+});
+
+test("start input styleKey reaches the generation effect and its key", async () => {
+  const workflowRunId = randomUUID();
+  const projectId = randomUUID();
+  const sourceAssetId = randomUUID();
+  const coverAssetId = randomUUID();
+  const generationJobId = randomUUID();
+  const styleKey = "cinematic";
+  const generationInputs: {
+    styleKey?: string;
+    effectKey: string;
+  }[] = [];
+
+  const graph = buildLivePhotoProjectGraphV1({
+    projects: {
+      async getProjectSnapshot() {
+        return {
+          projectId,
+          userId: "test-user",
+          sourceAssetIds: [sourceAssetId],
+          coverAssetId,
+        };
+      },
+    },
+    effects: {
+      async ensureGenerationBatch(input) {
+        generationInputs.push({
+          ...(input.styleKey !== undefined ? { styleKey: input.styleKey } : {}),
+          effectKey: input.effectKey,
+        });
+        return { jobId: generationJobId };
+      },
+      async ensureRenderJob() {
+        return { jobId: randomUUID() };
+      },
+      async markWorkflowCompleted() {},
+      async markWorkflowCancelled() {},
+      async markWorkflowFailed() {},
+    },
+    checkpointer: createMemoryCheckpointer(),
+  });
+  const config = { configurable: { thread_id: workflowRunId } };
+
+  const state = await graph.invoke({
+    workflowRunId,
+    projectId,
+    userId: "test-user",
+    graphKey: "live-photo-project",
+    graphVersion: "v1",
+    sourceAssetIds: [sourceAssetId],
+    coverAssetId,
+    styleKey,
+  }, config);
+
+  assert.equal(state.styleKey, styleKey);
+  assert.equal(generationInputs.length, 1);
+  assert.equal(generationInputs[0]?.styleKey, styleKey);
+  assert.equal(
+    generationInputs[0]?.effectKey,
+    buildNodeEffectKey({
+      workflowRunId,
+      nodeName: "dispatch_generation_v1",
+      nodeVersion: 1,
+      revision: 0,
+      businessInput: {
+        sourceAssetIds: [sourceAssetId],
+        coverAssetId,
+        styleKey,
+      },
+    }),
+  );
+});
+
+test("the start input schema validates styleKey additively", () => {
+  const base = {
+    workflowRunId: randomUUID(),
+    projectId: randomUUID(),
+    userId: "test-user",
+    graphKey: "live-photo-project" as const,
+    graphVersion: "v1" as const,
+    sourceAssetIds: [randomUUID()],
+    coverAssetId: randomUUID(),
+  };
+
+  assert.equal(
+    livePhotoProjectStartInputSchema.parse(base).styleKey,
+    undefined,
+  );
+  assert.equal(
+    livePhotoProjectStartInputSchema.parse({ ...base, styleKey: "cinematic" })
+      .styleKey,
+    "cinematic",
+  );
+  assert.equal(
+    livePhotoProjectStartInputSchema.safeParse({ ...base, styleKey: "" })
+      .success,
+    false,
+  );
+  assert.equal(
+    livePhotoProjectStartInputSchema.safeParse({
+      ...base,
+      styleKey: "x".repeat(65),
+    }).success,
+    false,
   );
 });

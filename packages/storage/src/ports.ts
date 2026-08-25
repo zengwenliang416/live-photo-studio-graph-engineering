@@ -51,7 +51,12 @@ export interface ObjectStoragePort {
   ): Promise<SignedObjectUpload>;
   statObject(objectKey: string): Promise<ObjectStat | null>;
   readObjectPrefix(objectKey: string, maxBytes: number): Promise<Uint8Array>;
+  getObject(objectKey: string): Promise<Uint8Array>;
 }
+
+// Upper bound for full-object reads so a model-input fetch cannot buffer an
+// unbounded object into worker memory.
+export const GET_OBJECT_MAX_BYTES = 25 * 1024 * 1024;
 
 export class ObjectStorageUnavailableError extends Error {
   constructor(message = "Object storage is not configured.") {

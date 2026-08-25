@@ -47,6 +47,11 @@ test("project cards route by cover state and label untitled projects", () => {
   assert.match(pageSource, /zh-CN/u);
 });
 
+test("projects page header links to the image provider settings", () => {
+  assert.match(pageSource, /href="\/settings"/u);
+  assert.match(pageSource, /生图设置/u);
+});
+
 test("projects page styles keep a 390px single column with 44px targets", () => {
   assert.match(styleSource, /@media \(max-width: 390px\)/u);
   assert.match(styleSource, /min-height: 44px/u);

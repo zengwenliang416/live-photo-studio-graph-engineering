@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  GET_OBJECT_MAX_BYTES,
   InMemoryObjectStorage,
   loadObjectStorageEnvironment,
   S3ObjectStorage,
@@ -194,4 +195,38 @@ test("S3 signed upload binds content-type into the signature", async () => {
   assert.equal(url.hostname, "rustfs.internal");
   assert.deepEqual(signed.headers, { "content-type": "image/jpeg" });
   assert.ok(Date.parse(signed.expiresAt) > Date.now());
+});
+
+test("mock storage getObject returns a copy and rejects missing objects", async () => {
+  const storage = new InMemoryObjectStorage();
+  const body = new TextEncoder().encode("model-input-bytes");
+  await storage.putObject({
+    objectKey: "projects/project-1/assets/asset-1.jpg",
+    body,
+    contentType: "image/jpeg",
+  });
+
+  const read = await storage.getObject("projects/project-1/assets/asset-1.jpg");
+  assert.equal(new TextDecoder().decode(read), "model-input-bytes");
+
+  read[0] = 0;
+  const again = await storage.getObject("projects/project-1/assets/asset-1.jpg");
+  assert.equal(new TextDecoder().decode(again), "model-input-bytes");
+
+  await assert.rejects(
+    storage.getObject("missing/key"),
+    /OBJECT_STORAGE_NOT_FOUND/u,
+  );
+});
+
+test("mock storage getObject rejects objects beyond the read ceiling", async () => {
+  const storage = new InMemoryObjectStorage();
+  storage.objects.set(
+    "projects/project-1/assets/oversized.bin",
+    new Uint8Array(GET_OBJECT_MAX_BYTES + 1),
+  );
+  await assert.rejects(
+    storage.getObject("projects/project-1/assets/oversized.bin"),
+    /OBJECT_STORAGE_TOO_LARGE/u,
+  );
 });

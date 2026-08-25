@@ -4,6 +4,7 @@ import { Redis } from "ioredis";
 import type { Pool } from "pg";
 import { createAppPool } from "@live-photo-studio/database";
 import { safeLogEvent } from "@live-photo-studio/graph-contracts";
+import { createObjectStorageFromEnvironment } from "@live-photo-studio/storage";
 import {
   GenerationService,
 } from "./generation-service.js";
@@ -11,6 +12,7 @@ import {
   generationRequestedPayloadSchema,
   MockImageGenerationProvider,
 } from "./provider.js";
+import { resolveProvider } from "./provider-resolver.js";
 import { loadWorkerAiConfig } from "./config.js";
 
 async function main(): Promise<void> {
@@ -19,13 +21,19 @@ async function main(): Promise<void> {
   const connection = new Redis(config.REDIS_URL, {
     maxRetriesPerRequest: null,
   });
+  const storage = createObjectStorageFromEnvironment();
 
-  const provider = new MockImageGenerationProvider();
+  const fallbackProvider = new MockImageGenerationProvider();
   const service = new GenerationService(
     pool,
-    provider,
+    fallbackProvider,
     config.CANDIDATES_PER_BATCH,
     config.AI_MAX_COST_MICROS,
+    {
+      storage,
+      resolveProvider: (userId) =>
+        resolveProvider({ pool, config, storage, userId }),
+    },
   );
 
   const worker = new Worker(
@@ -69,7 +77,7 @@ async function main(): Promise<void> {
 
   console.info(JSON.stringify(safeLogEvent("worker_ai.started", {
     queue: config.GENERATION_JOB_QUEUE,
-    provider: provider.name,
+    provider: fallbackProvider.name,
     concurrency: config.AI_WORKER_CONCURRENCY,
   })));
 }

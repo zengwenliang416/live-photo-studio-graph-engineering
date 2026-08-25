@@ -86,6 +86,9 @@ function ProjectsPanel(): React.JSX.Element {
           </span>
           <span className={styles.brandName}>Live Photo Studio</span>
         </div>
+        <Link className={styles.settingsLink} href="/settings">
+          生图设置
+        </Link>
       </header>
 
       <div className={styles.content}>

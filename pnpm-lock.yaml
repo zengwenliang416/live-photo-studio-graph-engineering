@@ -16,6 +16,12 @@ importers:
       '@live-photo-studio/graph-contracts':
         specifier: workspace:*
         version: link:../../packages/graph-contracts
+      '@live-photo-studio/graph-runtime':
+        specifier: workspace:*
+        version: link:../../packages/graph-runtime
+      '@live-photo-studio/prompt-kit':
+        specifier: workspace:*
+        version: link:../../packages/prompt-kit
       '@live-photo-studio/storage':
         specifier: workspace:*
         version: link:../../packages/storage
@@ -163,6 +169,15 @@ importers:
       '@live-photo-studio/graph-contracts':
         specifier: workspace:*
         version: link:../../packages/graph-contracts
+      '@live-photo-studio/graph-runtime':
+        specifier: workspace:*
+        version: link:../../packages/graph-runtime
+      '@live-photo-studio/prompt-kit':
+        specifier: workspace:*
+        version: link:../../packages/prompt-kit
+      '@live-photo-studio/storage':
+        specifier: workspace:*
+        version: link:../../packages/storage
       bullmq:
         specifier: ^6.0.0
         version: 6.2.0(ioredis@5.11.1)(pg@8.23.0)
@@ -275,6 +290,18 @@ importers:
       '@live-photo-studio/graph-contracts':
         specifier: workspace:*
         version: link:../graph-contracts
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.13.3
+      tsx:
+        specifier: ^4.20.0
+        version: 4.23.12
+      typescript:
+        specifier: ^5.9.0
+        version: 5.9.3
+
+  packages/prompt-kit:
     devDependencies:
       '@types/node':
         specifier: ^24.0.0

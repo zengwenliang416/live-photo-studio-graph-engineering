@@ -204,7 +204,7 @@ packages/logger      结构化日志和脱敏
 
 - 模型调用只存在于 `apps/worker-ai` 的 Provider Adapter。
 - `AI_PROVIDER=mock` 必须保持可用，使 CI 与本地开发不产生真实费用。
-- OpenAI Key 只从服务端环境变量读取。
+- OpenAI 兼容 Key 只存在于服务端：环境变量，或 `user_image_providers` 表中经 `SETTINGS_ENCRYPTION_KEY`(AES-256-GCM)加密的用户级配置；浏览器永不持有。
 - 输入图角色顺序必须稳定并在 Prompt 中解释。
 - GPT Image 参考图不要盲目塞满；常规保持 3–6 张。
 - 提示词由 Builder 编译，不在 Controller 拼字符串。

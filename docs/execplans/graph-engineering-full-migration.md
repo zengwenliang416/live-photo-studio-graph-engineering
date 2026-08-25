@@ -1041,3 +1041,19 @@ Keep architecture diagrams, API contract snapshots, migration output, test logs
 and canary results under `docs/graph-engineering/evidence/` using small text or
 JSON summaries. Do not commit credentials, binary test media or full provider
 responses.
+
+## Progress addendum
+
+- [x] 2026-08-25: Additive `styleKey` passthrough from `START_WORKFLOW` to the
+  generation payload. Motivation: a workflow run must carry its chosen style
+  preset so the generation worker can resolve prompts without re-reading
+  mutable project rows. Impact: `generationRequestedPayloadSchema` gains an
+  optional `styleKey` (1-64 chars); the v1 graph state and start input schema
+  accept it; `dispatch_generation_v1` reads it, includes it in the effect key
+  business input (null when absent) and forwards it to
+  `ensureGenerationBatch`; the PostgreSQL effect adapter adds it to the
+  Outbox payload only when present. No existing field, node, event or route
+  was renamed or removed; old payloads without `styleKey` still parse. The
+  API start schema needed no change because `input` is already a free-form
+  record. Decision recorded in ADR 0011. Verified: graph-contracts and
+  orchestrator tests/checks pass, `pnpm graph:demo` unchanged.

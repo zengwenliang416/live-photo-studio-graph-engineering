@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { GET_OBJECT_MAX_BYTES } from "./ports.js";
 import type {
   ObjectStat,
   ObjectStoragePort,
@@ -79,6 +80,17 @@ export class InMemoryObjectStorage implements ObjectStoragePort {
       throw new Error("OBJECT_STORAGE_NOT_FOUND");
     }
     return body.subarray(0, Math.min(maxBytes, body.byteLength));
+  }
+
+  async getObject(objectKey: string): Promise<Uint8Array> {
+    const body = this.objects.get(objectKey);
+    if (!body) {
+      throw new Error("OBJECT_STORAGE_NOT_FOUND");
+    }
+    if (body.byteLength > GET_OBJECT_MAX_BYTES) {
+      throw new Error("OBJECT_STORAGE_TOO_LARGE");
+    }
+    return new Uint8Array(body);
   }
 }
 

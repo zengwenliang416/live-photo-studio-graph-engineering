@@ -8,6 +8,7 @@ import {
   S3ServiceException,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { GET_OBJECT_MAX_BYTES } from "./ports.js";
 import type {
   ObjectStat,
   ObjectStoragePort,
@@ -176,6 +177,37 @@ export class S3ObjectStorage implements ObjectStoragePort {
       throw new Error("OBJECT_STORAGE_NOT_FOUND");
     }
     return output.Body.transformToByteArray();
+  }
+
+  async getObject(objectKey: string): Promise<Uint8Array> {
+    let output;
+    try {
+      output = await this.client.send(
+        new GetObjectCommand({
+          Bucket: this.config.bucket,
+          Key: objectKey,
+        }),
+      );
+    } catch (error) {
+      if (isObjectMissingError(error)) {
+        throw new Error("OBJECT_STORAGE_NOT_FOUND");
+      }
+      throw error;
+    }
+    if (!output.Body) {
+      throw new Error("OBJECT_STORAGE_NOT_FOUND");
+    }
+    if (
+      output.ContentLength !== undefined &&
+      output.ContentLength > GET_OBJECT_MAX_BYTES
+    ) {
+      throw new Error("OBJECT_STORAGE_TOO_LARGE");
+    }
+    const bytes = await output.Body.transformToByteArray();
+    if (bytes.byteLength > GET_OBJECT_MAX_BYTES) {
+      throw new Error("OBJECT_STORAGE_TOO_LARGE");
+    }
+    return bytes;
   }
 }
 

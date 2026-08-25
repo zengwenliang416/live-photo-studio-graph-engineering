@@ -15,16 +15,29 @@ export interface GeneratedCandidate {
   readonly providerRequestId?: string | undefined;
 }
 
+export interface ReferenceImageInput {
+  readonly bytes: Uint8Array;
+  readonly contentType: string;
+}
+
+export interface ImageGenerationInput {
+  readonly projectId: string;
+  readonly revision: number;
+  readonly count: number;
+  readonly prompt: string;
+  readonly referenceImages: ReadonlyArray<ReferenceImageInput>;
+}
+
 export interface ImageGenerationProvider {
   readonly name: string;
   readonly estimatedCostMicros?: number | undefined;
-  generate(input: {
-    projectId: string;
-    sourceAssetIds: readonly string[];
-    coverAssetId: string;
-    revision: number;
-    count: number;
-  }): Promise<readonly GeneratedCandidate[]>;
+  /**
+   * Paid providers set this to receive a compiled prompt and reference image
+   * bytes. Providers without the flag (mock, test doubles) get an empty plan
+   * and never trigger storage reads or prompt compilation.
+   */
+  readonly usesPromptPlan?: boolean;
+  generate(input: ImageGenerationInput): Promise<readonly GeneratedCandidate[]>;
 }
 
 export class ProviderFailureError extends Error {
@@ -59,13 +72,9 @@ export class MockImageGenerationProvider implements ImageGenerationProvider {
   readonly name = "mock";
   readonly estimatedCostMicros = 0;
 
-  async generate(input: {
-    projectId: string;
-    sourceAssetIds: readonly string[];
-    coverAssetId: string;
-    revision: number;
-    count: number;
-  }): Promise<readonly GeneratedCandidate[]> {
+  async generate(
+    input: ImageGenerationInput,
+  ): Promise<readonly GeneratedCandidate[]> {
     const candidates: GeneratedCandidate[] = [];
     for (let index = 0; index < input.count; index += 1) {
       candidates.push({

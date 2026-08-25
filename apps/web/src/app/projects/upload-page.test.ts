@@ -21,9 +21,20 @@ const styleSource = readFileSync(
   "utf8",
 );
 
-test("upload page never starts a workflow run itself", () => {
-  assert.doesNotMatch(pageSource, /startWorkflowRun/u);
+test("upload page starts the run with the style and persists the run id", () => {
+  assert.match(pageSource, /startWorkflowRun/u);
+  assert.match(pageSource, /\{ styleKey \}/u);
+  assert.match(pageSource, /workflowRunStorageKey/u);
+  assert.match(pageSource, /window\.localStorage\.setItem/u);
   assert.match(pageSource, /router\.push\(`\/projects\/\$\{projectId\}`\)/u);
+  assert.match(pageSource, /正在启动/u);
+});
+
+test("upload page offers a non-blocking style picker", () => {
+  assert.match(pageSource, /listStylePresets/u);
+  assert.match(pageSource, /role="radiogroup"/u);
+  assert.match(pageSource, /选择风格/u);
+  assert.match(pageSource, /风格列表加载失败,不影响上传/u);
 });
 
 test("upload page wires the intent, signed PUT and confirm pipeline", () => {

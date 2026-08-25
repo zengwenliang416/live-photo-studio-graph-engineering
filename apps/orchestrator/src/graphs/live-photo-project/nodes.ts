@@ -71,6 +71,7 @@ export function createLivePhotoProjectNodes(
       "projectId",
       "sourceAssetIds",
       "coverAssetId",
+      "styleKey",
       "generationRevision",
     ],
     writes: ["pendingExternalJobId", "currentPhase"],
@@ -94,6 +95,7 @@ export function createLivePhotoProjectNodes(
       businessInput: {
         sourceAssetIds: state.sourceAssetIds,
         coverAssetId: state.coverAssetId,
+        styleKey: state.styleKey ?? null,
       },
     });
     const job = await dependencies.effects.ensureGenerationBatch({
@@ -103,6 +105,7 @@ export function createLivePhotoProjectNodes(
       sourceAssetIds: state.sourceAssetIds,
       coverAssetId: state.coverAssetId,
       revision: state.generationRevision,
+      ...(state.styleKey !== undefined ? { styleKey: state.styleKey } : {}),
       effectKey,
     });
     return {

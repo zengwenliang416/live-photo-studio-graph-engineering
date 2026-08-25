@@ -12,6 +12,7 @@ import {
   ApiProblemError,
   WorkflowApiClient,
 } from "../../../../lib/api-client.js";
+import { workflowRunStorageKey } from "../../../../lib/workflow-session.js";
 import {
   advanceUploadItem,
   firstReadyAssetId,
@@ -58,12 +59,26 @@ function UploadPanel(): React.JSX.Element {
   >(null);
   const [isSettingCover, setIsSettingCover] = useState(false);
   const [coverError, setCoverError] = useState<string | null>(null);
+  const [styleKey, setStyleKey] = useState<string | null>(null);
+  const [isStarting, setIsStarting] = useState(false);
+  const [startError, setStartError] = useState<string | null>(null);
 
   const projectQuery = useQuery({
     queryKey: ["project", projectId],
     queryFn: () => client.getProject(projectId),
     enabled: projectId.length > 0,
   });
+
+  const stylePresetsQuery = useQuery({
+    queryKey: ["style-presets"],
+    queryFn: () => client.listStylePresets(),
+  });
+  const stylePresets = stylePresetsQuery.data?.data.items ?? [];
+
+  // Default to the first preset once the list arrives.
+  useEffect(() => {
+    setStyleKey((prev) => prev ?? stylePresets[0]?.key ?? null);
+  }, [stylePresets]);
 
   // Refresh recovery: assets already READY on the server reappear as
   // non-retryable items and the stored cover is preselected.
@@ -241,9 +256,28 @@ function UploadPanel(): React.JSX.Element {
         item.status === "ready" && item.assetId === confirmedCoverAssetId,
     );
 
-  const startGeneration = (): void => {
-    if (!canStart) return;
-    router.push(`/projects/${projectId}`);
+  const startGeneration = async (): Promise<void> => {
+    if (!canStart || isStarting) return;
+    setIsStarting(true);
+    setStartError(null);
+    try {
+      const started = await client.startWorkflowRun(
+        projectId,
+        styleKey === null ? undefined : { styleKey },
+      );
+      window.localStorage.setItem(
+        workflowRunStorageKey(projectId),
+        started.data.workflowRunId,
+      );
+      router.push(`/projects/${projectId}`);
+    } catch (error: unknown) {
+      setStartError(
+        error instanceof ApiProblemError
+          ? `启动工作流失败(${error.code})。`
+          : "启动工作流失败,请检查网络后重试。",
+      );
+      setIsStarting(false);
+    }
   };
 
   if (projectQuery.isLoading) {
@@ -388,18 +422,70 @@ function UploadPanel(): React.JSX.Element {
           </section>
         )}
 
+        <section className={styles.panel} aria-labelledby="style-title">
+          <h2 className={styles.sectionTitle} id="style-title">
+            选择风格
+          </h2>
+          {stylePresetsQuery.isLoading && (
+            <p className={styles.status} role="status" aria-live="polite">
+              正在加载风格列表…
+            </p>
+          )}
+          {stylePresetsQuery.isError && (
+            <div className={styles.error} role="alert">
+              <p>风格列表加载失败,不影响上传;可重试后再开始生成。</p>
+              <button
+                className={styles.button}
+                type="button"
+                onClick={() => void stylePresetsQuery.refetch()}
+              >
+                重试
+              </button>
+            </div>
+          )}
+          {stylePresets.length > 0 && (
+            <div
+              className={styles.styleGroup}
+              role="radiogroup"
+              aria-label="生成风格"
+            >
+              {stylePresets.map((preset) => (
+                <label className={styles.styleCard} key={preset.key}>
+                  <input
+                    type="radio"
+                    name="style-preset"
+                    value={preset.key}
+                    checked={styleKey === preset.key}
+                    onChange={() => setStyleKey(preset.key)}
+                  />
+                  <span className={styles.styleName}>{preset.name}</span>
+                  <span className={styles.styleDescription}>
+                    {preset.description}
+                  </span>
+                </label>
+              ))}
+            </div>
+          )}
+        </section>
+
         <div className={styles.actions}>
           <button
             className={`${styles.button} ${styles.buttonPrimary}`}
             type="button"
-            disabled={!canStart}
-            onClick={startGeneration}
+            disabled={!canStart || isStarting}
+            aria-busy={isStarting}
+            onClick={() => void startGeneration()}
           >
-            开始生成
+            {isStarting ? "正在启动…" : "开始生成"}
           </button>
           {!canStart && (
             <p className={styles.hint}>
               至少成功上传一张图片并完成封面设置后,才能开始生成。
+            </p>
+          )}
+          {startError !== null && (
+            <p className={styles.error} role="alert">
+              {startError}
             </p>
           )}
         </div>

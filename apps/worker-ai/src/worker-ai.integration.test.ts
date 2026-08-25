@@ -177,10 +177,10 @@ if (!RUN_PG_TESTS) {
     const provider = new MockImageGenerationProvider();
     const first = await provider.generate({
       projectId: "p",
-      sourceAssetIds: ["s"],
-      coverAssetId: "c",
       revision: 3,
       count: 4,
+      prompt: "",
+      referenceImages: [],
     });
     assert.equal(first.length, 4);
     assert.deepEqual(first[0], {

@@ -57,6 +57,7 @@ export class PostgresWorkflowEffectAdapter implements WorkflowEffectPort {
     sourceAssetIds: readonly string[];
     coverAssetId: string;
     revision: number;
+    styleKey?: string;
     effectKey: string;
     traceId?: string | undefined;
   }): Promise<{ jobId: string }> {
@@ -72,6 +73,7 @@ export class PostgresWorkflowEffectAdapter implements WorkflowEffectPort {
         sourceAssetIds: input.sourceAssetIds,
         coverAssetId: input.coverAssetId,
         revision: input.revision,
+        ...(input.styleKey !== undefined ? { styleKey: input.styleKey } : {}),
       },
     });
   }

@@ -15,6 +15,10 @@ export const apiConfigSchema = z.object({
   GRAPH_WORKFLOW_CANARY_USER_IDS: z.string().default(""),
   GRAPH_ADMIN_USER_IDS: z.string().default(""),
   UPLOAD_MAX_BYTES: z.coerce.number().int().positive().default(20_971_520),
+  SETTINGS_ENCRYPTION_KEY: z
+    .string()
+    .regex(/^[0-9a-f]{64}$/u)
+    .optional(),
 });
 
 export type ApiConfig = z.infer<typeof apiConfigSchema>;

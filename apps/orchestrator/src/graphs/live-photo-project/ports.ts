@@ -21,6 +21,7 @@ export interface WorkflowEffectPort {
     sourceAssetIds: readonly string[];
     coverAssetId: string;
     revision: number;
+    styleKey?: string;
     effectKey: string;
   }): Promise<ExternalJobReference>;
 

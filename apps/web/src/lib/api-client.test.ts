@@ -26,6 +26,9 @@ function recordingClient() {
     set(actionId: string, key: string): void {
       this.map.set(actionId, key);
     },
+    remove(actionId: string): void {
+      this.map.delete(actionId);
+    },
   };
   const client = new WorkflowApiClient({
     fetchImpl: async (_input, init) => {
@@ -156,6 +159,9 @@ function projectRecordingClient(responder: (call: RecordedCall) => unknown) {
     },
     set(actionId: string, key: string): void {
       this.map.set(actionId, key);
+    },
+    remove(actionId: string): void {
+      this.map.delete(actionId);
     },
   };
   const client = new WorkflowApiClient({
@@ -345,4 +351,152 @@ test("uploadToSignedUrl maps non-2xx to ApiProblemError", async () => {
       error.name === "ApiProblemError" &&
       (error as Error & { code?: string }).code === "HTTP_403",
   );
+});
+
+test("startWorkflowRun sends the styleKey inside input when provided", async () => {
+  const { client, calls } = projectRecordingClient(() => ({
+    data: { workflowRunId: "00000000-0000-4000-8000-0000000000c3" },
+  }));
+  await client.startWorkflowRun("p1", { styleKey: "film" });
+  assert.equal(calls[0]?.method, "POST");
+  assert.equal(calls[0]?.url, "http://test/v1/projects/p1/workflow-runs");
+  assert.deepEqual(calls[0]?.body, { input: { styleKey: "film" } });
+});
+
+test("startWorkflowRun keeps the empty body when no input is given", async () => {
+  const { client, calls } = projectRecordingClient(() => ({
+    data: { workflowRunId: "00000000-0000-4000-8000-0000000000c3" },
+  }));
+  await client.startWorkflowRun("p1");
+  assert.deepEqual(calls[0]?.body, {});
+});
+
+test("getImageProviderSettings reads the configuration without a key", async () => {
+  const { client, calls } = projectRecordingClient(() => ({
+    data: {
+      configured: true,
+      baseUrl: "https://api.example.test/v1",
+      model: "gpt-image-2",
+      enabled: true,
+      updatedAt: CREATED_AT,
+      keyPreview: "sk-…1234",
+    },
+  }));
+  const result = await client.getImageProviderSettings();
+  assert.equal(calls[0]?.method, "GET");
+  assert.equal(calls[0]?.url, "http://test/v1/settings/image-provider");
+  assert.equal(calls[0]?.key, undefined);
+  assert.equal(result.data.configured, true);
+  assert.equal(result.data.keyPreview, "sk-…1234");
+});
+
+test("putImageProviderSettings sends the full body with the fixed action key", async () => {
+  const { client, calls } = projectRecordingClient(() => ({
+    data: {
+      baseUrl: "https://api.example.test/v1",
+      model: "gpt-image-2",
+      enabled: true,
+      updatedAt: CREATED_AT,
+    },
+  }));
+  const body = {
+    baseUrl: "https://api.example.test/v1",
+    apiKey: "sk-secret",
+    model: "gpt-image-2",
+    enabled: true,
+  };
+  await client.putImageProviderSettings(body);
+  assert.equal(calls[0]?.method, "PUT");
+  assert.equal(calls[0]?.url, "http://test/v1/settings/image-provider");
+  assert.deepEqual(calls[0]?.body, body);
+  assert.ok(calls[0]?.key);
+});
+
+test("putImageProviderSettings retries reuse the key, success rotates it", async () => {
+  const keys: (string | undefined)[] = [];
+  const keyStore = {
+    map: new Map<string, string>(),
+    get(actionId: string): string | undefined {
+      return this.map.get(actionId);
+    },
+    set(actionId: string, key: string): void {
+      this.map.set(actionId, key);
+    },
+    remove(actionId: string): void {
+      this.map.delete(actionId);
+    },
+  };
+  let attempt = 0;
+  const client = new WorkflowApiClient({
+    fetchImpl: async (_input, init) => {
+      keys.push(
+        ((init?.headers ?? {}) as Record<string, string>)["idempotency-key"],
+      );
+      attempt += 1;
+      if (attempt === 1) {
+        return {
+          ok: false,
+          status: 500,
+          headers: new Headers({
+            "content-type": "application/problem+json",
+          }),
+          json: async () => ({ code: "UPSTREAM", title: "boom" }),
+        } as unknown as Response;
+      }
+      return jsonResponse({
+        data: {
+          baseUrl: "https://api.example.test/v1",
+          model: "gpt-image-2",
+          enabled: true,
+          updatedAt: CREATED_AT,
+        },
+      });
+    },
+    baseUrl: "http://test",
+    userId: "u",
+    keyStore,
+  });
+  const body = {
+    baseUrl: "https://api.example.test/v1",
+    apiKey: "sk-secret",
+    model: "gpt-image-2",
+  };
+  await assert.rejects(client.putImageProviderSettings(body));
+  await client.putImageProviderSettings(body);
+  assert.equal(keys[0], keys[1]);
+  await client.putImageProviderSettings(body);
+  assert.notEqual(keys[1], keys[2]);
+});
+
+test("deleteImageProviderSettings removes the stored key after success", async () => {
+  const { client, calls, keyStore } = projectRecordingClient(() => ({
+    data: { configured: false },
+  }));
+  const result = await client.deleteImageProviderSettings();
+  assert.equal(calls[0]?.method, "DELETE");
+  assert.equal(calls[0]?.url, "http://test/v1/settings/image-provider");
+  assert.equal(calls[0]?.body, undefined);
+  assert.ok(calls[0]?.key);
+  assert.equal(keyStore.map.has("settings:image-provider:delete"), false);
+  assert.equal(result.data.configured, false);
+});
+
+test("listStylePresets returns preset items", async () => {
+  const { client, calls } = projectRecordingClient(() => ({
+    data: {
+      items: [
+        {
+          key: "film",
+          name: "胶片日常",
+          description: "柔和胶片色调",
+          version: "style-extension.v1",
+        },
+      ],
+    },
+  }));
+  const result = await client.listStylePresets();
+  assert.equal(calls[0]?.method, "GET");
+  assert.equal(calls[0]?.url, "http://test/v1/style-presets");
+  assert.equal(calls[0]?.key, undefined);
+  assert.equal(result.data.items[0]?.key, "film");
 });

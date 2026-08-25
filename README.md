@@ -59,7 +59,7 @@ OPENAI_IMAGE_MODEL=gpt-image-2-2026-04-21
 
 ## 主流程
 
-网页入口：`/` 重定向到 `/projects`（项目列表/创建）→ `/projects/[id]/upload`（上传原图、选封面）→ `/projects/[id]`(Graph 工作流投影页：生成、选择 anchor、渲染、下载导出包）。
+网页入口：`/` 重定向到 `/projects`（项目列表/创建）→ `/projects/[id]/upload`（上传原图、选封面、选风格）→ `/projects/[id]`(Graph 工作流投影页：生成、选择 anchor、渲染、下载导出包）。生图接口在 `/settings` 按用户配置（OpenAI/NewAPI 兼容端点 + Key + 模型，密钥经 AES-256-GCM 加密后只存服务端，浏览器不直连生图 API);未配置时回退服务端 env，再回退 `mock`。
 
 ```text
 创建项目(POST /v1/projects,幂等)
@@ -67,8 +67,9 @@ OPENAI_IMAGE_MODEL=gpt-image-2-2026-04-21
 → 浏览器直传原图到 S3 兼容端点
 → API 校验大小与 Magic Bytes 并完成上传(POST /v1/assets/:id/confirm)
 → 设置封面(POST /v1/projects/:id/cover)
-→ 启动 Graph 工作流(POST /v1/projects/:id/workflow-runs,同事务写 Outbox)
-→ AI Worker 调用 Mock/OpenAI Provider 生成候选
+→ 选择风格 preset(GET /v1/style-presets)
+→ 启动 Graph 工作流(POST /v1/projects/:id/workflow-runs,input.styleKey,同事务写 Outbox)
+→ AI Worker 按用户配置解析 Provider,编译 Prompt(含 prompt_version/prompt_hash)生成候选
 → 用户在工作流页选择 anchor
 → Media Worker 渲染 MOV 与导出包
 → 网页下载 ZIP(短期签名 URL)
@@ -117,6 +118,8 @@ docs                 架构与 ADR
 - 增加 iOS Importer，写入 Live Photo 配对元数据并调用 PhotoKit。
 - 为 OpenAI Provider 增加组织验证、限流、成本预算和评估集。
 - 为 Media Worker 构建包含 FFmpeg、ImageMagick、libheif 的固定镜像。
+
+用户级生图接口(OpenAI 兼容端点)已支持：在 `/settings` 配置后由 `worker-ai` 在服务端调用，密钥经 `SETTINGS_ENCRYPTION_KEY`(AES-256-GCM）加密落库。风格 preset 由 `packages/prompt-kit` 管理，修改蓝图必须递增 preset version。
 
 协作和代码规则以根目录 [`AGENTS.md`](./AGENTS.md) 为准。交付校验、未验证项和上线前清单见 [`DELIVERY_NOTES.md`](./DELIVERY_NOTES.md)，完整文件目录见 [`FILE_INDEX.md`](./FILE_INDEX.md)。
 

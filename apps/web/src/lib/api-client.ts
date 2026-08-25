@@ -94,10 +94,53 @@ const setCoverResponseSchema = z.object({
     coverAssetId: z.string().uuid(),
   }),
 });
+const imageProviderSettingsResponseSchema = z.object({
+  data: z.object({
+    configured: z.boolean(),
+    baseUrl: z.string().min(1).optional(),
+    model: z.string().min(1).optional(),
+    enabled: z.boolean().optional(),
+    updatedAt: z.string().min(1).optional(),
+    keyPreview: z.string().nullable().optional(),
+  }),
+});
+const imageProviderSaveResponseSchema = z.object({
+  data: z.object({
+    baseUrl: z.string().min(1),
+    model: z.string().min(1),
+    enabled: z.boolean(),
+    updatedAt: z.string().min(1),
+  }),
+});
+const imageProviderDeleteResponseSchema = z.object({
+  data: z.object({ configured: z.literal(false) }),
+});
+const stylePresetsResponseSchema = z.object({
+  data: z.object({
+    items: z.array(
+      z.object({
+        key: z.string().min(1),
+        name: z.string().min(1),
+        description: z.string(),
+        version: z.string().min(1),
+      }),
+    ),
+  }),
+});
 
 export type WorkflowAction = "SELECT" | "REGENERATE" | "CANCEL";
 
 export type ProjectAssetStatus = "UPLOADING" | "READY" | "REJECTED";
+
+export const IMAGE_PROVIDER_PUT_ACTION_ID = "settings:image-provider:put";
+export const IMAGE_PROVIDER_DELETE_ACTION_ID = "settings:image-provider:delete";
+
+export interface StylePreset {
+  readonly key: string;
+  readonly name: string;
+  readonly description: string;
+  readonly version: string;
+}
 
 export interface ProjectSummary {
   readonly projectId: string;
@@ -132,6 +175,8 @@ export interface ApiClientOptions {
   readonly keyStore?: {
     get(actionId: string): string | undefined;
     set(actionId: string, key: string): void;
+    /** Optional rotation hook used after a completed logical action. */
+    remove?(actionId: string): void;
   };
   readonly userId?: string;
 }
@@ -158,9 +203,20 @@ function writeStoredKey(actionId: string, key: string): void {
   }
 }
 
+function removeStoredKey(actionId: string): void {
+  memoryKeys.delete(actionId);
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(`workflow-idempotency:${actionId}`);
+  } catch {
+    // Restricted storage: the in-memory entry is already gone.
+  }
+}
+
 const defaultKeyStore = {
   get: readStoredKey,
   set: writeStoredKey,
+  remove: removeStoredKey,
 };
 
 let fallbackKeyCounter = 0;
@@ -188,6 +244,7 @@ export class WorkflowApiClient {
   private readonly keys: {
     get(actionId: string): string | undefined;
     set(actionId: string, key: string): void;
+    remove?(actionId: string): void;
   };
   private readonly userId: string;
 
@@ -238,16 +295,88 @@ export class WorkflowApiClient {
     return schema.parse(payload);
   }
 
-  startWorkflowRun(projectId: string): Promise<{
+  /**
+   * Starts the project workflow run. The idempotency key stays
+   * `start:${projectId}` even when a styleKey is given: a project has at most
+   * one in-flight run, so restarting with a different style intentionally
+   * replays the first recorded run instead of opening a parallel one.
+   */
+  startWorkflowRun(
+    projectId: string,
+    input?: { styleKey?: string },
+  ): Promise<{
     data: { workflowRunId: string };
   }> {
+    const styleKey = input?.styleKey;
     return this.request(
       "POST",
       `/v1/projects/${projectId}/workflow-runs`,
       startWorkflowResponseSchema,
-      {},
+      styleKey === undefined ? {} : { input: { styleKey } },
       `start:${projectId}`,
     );
+  }
+
+  getImageProviderSettings(): Promise<
+    z.infer<typeof imageProviderSettingsResponseSchema>
+  > {
+    return this.request(
+      "GET",
+      "/v1/settings/image-provider",
+      imageProviderSettingsResponseSchema,
+    );
+  }
+
+  /**
+   * Full-replace save; the server never echoes the key back, so apiKey must
+   * always carry the complete secret. The fixed actionId makes retries of the
+   * same save replay the first response; after a successful save the key
+   * rotates, because reusing it with a different body would 409.
+   */
+  async putImageProviderSettings(input: {
+    baseUrl: string;
+    apiKey: string;
+    model: string;
+    enabled?: boolean;
+  }): Promise<{
+    data: { baseUrl: string; model: string; enabled: boolean; updatedAt: string };
+  }> {
+    const result = await this.request(
+      "PUT",
+      "/v1/settings/image-provider",
+      imageProviderSaveResponseSchema,
+      {
+        baseUrl: input.baseUrl,
+        apiKey: input.apiKey,
+        model: input.model,
+        ...(input.enabled === undefined ? {} : { enabled: input.enabled }),
+      },
+      IMAGE_PROVIDER_PUT_ACTION_ID,
+    );
+    this.keys.remove?.(IMAGE_PROVIDER_PUT_ACTION_ID);
+    return result;
+  }
+
+  /**
+   * Fixed actionId like the save above; the stored key is removed after a
+   * successful delete so the next delete starts a fresh idempotency record.
+   */
+  async deleteImageProviderSettings(): Promise<{
+    data: { configured: false };
+  }> {
+    const result = await this.request(
+      "DELETE",
+      "/v1/settings/image-provider",
+      imageProviderDeleteResponseSchema,
+      undefined,
+      IMAGE_PROVIDER_DELETE_ACTION_ID,
+    );
+    this.keys.remove?.(IMAGE_PROVIDER_DELETE_ACTION_ID);
+    return result;
+  }
+
+  listStylePresets(): Promise<{ data: { items: StylePreset[] } }> {
+    return this.request("GET", "/v1/style-presets", stylePresetsResponseSchema);
   }
 
   getWorkflowRun(workflowRunId: string): Promise<{

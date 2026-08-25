@@ -37,6 +37,10 @@ class FakeObjectStorage implements ObjectStoragePort {
   async readObjectPrefix(): Promise<never> {
     throw new Error("not used");
   }
+
+  async getObject(): Promise<never> {
+    throw new Error("not used");
+  }
 }
 
 test("object-storage download adapter forwards only the object key and TTL", async () => {

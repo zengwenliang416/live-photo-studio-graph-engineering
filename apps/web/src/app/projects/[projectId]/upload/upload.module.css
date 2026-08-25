@@ -218,6 +218,46 @@
   accent-color: var(--accent);
 }
 
+.styleGroup {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.styleCard {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 10px;
+  align-items: center;
+  min-height: 44px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.styleCard:has(input:checked) {
+  border-color: var(--accent);
+  background: rgb(230 175 46 / 12%);
+}
+
+.styleCard input {
+  grid-row: span 2;
+  accent-color: var(--accent);
+}
+
+.styleName {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.styleDescription {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
 .actions {
   margin-top: 26px;
 }
@@ -280,7 +320,8 @@
 .button:focus-visible,
 .backLink:focus-visible,
 .fileInput:focus-visible,
-.coverChoice:has(input:focus-visible) {
+.coverChoice:has(input:focus-visible),
+.styleCard:has(input:focus-visible) {
   outline: 3px solid rgb(230 175 46 / 70%);
   outline-offset: 3px;
 }

@@ -17,6 +17,7 @@ export const LivePhotoProjectState = Annotation.Root({
     default: () => [],
   }),
   coverAssetId: Annotation<string | undefined>(),
+  styleKey: Annotation<string | undefined>(),
   styleReferenceAssetIds: Annotation<string[]>({
     reducer: uniqueStrings,
     default: () => [],
@@ -63,6 +64,7 @@ export const livePhotoProjectStartInputSchema = z.object({
   graphVersion: z.literal("v1"),
   sourceAssetIds: z.array(z.string().uuid()).min(1),
   coverAssetId: z.string().uuid(),
+  styleKey: z.string().min(1).max(64).optional(),
   styleReferenceAssetIds: z.array(z.string().uuid()).default([]),
   identityReferenceAssetIds: z.array(z.string().uuid()).default([]),
   maxRepairAttempts: z.number().int().min(0).max(10).default(2),

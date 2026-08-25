@@ -47,6 +47,19 @@
   letter-spacing: 0.02em;
 }
 
+.settingsLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--muted);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.settingsLink:hover {
+  color: var(--text);
+}
+
 .content {
   width: min(100%, 720px);
   margin: 0 auto;
@@ -212,7 +225,8 @@
 
 .button:focus-visible,
 .card:focus-visible,
-.input:focus-visible {
+.input:focus-visible,
+.settingsLink:focus-visible {
   outline: 3px solid rgb(230 175 46 / 70%);
   outline-offset: 3px;
 }
