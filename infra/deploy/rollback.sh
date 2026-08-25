@@ -15,4 +15,4 @@ docker compose --env-file "$env_file" -f "$compose_file" up -d \
   api orchestrator worker-ai worker-media web
 
 COMPOSE_FILE="$compose_file" DEPLOY_ENV_FILE="$env_file" \
-  infra/deploy/smoke-test.sh
+  sh infra/deploy/smoke-test.sh

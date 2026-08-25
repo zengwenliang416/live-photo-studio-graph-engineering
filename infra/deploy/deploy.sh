@@ -31,5 +31,5 @@ docker compose --env-file "$env_file" -f "$compose_file" run --rm checkpoint-set
 docker compose --env-file "$env_file" -f "$compose_file" up -d --remove-orphans
 
 COMPOSE_FILE="$compose_file" DEPLOY_ENV_FILE="$env_file" \
-  infra/deploy/smoke-test.sh
-DEPLOY_STATE_DIR="$state_dir" infra/deploy/record-release.sh "$APP_IMAGE"
+  sh infra/deploy/smoke-test.sh
+DEPLOY_STATE_DIR="$state_dir" sh infra/deploy/record-release.sh "$APP_IMAGE"
