@@ -12,20 +12,22 @@ const styleSource = readFileSync(
 );
 
 test("project page states the Web ZIP and Photos-library boundary", () => {
-  assert.match(pageSource, /future iOS Importer/u);
-  assert.match(pageSource, /does not save a Live Photo directly/u);
-  assert.match(pageSource, /Photos library/u);
+  assert.match(pageSource, /iOS 导入器/u);
+  assert.match(pageSource, /不会直接在 iPhone/u);
+  assert.match(pageSource, /照片图库/u);
 });
 
 test("project page keeps workflow authority on the server", () => {
-  assert.match(pageSource, /server projection/u);
+  assert.match(pageSource, /Server projection/u);
   assert.match(pageSource, /resolveWorkflowRunId/u);
   assert.match(pageSource, /getLatestExportDownload/u);
   assert.match(pageSource, /allowedActions\.includes\("CANCEL"\)/u);
   assert.doesNotMatch(pageSource, /mockWorkflowOrchestrator|DemoZipBuilder|indexedDB/u);
 });
 
-test("mobile accessibility and focus evidence is present in the scoped design module", () => {
+test("desktop workbench and mobile accessibility evidence are both present", () => {
+  assert.match(styleSource, /grid-template-columns: minmax\(0, 1\.4fr\)/u);
+  assert.match(styleSource, /grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/u);
   assert.match(styleSource, /@media \(max-width: 390px\)/u);
   assert.match(styleSource, /min-height: 44px/u);
   assert.match(styleSource, /:focus-visible/u);

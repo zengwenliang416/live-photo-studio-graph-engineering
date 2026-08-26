@@ -171,7 +171,7 @@ test("put then get round-trips without ever exposing the api key", async () => {
   await app.close();
 });
 
-test("style presets endpoint lists all presets with key, name and version", async () => {
+test("style presets endpoint lists the complete visual catalog", async () => {
   const { app } = await createApp();
 
   const response = await request(app.getHttpServer())
@@ -179,11 +179,14 @@ test("style presets endpoint lists all presets with key, name and version", asyn
     .set("x-user-id", USER);
   assert.equal(response.status, 200);
   const items = response.body.data.items as Array<Record<string, unknown>>;
-  assert.equal(items.length, 4);
+  assert.equal(items.length, 15);
   for (const item of items) {
     assert.ok(typeof item["key"] === "string");
     assert.ok(typeof item["name"] === "string");
     assert.ok(typeof item["version"] === "string");
+    assert.ok(typeof item["category"] === "string");
+    assert.ok(Array.isArray(item["colorPalette"]));
+    assert.ok(typeof item["previewStyle"] === "string");
   }
   await app.close();
 });

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import {
   QueryClient,
   QueryClientProvider,
@@ -13,7 +12,7 @@ import {
   ApiProblemError,
   WorkflowApiClient,
 } from "../../lib/api-client.js";
-import { AccountActions } from "../../components/auth/account-actions.js";
+import { AppShell } from "../../components/app-shell/app-shell.js";
 import styles from "./settings.module.css";
 
 const DEFAULT_MODEL = "gpt-image-2";
@@ -109,28 +108,15 @@ function SettingsPanel(): React.JSX.Element {
   };
 
   return (
-    <main className={styles.shell}>
-      <header className={styles.header}>
-        <div className={styles.brand} aria-label="Live Photo Studio">
-          <span className={styles.brandMark} aria-hidden="true">
-            ◌
-          </span>
-          <span className={styles.brandName}>Live Photo Studio</span>
-        </div>
-        <div className={styles.headerActions}>
-          <Link className={styles.backLink} href="/projects">
-            返回项目列表
-          </Link>
-          <AccountActions />
-        </div>
-      </header>
-
-      <div className={styles.content}>
-        <p className={styles.eyebrow}>生图设置</p>
-        <h1 className={styles.title}>配置生图接口。</h1>
-        <p className={styles.intro}>
-          密钥仅在你的服务器端加密存储,浏览器不会直接调用生图接口。
-        </p>
+    <AppShell active="settings" context="生图设置">
+      <main className={styles.workspace}>
+        <header className={styles.pageHeader}>
+          <p className={styles.eyebrow}>Settings / Provider channel</p>
+          <h1 className={styles.title}>生图服务设置</h1>
+          <p className={styles.intro}>
+            配置个人图片模型通道。密钥只在服务器端加密存储，浏览器不会直接调用生图接口。
+          </p>
+        </header>
 
         {settingsQuery.isLoading && (
           <p className={styles.status} role="status" aria-live="polite">
@@ -151,149 +137,208 @@ function SettingsPanel(): React.JSX.Element {
           </div>
         )}
 
-        {settingsQuery.isSuccess && settings?.configured === false && (
-          <p className={styles.empty}>
-            尚未配置生图接口。未配置时将使用服务端默认(mock)通道,适合本地开发与联调;接入真实图片模型前请先在下方完成配置。
-          </p>
-        )}
-
         {settingsQuery.isSuccess && (
-          <section className={styles.panel} aria-labelledby="form-title">
-            <h2 className={styles.sectionTitle} id="form-title">
-              接口配置
-            </h2>
-            <form className={styles.form} onSubmit={onSubmit}>
-              <label className={styles.label} htmlFor="provider-base-url">
-                接口地址
-              </label>
-              <input
-                className={styles.input}
-                id="provider-base-url"
-                name="provider-base-url"
-                type="url"
-                required
-                placeholder="https://api.example.com/v1"
-                value={baseUrl}
-                onChange={(event) => setBaseUrl(event.target.value)}
-              />
-
-              <label className={styles.label} htmlFor="provider-api-key">
-                API Key
-              </label>
-              <input
-                className={styles.input}
-                id="provider-api-key"
-                name="provider-api-key"
-                type="password"
-                required
-                autoComplete="off"
-                placeholder={
-                  settings?.configured === true && settings.keyPreview
-                    ? `当前密钥:${settings.keyPreview}`
-                    : "输入完整的 API Key"
-                }
-                value={apiKey}
-                onChange={(event) => setApiKey(event.target.value)}
-              />
-              <p className={styles.hint}>
-                密钥不会回显;每次保存都需要重新输入完整密钥。
-              </p>
-
-              <label className={styles.label} htmlFor="provider-model">
-                模型
-              </label>
-              <input
-                className={styles.input}
-                id="provider-model"
-                name="provider-model"
-                type="text"
-                required
-                placeholder={DEFAULT_MODEL}
-                value={model}
-                onChange={(event) => setModel(event.target.value)}
-              />
-
-              <label className={styles.switch} htmlFor="provider-enabled">
-                <input
-                  id="provider-enabled"
-                  name="provider-enabled"
-                  type="checkbox"
-                  checked={enabled}
-                  onChange={(event) => setEnabled(event.target.checked)}
-                />
-                启用该生图接口
-              </label>
-
+          <div className={styles.settingsGrid}>
+            <aside className={styles.contextPanel}>
+              <span className={styles.panelIndex}>CHANNEL STATUS</span>
+              <h2 className={styles.sectionTitle}>当前通道</h2>
+              <div
+                className={styles.channelStatus}
+                data-configured={settings?.configured || undefined}
+              >
+                <span className={styles.statusDot} aria-hidden="true" />
+                <div>
+                  <strong>
+                    {settings?.configured === true
+                      ? "个人通道已配置"
+                      : "使用服务端默认通道"}
+                  </strong>
+                  <p>
+                    {settings?.configured === true
+                      ? `${settings.model ?? DEFAULT_MODEL} · ${
+                          settings.enabled === false ? "已停用" : "已启用"
+                        }`
+                      : "默认 mock 通道适合本地开发与无费用联调。"}
+                  </p>
+                </div>
+              </div>
+              <dl className={styles.securityList}>
+                <div>
+                  <dt>密钥边界</dt>
+                  <dd>仅服务端 AES-256-GCM 加密存储</dd>
+                </div>
+                <div>
+                  <dt>浏览器边界</dt>
+                  <dd>前端不会持有或直连模型密钥</dd>
+                </div>
+                <div>
+                  <dt>工作流边界</dt>
+                  <dd>AI 调用只在异步 Worker 中执行</dd>
+                </div>
+              </dl>
               {settings?.updatedAt !== undefined && (
-                <p className={styles.hint}>
-                  上次更新:{settings.updatedAt}
+                <p className={styles.updatedAt}>
+                  上次更新：{settings.updatedAt}
                 </p>
               )}
+            </aside>
 
-              <button
-                className={`${styles.button} ${styles.buttonPrimary}`}
-                type="submit"
-                disabled={!canSave}
-                aria-busy={saveMutation.isPending}
-              >
-                {saveMutation.isPending ? "保存中…" : "保存设置"}
-              </button>
-            </form>
-
-            {settings?.configured === true && (
-              <div className={styles.dangerZone}>
-                {confirmingDelete ? (
-                  <>
-                    <p className={styles.hint}>
-                      确认删除?删除后将回退到服务端默认通道。
-                    </p>
-                    <div className={styles.dangerActions}>
-                      <button
-                        className={`${styles.button} ${styles.buttonDanger}`}
-                        type="button"
-                        disabled={isBusy}
-                        aria-busy={deleteMutation.isPending}
-                        onClick={() => deleteMutation.mutate()}
-                      >
-                        {deleteMutation.isPending ? "删除中…" : "确认删除"}
-                      </button>
-                      <button
-                        className={styles.button}
-                        type="button"
-                        disabled={isBusy}
-                        onClick={() => setConfirmingDelete(false)}
-                      >
-                        取消
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <button
-                    className={styles.button}
-                    type="button"
-                    disabled={isBusy}
-                    onClick={() => setConfirmingDelete(true)}
-                  >
-                    删除配置
-                  </button>
-                )}
+            <section className={styles.panel} aria-labelledby="form-title">
+              <div className={styles.panelHeader}>
+                <div>
+                  <span className={styles.panelIndex}>PROVIDER CONFIGURATION</span>
+                  <h2 className={styles.sectionTitle} id="form-title">
+                    接口配置
+                  </h2>
+                </div>
+                <span className={styles.keyState}>
+                  {settings?.configured === true
+                    ? `密钥 ${settings.keyPreview ?? "已保存"}`
+                    : "尚未保存密钥"}
+                </span>
               </div>
-            )}
+              <form className={styles.form} onSubmit={onSubmit}>
+                <div className={styles.field}>
+                  <label className={styles.label} htmlFor="provider-base-url">
+                    接口地址
+                  </label>
+                  <input
+                    className={styles.input}
+                    id="provider-base-url"
+                    name="provider-base-url"
+                    type="url"
+                    required
+                    placeholder="https://api.example.com/v1"
+                    value={baseUrl}
+                    onChange={(event) => setBaseUrl(event.target.value)}
+                  />
+                  <p className={styles.hint}>
+                    使用 OpenAI 兼容的服务端 Base URL。
+                  </p>
+                </div>
 
-            {notice !== null && (
-              <p className={styles.notice} role="status" aria-live="polite">
-                {notice}
-              </p>
-            )}
-            {formError !== null && (
-              <p className={styles.error} role="alert">
-                {formError}
-              </p>
-            )}
-          </section>
+                <div className={styles.field}>
+                  <label className={styles.label} htmlFor="provider-api-key">
+                    API Key
+                  </label>
+                  <input
+                    className={styles.input}
+                    id="provider-api-key"
+                    name="provider-api-key"
+                    type="password"
+                    required
+                    autoComplete="off"
+                    placeholder={
+                      settings?.configured === true && settings.keyPreview
+                        ? `当前密钥:${settings.keyPreview}`
+                        : "输入完整的 API Key"
+                    }
+                    value={apiKey}
+                    onChange={(event) => setApiKey(event.target.value)}
+                  />
+                  <p className={styles.hint}>
+                    密钥不会回显；每次保存都需要重新输入完整密钥。
+                  </p>
+                </div>
+
+                <div className={styles.field}>
+                  <label className={styles.label} htmlFor="provider-model">
+                    模型
+                  </label>
+                  <input
+                    className={styles.input}
+                    id="provider-model"
+                    name="provider-model"
+                    type="text"
+                    required
+                    placeholder={DEFAULT_MODEL}
+                    value={model}
+                    onChange={(event) => setModel(event.target.value)}
+                  />
+                  <p className={styles.hint}>
+                    生产环境优先固定经过验证的模型 Snapshot。
+                  </p>
+                </div>
+
+                <label className={styles.switch} htmlFor="provider-enabled">
+                  <span>
+                    <strong>启用该生图接口</strong>
+                    <small>停用后工作流回退到服务端默认通道。</small>
+                  </span>
+                  <input
+                    id="provider-enabled"
+                    name="provider-enabled"
+                    type="checkbox"
+                    checked={enabled}
+                    onChange={(event) => setEnabled(event.target.checked)}
+                  />
+                </label>
+
+                <button
+                  className={`${styles.button} ${styles.buttonPrimary}`}
+                  type="submit"
+                  disabled={!canSave}
+                  aria-busy={saveMutation.isPending}
+                >
+                  {saveMutation.isPending ? "保存中…" : "保存接口设置"}
+                </button>
+              </form>
+
+              {settings?.configured === true && (
+                <div className={styles.dangerZone}>
+                  {confirmingDelete ? (
+                    <>
+                      <p className={styles.hint}>
+                        确认删除？删除后将回退到服务端默认通道。
+                      </p>
+                      <div className={styles.dangerActions}>
+                        <button
+                          className={`${styles.button} ${styles.buttonDanger}`}
+                          type="button"
+                          disabled={isBusy}
+                          aria-busy={deleteMutation.isPending}
+                          onClick={() => deleteMutation.mutate()}
+                        >
+                          {deleteMutation.isPending ? "删除中…" : "确认删除"}
+                        </button>
+                        <button
+                          className={styles.button}
+                          type="button"
+                          disabled={isBusy}
+                          onClick={() => setConfirmingDelete(false)}
+                        >
+                          取消
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <button
+                      className={styles.button}
+                      type="button"
+                      disabled={isBusy}
+                      onClick={() => setConfirmingDelete(true)}
+                    >
+                      删除配置
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {notice !== null && (
+                <p className={styles.notice} role="status" aria-live="polite">
+                  {notice}
+                </p>
+              )}
+              {formError !== null && (
+                <p className={styles.error} role="alert">
+                  {formError}
+                </p>
+              )}
+            </section>
+          </div>
         )}
-      </div>
-    </main>
+      </main>
+    </AppShell>
   );
 }
 

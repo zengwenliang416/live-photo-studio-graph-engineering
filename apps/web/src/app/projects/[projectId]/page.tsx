@@ -10,7 +10,7 @@ import {
 import { resolveWorkflowRunId } from "../../../lib/workflow-session.js";
 import { useWorkflow } from "../../../hooks/use-workflow.js";
 import { useWorkflowEvents } from "../../../hooks/use-workflow-events.js";
-import { AccountActions } from "../../../components/auth/account-actions.js";
+import { AppShell } from "../../../components/app-shell/app-shell.js";
 import styles from "./project-workflow.module.css";
 
 const GRAPH_ENABLED =
@@ -141,11 +141,10 @@ function ReviewPanel(): React.JSX.Element {
         <section className={styles.content} aria-labelledby="legacy-title">
           <p className={styles.eyebrow}>Legacy route</p>
           <h1 className={styles.title} id="legacy-title">
-            Legacy path is active
+            当前会话未启用 Graph 工作流
           </h1>
           <p className={styles.intro}>
-            This session is not in the Graph canary cohort. The local snapshot
-            does not claim to provide a legacy fallback implementation.
+            当前部署不提供浏览器端旧流程回退，工作流必须由服务端 Graph 投影驱动。
           </p>
         </section>
       </main>
@@ -156,12 +155,12 @@ function ReviewPanel(): React.JSX.Element {
     return (
       <main className={styles.shell} aria-busy="true">
         <section className={styles.content} aria-labelledby="loading-title">
-          <p className={styles.eyebrow}>Live Photo Studio</p>
+          <p className={styles.eyebrow}>Live Photo Studio / Session</p>
           <h1 className={styles.title} id="loading-title">
-            Reopening your studio session
+            正在恢复创作工作区
           </h1>
           <p className={styles.intro} role="status" aria-live="polite">
-            The server projection is being checked before this page resumes.
+            正在读取服务端工作流投影，页面不会创建新的客户端阶段。
           </p>
         </section>
       </main>
@@ -175,18 +174,17 @@ function ReviewPanel(): React.JSX.Element {
           <p className={styles.eyebrow}>Workflow unavailable</p>
           <div className={styles.error} role="alert">
             <h1 className={styles.sectionTitle} id="error-title">
-              We could not load this workflow
+              无法加载当前工作流
             </h1>
             <p>
-              No client-side phase was created. Retry to query the server
-              projection again.
+              页面没有创建任何客户端阶段。请重试查询服务端工作流投影。
             </p>
             <button
               className={`${styles.button} ${styles.buttonPrimary}`}
               type="button"
               onClick={retry}
             >
-              Retry
+              重试
             </button>
           </div>
         </section>
@@ -203,33 +201,26 @@ function ReviewPanel(): React.JSX.Element {
     !terminal && workflow.allowedActions.includes("CANCEL");
 
   return (
-    <main className={styles.shell}>
-      <header className={styles.header}>
-        <div className={styles.brand} aria-label="Live Photo Studio">
-          <span className={styles.brandMark} aria-hidden="true">
-            ◌
-          </span>
-          <span className={styles.brandName}>Live Photo Studio</span>
-          <span className={styles.badge}>Graph v1</span>
-        </div>
-        <div className={styles.headerActions}>
-          <span className={styles.headerMeta}>
-            run {runId ? shortId(runId) : "pending"}
-          </span>
-          <AccountActions />
-        </div>
-      </header>
+    <AppShell
+      active="projects"
+      context={`工作流 ${runId ? shortId(runId) : "pending"}`}
+    >
+      <main className={styles.workspace}>
+        <header className={styles.pageHeader}>
+          <div>
+            <p className={styles.eyebrow}>Graph workflow / Server projection</p>
+            <h1 className={styles.title}>让静态画面真正开始呼吸</h1>
+            <p className={styles.intro}>
+              生成、人工选择与媒体渲染均异步执行；刷新页面只会恢复同一个工作流运行。
+            </p>
+          </div>
+          <div className={styles.runMeta}>
+            <span>GRAPH V1</span>
+            <code>{runId ? shortId(runId) : "PENDING"}</code>
+          </div>
+        </header>
 
-      <div className={styles.content}>
-        <p className={styles.eyebrow}>Project workflow / server projection</p>
-        <h1 className={styles.title}>Make the still image feel alive.</h1>
-        <p className={styles.intro}>
-          Generation, human selection and media rendering run asynchronously.
-          Refreshing this page reopens the same workflow run instead of
-          inventing a new client-side phase.
-        </p>
-
-        <ol className={styles.progress} aria-label="Progress by stage">
+        <ol className={styles.progress} aria-label="工作流阶段">
           {stageList.map(
             ({
               stage,
@@ -246,113 +237,149 @@ function ReviewPanel(): React.JSX.Element {
                 aria-current={active ? "step" : undefined}
                 data-done={done || undefined}
               >
-                {phaseLabel(stage)}
+                <span>{phaseLabel(stage)}</span>
+                <small>{done ? "已完成" : active ? "当前阶段" : "等待"}</small>
               </li>
             ),
           )}
         </ol>
 
-        <section className={styles.panel} aria-labelledby="workflow-title">
-          <div className={styles.phaseRow}>
-            <h2 className={styles.sectionTitle} id="workflow-title">
-              {phaseLabel(phase)}
-            </h2>
-            <span className={styles.phase}>{phase}</span>
-          </div>
-          <p className={styles.status} role="status" aria-live="polite">
-            {workflow.run?.status === "INTERRUPTED"
-              ? "This step is waiting for your decision."
-              : "The workflow state comes from the API projection; SSE only refreshes this view."}
-          </p>
-
-          {workflow.allowedActions.includes("SELECT") && (
-            <fieldset className={styles.task}>
-              <legend className={styles.taskLegend}>
-                Select an anchor image
-              </legend>
-              <div className={styles.candidateList}>
-                {workflow.candidateOutputIds.map((outputId, index) => (
-                  <label className={styles.candidate} key={outputId}>
-                    <input
-                      type="radio"
-                      name="anchor-output"
-                      value={outputId}
-                      checked={selectedOutputId === outputId}
-                      onChange={() => setSelectedOutputId(outputId)}
-                    />
-                    <span>Candidate {index + 1}</span>
-                    <code className={styles.candidateCode}>
-                      {shortId(outputId)}
-                    </code>
-                  </label>
-                ))}
+        <div className={styles.workflowGrid}>
+          <section className={styles.reviewPanel} aria-labelledby="workflow-title">
+            <div className={styles.phaseRow}>
+              <div>
+                <span className={styles.panelIndex}>HUMAN REVIEW DESK</span>
+                <h2 className={styles.sectionTitle} id="workflow-title">
+                  {phaseLabel(phase)}
+                </h2>
               </div>
-              <button
-                className={`${styles.button} ${styles.buttonPrimary}`}
-                type="button"
-                onClick={() => onDecide("SELECT")}
-                disabled={workflow.isMutating || !selectedOutputId}
-              >
-                Select anchor
-              </button>
-            </fieldset>
-          )}
-
-          <div
-            className={styles.actions}
-            role="group"
-            aria-label="Workflow actions"
-          >
-            {workflow.allowedActions.includes("REGENERATE") && (
-              <button
-                className={styles.button}
-                type="button"
-                onClick={() => onDecide("REGENERATE")}
-                disabled={workflow.isMutating}
-              >
-                Regenerate
-              </button>
-            )}
-            {canCancel && (
-              <button
-                className={`${styles.button} ${styles.buttonDanger}`}
-                type="button"
-                onClick={() => workflow.cancel()}
-                disabled={workflow.isMutating}
-              >
-                Cancel workflow
-              </button>
-            )}
-          </div>
-
-          {workflow.run?.status === "SUCCEEDED" && (
-            <div className={styles.actions}>
-              <button
-                className={`${styles.button} ${styles.buttonPrimary}`}
-                type="button"
-                onClick={() => void downloadLatestExport()}
-                disabled={isDownloading}
-              >
-                {isDownloading
-                  ? "Preparing download..."
-                  : "Download resource package"}
-              </button>
+              <span className={styles.phase}>{phase}</span>
             </div>
-          )}
-          {downloadError !== null && downloadError !== undefined && (
-            <p className={styles.error} role="alert">
-              {downloadError instanceof Error
-                ? downloadError.message
-                : "The export download is not available yet."}
+            <p className={styles.status} role="status" aria-live="polite">
+              {workflow.run?.status === "INTERRUPTED"
+                ? "当前阶段正在等待你的人工决策。"
+                : "状态来自 API 投影，SSE 只负责提示页面刷新。"}
             </p>
-          )}
 
-          <p className={styles.notice}>
-            The Web result is a downloadable resource package for a future iOS Importer. The Web export does not save a Live Photo directly to the iPhone Photos library as a native Live Photo. This page never creates a browser ZIP; completed exports come from the Media Worker and are delivered through the API&apos;s private download boundary.
-          </p>
-        </section>
-      </div>
-    </main>
+            {workflow.allowedActions.includes("SELECT") ? (
+              <fieldset className={styles.task}>
+                <legend className={styles.taskLegend}>选择系列基准图</legend>
+                <p className={styles.taskCopy}>
+                  从候选中选定一张作为后续系列延展的视觉锚点。
+                </p>
+                <div className={styles.candidateList}>
+                  {workflow.candidateOutputIds.map((outputId, index) => (
+                    <label className={styles.candidate} key={outputId}>
+                      <input
+                        type="radio"
+                        name="anchor-output"
+                        value={outputId}
+                        checked={selectedOutputId === outputId}
+                        onChange={() => setSelectedOutputId(outputId)}
+                      />
+                      <span
+                        className={styles.candidateVisual}
+                        data-variant={index % 4}
+                      >
+                        <span>候选 {String.fromCharCode(65 + index)}</span>
+                        <code>{shortId(outputId)}</code>
+                      </span>
+                      <span className={styles.candidateBody}>
+                        <strong>光影变奏 {index + 1}</strong>
+                        <small>点击卡片选择此候选作为系列视觉基准。</small>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            ) : (
+              <div className={styles.waitingStage}>
+                <span className={styles.waitingMark} aria-hidden="true">
+                  ◌
+                </span>
+                <h3>{phaseLabel(phase)}</h3>
+                <p>工作流正在服务器端推进，页面会在状态变化时更新。</p>
+              </div>
+            )}
+          </section>
+
+          <aside className={styles.commandPanel}>
+            <section className={styles.commandCard}>
+              <span className={styles.panelIndex}>CURRENT COMMAND</span>
+              <h2 className={styles.sectionTitle}>阶段操作</h2>
+              <div
+                className={styles.actions}
+                role="group"
+                aria-label="工作流操作"
+              >
+                {workflow.allowedActions.includes("SELECT") && (
+                  <button
+                    className={`${styles.button} ${styles.buttonPrimary}`}
+                    type="button"
+                    onClick={() => onDecide("SELECT")}
+                    disabled={workflow.isMutating || !selectedOutputId}
+                  >
+                    确认基准图并继续
+                  </button>
+                )}
+                {workflow.allowedActions.includes("REGENERATE") && (
+                  <button
+                    className={styles.button}
+                    type="button"
+                    onClick={() => onDecide("REGENERATE")}
+                    disabled={workflow.isMutating}
+                  >
+                    重新生成候选
+                  </button>
+                )}
+                {canCancel && (
+                  <button
+                    className={`${styles.button} ${styles.buttonDanger}`}
+                    type="button"
+                    onClick={() => workflow.cancel()}
+                    disabled={workflow.isMutating}
+                  >
+                    取消工作流
+                  </button>
+                )}
+              </div>
+            </section>
+
+            {workflow.run?.status === "SUCCEEDED" && (
+              <section className={styles.commandCard}>
+                <span className={styles.panelIndex}>EXPORT PACKAGE</span>
+                <h2 className={styles.sectionTitle}>导出交付</h2>
+                <button
+                  className={`${styles.button} ${styles.buttonPrimary}`}
+                  type="button"
+                  onClick={() => void downloadLatestExport()}
+                  disabled={isDownloading}
+                >
+                  {isDownloading ? "正在准备下载…" : "下载资源包"}
+                </button>
+              </section>
+            )}
+
+            {downloadError !== null && downloadError !== undefined && (
+              <p className={styles.error} role="alert">
+                {downloadError instanceof Error
+                  ? downloadError.message
+                  : "导出资源包暂不可用。"}
+              </p>
+            )}
+
+            <section className={styles.boundaryCard}>
+              <span className={styles.panelIndex}>DELIVERY BOUNDARY</span>
+              <p>
+                Web 结果是供未来 iOS 导入器使用的资源包，不会直接在 iPhone
+                照片图库中保存原生 Live Photo。资源包由 Media Worker
+                生成，并通过 API 私有下载边界交付。
+              </p>
+            </section>
+          </aside>
+        </div>
+      </main>
+    </AppShell>
   );
 }
 

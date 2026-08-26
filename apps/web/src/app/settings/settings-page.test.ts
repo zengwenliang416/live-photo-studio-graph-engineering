@@ -9,12 +9,12 @@ const styleSource = readFileSync(
 );
 
 test("settings page renders the provider form with labels and Chinese copy", () => {
-  assert.match(pageSource, /配置生图接口/u);
+  assert.match(pageSource, /生图服务设置/u);
   assert.match(pageSource, /接口地址/u);
   assert.match(pageSource, /API Key/u);
   assert.match(pageSource, /模型/u);
   assert.match(pageSource, /启用该生图接口/u);
-  assert.match(pageSource, /保存设置/u);
+  assert.match(pageSource, /保存接口设置/u);
   assert.match(pageSource, /删除配置/u);
   assert.match(pageSource, /htmlFor="provider-base-url"/u);
   assert.match(pageSource, /htmlFor="provider-api-key"/u);
@@ -31,8 +31,8 @@ test("settings page never echoes the key and states the browser boundary", () =>
 });
 
 test("settings page guides unconfigured users to the server default", () => {
-  assert.match(pageSource, /尚未配置生图接口/u);
-  assert.match(pageSource, /服务端默认\(mock\)通道/u);
+  assert.match(pageSource, /使用服务端默认通道/u);
+  assert.match(pageSource, /默认 mock 通道/u);
 });
 
 test("settings page requires a full key before saving and double-confirms delete", () => {
@@ -53,7 +53,11 @@ test("settings page uses the centralized client with status and alert regions", 
   assert.doesNotMatch(pageSource, /\bfetch\(/u);
 });
 
-test("settings page styles stay usable at 390px with 44px targets", () => {
+test("settings page uses a desktop split view and stays usable at 390px", () => {
+  assert.match(
+    styleSource,
+    /grid-template-columns: minmax\(280px, 0\.72fr\) minmax\(0, 1\.28fr\)/u,
+  );
   assert.match(styleSource, /@media \(max-width: 390px\)/u);
   assert.match(styleSource, /min-height: 44px/u);
   assert.match(styleSource, /grid-template-columns: 1fr/u);

@@ -187,7 +187,7 @@ test("idempotent replay of put returns the first response; reuse with a differen
   );
 });
 
-test("listStylePresets exposes key, name, description and version only", async () => {
+test("listStylePresets exposes the visual style catalog without prompt internals", async () => {
   const { service } = makeService(KEY_HEX);
   const result = service.listStylePresets();
   const data = (
@@ -195,11 +195,21 @@ test("listStylePresets exposes key, name, description and version only", async (
       data: { items: Array<Record<string, unknown>> };
     }
   ).data;
-  assert.equal(data.items.length, 4);
+  assert.equal(data.items.length, 15);
   for (const item of data.items) {
     assert.deepEqual(
       Object.keys(item).sort(),
-      ["description", "key", "name", "version"],
+      [
+        "category",
+        "colorPalette",
+        "description",
+        "key",
+        "name",
+        "previewStyle",
+        "recommendedFor",
+        "recommendedMotion",
+        "version",
+      ],
     );
   }
 });

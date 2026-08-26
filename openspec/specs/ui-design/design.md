@@ -1,55 +1,47 @@
 ---
-version: 1.0
+version: 2.0
 name: Live Photo Studio Design System
-description: Mobile-first light UI for a Chinese Live Photo Studio workflow.
+description: Desktop-first obsidian editorial workbench for a Chinese Live Photo Studio workflow.
 colors:
-  primary: "#171717"
-  secondary: "#4d4d4d"
-  tertiary: "#006bff"
-  neutral: "#f2f2f2"
-  background-100: "#ffffff"
-  background-200: "#fafafa"
-  gray-100: "#f2f2f2"
-  gray-200: "#ebebeb"
-  gray-300: "#e6e6e6"
-  gray-400: "#eaeaea"
-  gray-500: "#c9c9c9"
-  gray-600: "#a8a8a8"
-  gray-700: "#8f8f8f"
-  gray-800: "#7d7d7d"
-  gray-900: "#4d4d4d"
-  gray-1000: "#171717"
-  blue-700: "#006bff"
-  red-800: "#ea001d"
-  amber-700: "#ffae00"
-  green-700: "#28a948"
+  canvas: "#0a0a0b"
+  surface: "#141416"
+  surface-raised: "#1c1c1f"
+  surface-subtle: "#242428"
+  border: "#28282d"
+  border-strong: "#35353c"
+  text: "#f5f5f0"
+  muted: "#a3a39e"
+  muted-dim: "#73736c"
+  gold: "#e6af2e"
+  red: "#ef4444"
+  green: "#10b981"
 typography:
-  heading-32:
-    fontFamily: Geist Sans
-    fontSize: 32px
-    fontWeight: 600
-    lineHeight: 40px
-    letterSpacing: -1.28px
-  heading-24:
-    fontFamily: Geist Sans
-    fontSize: 24px
+  display-48:
+    fontFamily: Cormorant Garamond
+    fontSize: 48px
+    fontWeight: 400
+    lineHeight: 52px
+    letterSpacing: -1.2px
+  heading-26:
+    fontFamily: Cormorant Garamond
+    fontSize: 26px
     fontWeight: 600
     lineHeight: 32px
-    letterSpacing: -0.96px
+    letterSpacing: -0.4px
   label-14:
-    fontFamily: Geist Sans
+    fontFamily: Avenir Next
     fontSize: 14px
-    fontWeight: 500
+    fontWeight: 600
     lineHeight: 20px
     letterSpacing: 0
   copy-14:
-    fontFamily: Geist Sans
+    fontFamily: Avenir Next
     fontSize: 14px
     fontWeight: 400
     lineHeight: 22px
     letterSpacing: 0
   button-14:
-    fontFamily: Geist Sans
+    fontFamily: Avenir Next
     fontSize: 14px
     fontWeight: 500
     lineHeight: 20px
@@ -67,20 +59,20 @@ rounded:
   lg: 16px
 components:
   button-primary:
-    backgroundColor: "{colors.gray-1000}"
-    textColor: "{colors.background-100}"
+    backgroundColor: "{colors.gold}"
+    textColor: "{colors.canvas}"
     typography: "{typography.button-14}"
     rounded: "{rounded.sm}"
     height: 40px
   button-secondary:
-    backgroundColor: "{colors.background-100}"
-    textColor: "{colors.primary}"
+    backgroundColor: "{colors.surface-raised}"
+    textColor: "{colors.text}"
     typography: "{typography.button-14}"
     rounded: "{rounded.sm}"
     height: 40px
   input:
-    backgroundColor: "{colors.background-100}"
-    textColor: "{colors.primary}"
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.text}"
     typography: "{typography.label-14}"
     rounded: "{rounded.sm}"
     height: 40px
@@ -90,42 +82,43 @@ components:
 
 ## Overview
 
-The web application is a mobile-first workbench for uploading source photos,
+The web application is a desktop-first creative workbench for uploading source photos,
 reviewing generated candidates, and downloading an export package for a future
 iOS importer. The UI must distinguish a downloadable web package from an asset
 already saved in the iPhone Photos library.
 
 ## Colors
 
-Use `gray-1000` and `gray-900` for primary and secondary text, `background-100`
-and `background-200` for page and elevated surfaces, and `gray-300` for
-boundaries. Use `blue-700` for links and focused controls, `green-700` for
-success, `amber-700` for recoverable attention, and `red-800` for destructive
-or failed states. Disabled controls use `gray-500` with supporting text and
-must not rely on color alone. New colors require a token change here.
+Use the obsidian canvas with layered slate surfaces and warm ivory text. Gold is
+reserved for selection, progress and primary generation actions. Green marks
+completed or healthy states; red is reserved for destructive or failed states.
+Style cards may use their versioned three-color palettes as content imagery,
+while all surrounding workbench chrome stays neutral.
 
 ## Typography
 
-Use `heading-32` for page titles, `heading-24` for section titles,
+Use `display-48` for desktop page titles, `heading-26` for section titles,
 `label-14` for labels and metadata, `copy-14` for instructions and status
-messages, and `button-14` for actions. Technical identifiers may use a
-monospace face only in diagnostic views. Do not use arbitrary font sizes in
-feature code.
+messages, and `button-14` for actions. Cormorant Garamond is the editorial
+display face; Avenir Next is the UI face. Technical identifiers may use a
+monospace face only in diagnostic views.
 
 ## Layout
 
-The primary content column is fluid with a 390px minimum usable mobile layout
-and a 1120px maximum desktop width. Use 16px mobile page padding, 24px desktop
-padding, and the spacing tokens for section rhythm. Candidate previews use a
-single-column mobile layout and a 2-4 column responsive grid on wider screens.
-Primary actions remain reachable near the bottom of the mobile viewport.
+The default desktop layout is a persistent 224px navigation rail plus a fluid
+workspace. Workspace content may grow to 1440px and uses 12-column composition:
+media and task content occupies 7-9 columns while context, settings or actions
+occupy 3-5 columns. Project and style catalogs use 3-4 column grids. At 900px
+and below, the navigation rail is removed and the workspace collapses to a
+single flow. The 390px layout remains fully usable, but it is a responsive
+fallback rather than the source of the desktop information architecture.
 
 ## Elevation & Depth
 
-Prefer surface and border hierarchy over heavy shadows. Panels use a 1px
-`gray-300` border and at most a small low-contrast shadow. Dialogs and menus
-use `background-100`, a stronger boundary, and a visible focus ring in
-`blue-700`. Do not encode workflow state only through elevation.
+Prefer surface and border hierarchy over heavy shadows. Panels use a refined
+hairline border; selected media and styles use a gold boundary plus explicit
+text/check state. Dialogs use `surface-raised`, a stronger boundary and a gold
+focus ring. Do not encode workflow state only through elevation.
 
 ## Motion
 
@@ -144,12 +137,12 @@ system unless the status semantics require it.
 
 ## Components
 
-Primary buttons use the dark token and have a visible disabled state. Secondary
-buttons use a bordered light surface. Inputs always have labels, validation
-text, and visible focus. Candidate previews show selection state with text and
-border treatment. Tables are for operational comparison; cards are reserved
-for media recognition and review. Loading states describe the current stage,
-and error states expose a retry or cancel action when available.
+Primary buttons use gold on obsidian and have a visible disabled state.
+Secondary buttons use a bordered slate surface. Inputs always have labels,
+validation text and visible focus. Style cards contain a local visual preview,
+category, palette, suitability and recommended motion. Candidate previews show
+selection state with text and border treatment. Loading states describe the
+current stage, and error states expose a retry or cancel action when available.
 
 ## Voice & Content
 
@@ -161,7 +154,7 @@ not claim that it is already saved to Photos.
 
 ## Theme & Internationalization
 
-- Theme capability: `light-only`.
+- Theme capability: `dark-only`.
 - Theme toggle: `none`.
 - Internationalization: `none`.
 - Supported locales: `zh-CN`.
@@ -173,7 +166,8 @@ not claim that it is already saved to Photos.
 - Do use the token names above in prototypes and production code.
 - Do require accessible focus states and body text contrast.
 - Do pair color state with icon or text.
-- Do use tables for direct operational comparison and media cards only for
-  recognition-heavy review.
+- Do use the persistent desktop rail and 12-column workbench at wide widths.
+- Do use compact high-density grids for style and candidate recognition.
+- Don't turn desktop views into a centered 720px mobile form.
 - Don't add one-off colors, spacing, shadows, or radii without updating this spec.
 - Don't claim that a web ZIP is a Photos-library Live Photo.

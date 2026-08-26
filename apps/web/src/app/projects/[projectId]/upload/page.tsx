@@ -13,7 +13,7 @@ import {
   WorkflowApiClient,
 } from "../../../../lib/api-client.js";
 import { workflowRunStorageKey } from "../../../../lib/workflow-session.js";
-import { AccountActions } from "../../../../components/auth/account-actions.js";
+import { AppShell } from "../../../../components/app-shell/app-shell.js";
 import {
   advanceUploadItem,
   firstReadyAssetId,
@@ -61,6 +61,7 @@ function UploadPanel(): React.JSX.Element {
   const [isSettingCover, setIsSettingCover] = useState(false);
   const [coverError, setCoverError] = useState<string | null>(null);
   const [styleKey, setStyleKey] = useState<string | null>(null);
+  const [styleCategory, setStyleCategory] = useState("全部");
   const [isStarting, setIsStarting] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
 
@@ -75,6 +76,14 @@ function UploadPanel(): React.JSX.Element {
     queryFn: () => client.listStylePresets(),
   });
   const stylePresets = stylePresetsQuery.data?.data.items ?? [];
+  const styleCategories = [
+    "全部",
+    ...Array.from(new Set(stylePresets.map((preset) => preset.category))),
+  ];
+  const filteredStylePresets =
+    styleCategory === "全部"
+      ? stylePresets
+      : stylePresets.filter((preset) => preset.category === styleCategory);
 
   // Default to the first preset once the list arrives.
   useEffect(() => {
@@ -313,193 +322,287 @@ function UploadPanel(): React.JSX.Element {
     );
   }
 
+  const projectTitle = projectQuery.data?.data.title.trim().length
+    ? projectQuery.data.data.title
+    : "未命名项目";
+
   return (
-    <main className={styles.shell}>
-      <header className={styles.header}>
-        <div className={styles.brand} aria-label="Live Photo Studio">
-          <span className={styles.brandMark} aria-hidden="true">
-            ◌
-          </span>
-          <span className={styles.brandName}>Live Photo Studio</span>
-        </div>
-        <div className={styles.headerActions}>
-          <Link className={styles.backLink} href="/projects">
-            返回项目列表
-          </Link>
-          <AccountActions />
-        </div>
-      </header>
-
-      <div className={styles.content}>
-        <p className={styles.eyebrow}>上传素材</p>
-        <h1 className={styles.title}>
-          {projectQuery.data?.data.title.trim().length
-            ? projectQuery.data.data.title
-            : "上传照片"}
-        </h1>
-        <p className={styles.intro}>
-          支持 JPEG、PNG、WebP 和 HEIC,单个文件不超过
-          20MiB。上传完成后选择一张封面,即可进入生成工作流。
-        </p>
-
-        <section className={styles.panel} aria-labelledby="picker-title">
-          <h2 className={styles.sectionTitle} id="picker-title">
-            选择照片
-          </h2>
-          <label className={styles.fileLabel} htmlFor="asset-files">
-            选择图片文件(可多选)
-          </label>
-          <input
-            className={styles.fileInput}
-            id="asset-files"
-            name="asset-files"
-            type="file"
-            multiple
-            accept={ACCEPT_ATTRIBUTE}
-            onChange={onFilesSelected}
-          />
-        </section>
-
-        {items.length > 0 && (
-          <section className={styles.panel} aria-labelledby="list-title">
-            <h2 className={styles.sectionTitle} id="list-title">
-              上传列表
-            </h2>
-            <p className={styles.status} role="status" aria-live="polite">
-              共 {summary.total} 个文件,{summary.ready} 个已就绪,
-              {summary.active} 个处理中,{summary.failed} 个失败。
+    <AppShell active="projects" context={projectTitle}>
+      <main className={styles.workspace}>
+        <header className={styles.pageHeader}>
+          <div>
+            <Link className={styles.backLink} href="/projects">
+              ← 返回项目库
+            </Link>
+            <p className={styles.eyebrow}>Asset desk / Style catalog</p>
+            <h1 className={styles.title}>{projectTitle}</h1>
+            <p className={styles.intro}>
+              左侧整理上传素材与封面，右侧从专业风格目录中确定系列视觉策略。
             </p>
-            <ul className={styles.list} aria-label="上传文件列表">
-              {items.map((item) => (
-                <li className={styles.item} key={item.key}>
-                  <div className={styles.itemMain}>
-                    <span className={styles.itemName}>{item.fileName}</span>
-                    <span className={styles.itemMeta}>
-                      {formatBytes(item.bytes)} ·{" "}
-                      {UPLOAD_STATUS_LABELS[item.status]}
-                    </span>
-                    {item.status === "failed" && (
-                      <span className={styles.itemError} role="alert">
-                        {item.errorMessage ?? "上传失败。"}
-                      </span>
-                    )}
-                  </div>
-                  <div className={styles.itemActions}>
-                    {item.status === "ready" &&
-                      item.assetId !== undefined && (
-                        <label className={styles.coverChoice}>
-                          <input
-                            type="radio"
-                            name="cover-asset"
-                            value={item.assetId}
-                            checked={coverAssetId === item.assetId}
-                            disabled={isSettingCover}
-                            onChange={() => {
-                              const assetId = item.assetId;
-                              if (assetId !== undefined) {
-                                void selectCover(assetId);
-                              }
-                            }}
-                          />
-                          设为封面
-                        </label>
-                      )}
-                    {item.status === "failed" &&
-                      filesRef.current.has(item.key) && (
-                        <button
-                          className={styles.button}
-                          type="button"
-                          onClick={() => retryItem(item.key)}
+          </div>
+          <div className={styles.headerStats} aria-label="上传摘要">
+            <div>
+              <strong>{summary.ready}</strong>
+              <span>已就绪</span>
+            </div>
+            <div>
+              <strong>{summary.active}</strong>
+              <span>处理中</span>
+            </div>
+            <div>
+              <strong>{summary.failed}</strong>
+              <span>失败</span>
+            </div>
+          </div>
+        </header>
+
+        <div className={styles.studioGrid}>
+          <div className={styles.mediaColumn}>
+            <section className={styles.panel} aria-labelledby="picker-title">
+              <div className={styles.panelHeading}>
+                <div>
+                  <span className={styles.panelIndex}>01 / SOURCE ASSETS</span>
+                  <h2 className={styles.sectionTitle} id="picker-title">
+                    素材工作区
+                  </h2>
+                </div>
+                <span className={styles.supported}>HEIC · JPEG · PNG · WEBP</span>
+              </div>
+              <label className={styles.dropzone} htmlFor="asset-files">
+                <span className={styles.dropzoneMark} aria-hidden="true">
+                  +
+                </span>
+                <strong>点击选择照片，或将多张素材拖放到这里</strong>
+                <span>单个文件不超过 20MiB，上传后可指定一张主封面。</span>
+              </label>
+              <input
+                className={styles.fileInput}
+                id="asset-files"
+                name="asset-files"
+                type="file"
+                multiple
+                accept={ACCEPT_ATTRIBUTE}
+                onChange={onFilesSelected}
+              />
+            </section>
+
+            <section className={styles.panel} aria-labelledby="list-title">
+              <div className={styles.panelHeading}>
+                <div>
+                  <span className={styles.panelIndex}>02 / ASSET QUEUE</span>
+                  <h2 className={styles.sectionTitle} id="list-title">
+                    素材与封面
+                  </h2>
+                </div>
+                <span className={styles.supported}>
+                  {summary.total} 个文件
+                </span>
+              </div>
+              {items.length === 0 ? (
+                <div className={styles.emptyQueue}>
+                  <span aria-hidden="true">◫</span>
+                  <p>素材会在这里以桌面网格呈现，并显示上传与封面状态。</p>
+                </div>
+              ) : (
+                <>
+                  <p className={styles.status} role="status" aria-live="polite">
+                    {summary.ready} 个已就绪，{summary.active} 个处理中，
+                    {summary.failed} 个失败。
+                  </p>
+                  <ul className={styles.list} aria-label="上传文件列表">
+                    {items.map((item, index) => (
+                      <li className={styles.item} key={item.key}>
+                        <div
+                          className={styles.assetPreview}
+                          data-variant={index % 5}
+                          aria-hidden="true"
                         >
-                          重试
-                        </button>
-                      )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-            {coverError !== null && (
-              <p className={styles.error} role="alert">
-                {coverError}
-              </p>
-            )}
-          </section>
-        )}
+                          <span>{String(index + 1).padStart(2, "0")}</span>
+                        </div>
+                        <div className={styles.itemMain}>
+                          <span className={styles.itemName}>{item.fileName}</span>
+                          <span className={styles.itemMeta}>
+                            {formatBytes(item.bytes)} ·{" "}
+                            {UPLOAD_STATUS_LABELS[item.status]}
+                          </span>
+                          {item.status === "failed" && (
+                            <span className={styles.itemError} role="alert">
+                              {item.errorMessage ?? "上传失败。"}
+                            </span>
+                          )}
+                        </div>
+                        <div className={styles.itemActions}>
+                          {item.status === "ready" &&
+                            item.assetId !== undefined && (
+                              <label className={styles.coverChoice}>
+                                <input
+                                  type="radio"
+                                  name="cover-asset"
+                                  value={item.assetId}
+                                  checked={coverAssetId === item.assetId}
+                                  disabled={isSettingCover}
+                                  onChange={() => {
+                                    const assetId = item.assetId;
+                                    if (assetId !== undefined) {
+                                      void selectCover(assetId);
+                                    }
+                                  }}
+                                />
+                                设为封面
+                              </label>
+                            )}
+                          {item.status === "failed" &&
+                            filesRef.current.has(item.key) && (
+                              <button
+                                className={styles.button}
+                                type="button"
+                                onClick={() => retryItem(item.key)}
+                              >
+                                重试
+                              </button>
+                            )}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+              {coverError !== null && (
+                <p className={styles.error} role="alert">
+                  {coverError}
+                </p>
+              )}
+            </section>
+          </div>
 
-        <section className={styles.panel} aria-labelledby="style-title">
-          <h2 className={styles.sectionTitle} id="style-title">
-            选择风格
-          </h2>
-          {stylePresetsQuery.isLoading && (
-            <p className={styles.status} role="status" aria-live="polite">
-              正在加载风格列表…
-            </p>
-          )}
-          {stylePresetsQuery.isError && (
-            <div className={styles.error} role="alert">
-              <p>风格列表加载失败,不影响上传;可重试后再开始生成。</p>
+          <aside className={styles.inspector}>
+            <section className={styles.panel} aria-labelledby="style-title">
+              <div className={styles.panelHeading}>
+                <div>
+                  <span className={styles.panelIndex}>03 / STYLE STRATEGY</span>
+                  <h2 className={styles.sectionTitle} id="style-title">
+                    选择风格
+                  </h2>
+                </div>
+                <span className={styles.supported}>
+                  {stylePresets.length} 种
+                </span>
+              </div>
+              <div className={styles.categoryTabs} aria-label="风格分类">
+                {styleCategories.map((category) => (
+                  <button
+                    className={styles.categoryTab}
+                    data-active={styleCategory === category || undefined}
+                    key={category}
+                    type="button"
+                    onClick={() => setStyleCategory(category)}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+              {stylePresetsQuery.isLoading && (
+                <p className={styles.status} role="status" aria-live="polite">
+                  正在加载风格列表…
+                </p>
+              )}
+              {stylePresetsQuery.isError && (
+                <div className={styles.error} role="alert">
+                  <p>风格列表加载失败,不影响上传;可重试后再开始生成。</p>
+                  <button
+                    className={styles.button}
+                    type="button"
+                    onClick={() => void stylePresetsQuery.refetch()}
+                  >
+                    重试
+                  </button>
+                </div>
+              )}
+              {filteredStylePresets.length > 0 && (
+                <div
+                  className={styles.styleGroup}
+                  role="radiogroup"
+                  aria-label="生成风格"
+                >
+                  {filteredStylePresets.map((preset) => (
+                    <label className={styles.styleCard} key={preset.key}>
+                      <input
+                        type="radio"
+                        name="style-preset"
+                        value={preset.key}
+                        checked={styleKey === preset.key}
+                        onChange={() => setStyleKey(preset.key)}
+                      />
+                      <span
+                        className={styles.stylePreview}
+                        data-preview={preset.previewStyle}
+                      >
+                        <span className={styles.styleCategory}>
+                          {preset.category}
+                        </span>
+                        <span className={styles.palette}>
+                          {preset.colorPalette.map((color) => (
+                            <span
+                              key={color}
+                              style={{ backgroundColor: color }}
+                            />
+                          ))}
+                        </span>
+                      </span>
+                      <span className={styles.styleBody}>
+                        <span className={styles.styleName}>{preset.name}</span>
+                        <span className={styles.styleDescription}>
+                          {preset.description}
+                        </span>
+                        <span className={styles.styleMeta}>
+                          适宜：{preset.recommendedFor}
+                        </span>
+                        <span className={styles.styleMotion}>
+                          推荐动态：{preset.recommendedMotion}
+                        </span>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <section className={`${styles.panel} ${styles.actionPanel}`}>
+              <div>
+                <span className={styles.panelIndex}>04 / DISPATCH</span>
+                <h2 className={styles.sectionTitle}>启动生成</h2>
+                <p className={styles.hint}>
+                  生成任务会异步进入 Graph 工作流，刷新页面不会创建新的运行。
+                </p>
+              </div>
               <button
-                className={styles.button}
+                className={`${styles.button} ${styles.buttonPrimary}`}
                 type="button"
-                onClick={() => void stylePresetsQuery.refetch()}
+                disabled={!canStart || isStarting}
+                aria-busy={isStarting}
+                onClick={() => void startGeneration()}
               >
-                重试
+                {isStarting ? "正在启动…" : "确认风格并开始生成"}
               </button>
-            </div>
-          )}
-          {stylePresets.length > 0 && (
-            <div
-              className={styles.styleGroup}
-              role="radiogroup"
-              aria-label="生成风格"
-            >
-              {stylePresets.map((preset) => (
-                <label className={styles.styleCard} key={preset.key}>
-                  <input
-                    type="radio"
-                    name="style-preset"
-                    value={preset.key}
-                    checked={styleKey === preset.key}
-                    onChange={() => setStyleKey(preset.key)}
-                  />
-                  <span className={styles.styleName}>{preset.name}</span>
-                  <span className={styles.styleDescription}>
-                    {preset.description}
-                  </span>
-                </label>
-              ))}
-            </div>
-          )}
-        </section>
-
-        <div className={styles.actions}>
-          <button
-            className={`${styles.button} ${styles.buttonPrimary}`}
-            type="button"
-            disabled={!canStart || isStarting}
-            aria-busy={isStarting}
-            onClick={() => void startGeneration()}
-          >
-            {isStarting ? "正在启动…" : "开始生成"}
-          </button>
-          {!canStart && (
-            <p className={styles.hint}>
-              至少成功上传一张图片并完成封面设置后,才能开始生成。
-            </p>
-          )}
-          {startError !== null && (
-            <p className={styles.error} role="alert">
-              {startError}
-            </p>
-          )}
+              {!canStart && (
+                <p className={styles.hint}>
+                  至少成功上传一张图片并完成封面设置后,才能开始生成。
+                </p>
+              )}
+              {startError !== null && (
+                <p className={styles.error} role="alert">
+                  {startError}
+                </p>
+              )}
+              <p className={styles.notice}>
+                最终结果以资源包形式导出，供 iOS 导入器使用；Web
+                端不会把 Live Photo 直接保存到 iPhone 相册。
+              </p>
+            </section>
+          </aside>
         </div>
-
-        <p className={styles.notice}>
-          生成的结果会以资源包形式导出,供 iOS 导入器使用;Web
-          端不会把 Live Photo 直接保存到 iPhone 相册。
-        </p>
-      </div>
-    </main>
+      </main>
+    </AppShell>
   );
 }
 

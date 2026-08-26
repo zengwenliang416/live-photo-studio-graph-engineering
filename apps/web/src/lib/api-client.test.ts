@@ -580,6 +580,11 @@ test("listStylePresets returns preset items", async () => {
           name: "胶片日常",
           description: "柔和胶片色调",
           version: "style-extension.v1",
+          category: "电影胶片",
+          recommendedFor: "人像",
+          recommendedMotion: "微距推近",
+          colorPalette: ["#111111", "#777777", "#eeeeee"],
+          previewStyle: "film",
         },
       ],
     },
@@ -589,4 +594,5 @@ test("listStylePresets returns preset items", async () => {
   assert.equal(calls[0]?.url, "http://test/v1/style-presets");
   assert.equal(calls[0]?.key, undefined);
   assert.equal(result.data.items[0]?.key, "film");
+  assert.equal(result.data.items[0]?.category, "电影胶片");
 });

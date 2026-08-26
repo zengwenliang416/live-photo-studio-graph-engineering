@@ -35,6 +35,9 @@ test("upload page offers a non-blocking style picker", () => {
   assert.match(pageSource, /role="radiogroup"/u);
   assert.match(pageSource, /选择风格/u);
   assert.match(pageSource, /风格列表加载失败,不影响上传/u);
+  assert.match(pageSource, /preset\.recommendedFor/u);
+  assert.match(pageSource, /preset\.recommendedMotion/u);
+  assert.match(pageSource, /preset\.colorPalette/u);
 });
 
 test("upload page wires the intent, signed PUT and confirm pipeline", () => {
@@ -74,7 +77,12 @@ test("upload page file input accepts the supported formats", () => {
   assert.match(pageSource, /htmlFor="asset-files"/u);
 });
 
-test("upload page styles stay usable at 390px with 44px targets", () => {
+test("upload page uses a desktop studio grid and stays usable at 390px", () => {
+  assert.match(
+    styleSource,
+    /grid-template-columns: minmax\(0, 1\.15fr\) minmax\(420px, 0\.85fr\)/u,
+  );
+  assert.match(styleSource, /grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/u);
   assert.match(styleSource, /@media \(max-width: 390px\)/u);
   assert.match(styleSource, /min-height: 44px/u);
   assert.match(styleSource, /grid-template-columns: 1fr/u);

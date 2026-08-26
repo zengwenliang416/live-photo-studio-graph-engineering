@@ -29,7 +29,7 @@ test("projects page loads the list through the centralized client", () => {
 });
 
 test("projects page covers empty, loading and error states in Chinese", () => {
-  assert.match(pageSource, /还没有项目/u);
+  assert.match(pageSource, /还没有系列项目/u);
   assert.match(pageSource, /正在加载项目列表/u);
   assert.match(pageSource, /role="status"/u);
   assert.match(pageSource, /aria-live="polite"/u);
@@ -49,10 +49,11 @@ test("project cards route by cover state and label untitled projects", () => {
 
 test("projects page header links to the image provider settings", () => {
   assert.match(pageSource, /href="\/settings"/u);
-  assert.match(pageSource, /生图设置/u);
+  assert.match(pageSource, /管理生图通道/u);
 });
 
-test("projects page styles keep a 390px single column with 44px targets", () => {
+test("projects page uses a desktop grid and keeps a 390px fallback", () => {
+  assert.match(styleSource, /grid-template-columns: repeat\(3, minmax\(0, 1fr\)\)/u);
   assert.match(styleSource, /@media \(max-width: 390px\)/u);
   assert.match(styleSource, /min-height: 44px/u);
   assert.match(styleSource, /grid-template-columns: 1fr/u);

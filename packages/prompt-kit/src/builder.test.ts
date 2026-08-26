@@ -107,6 +107,16 @@ test("every preset keeps the shared identity and typography guarantees", () => {
   }
 });
 
+test("every preset exposes complete visual catalog metadata", () => {
+  for (const preset of STYLE_PRESETS) {
+    assert.ok(preset.category.length > 0, `${preset.key}: missing category`);
+    assert.ok(preset.recommendedFor.length > 0, `${preset.key}: missing recommendation`);
+    assert.ok(preset.recommendedMotion.length > 0, `${preset.key}: missing motion`);
+    assert.equal(preset.colorPalette.length, 3, `${preset.key}: palette must contain 3 colors`);
+    assert.match(preset.previewStyle, /^[a-z0-9-]+$/u, `${preset.key}: invalid preview token`);
+  }
+});
+
 test("compilePrompt rejects a non-positive reference image count", () => {
   const preset = findStylePreset("anime-scene");
   assert.ok(preset);

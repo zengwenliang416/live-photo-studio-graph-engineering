@@ -130,6 +130,11 @@ const stylePresetsResponseSchema = z.object({
         name: z.string().min(1),
         description: z.string(),
         version: z.string().min(1),
+        category: z.string().min(1),
+        recommendedFor: z.string().min(1),
+        recommendedMotion: z.string().min(1),
+        colorPalette: z.tuple([z.string(), z.string(), z.string()]),
+        previewStyle: z.string().min(1),
       }),
     ),
   }),
@@ -147,6 +152,11 @@ export interface StylePreset {
   readonly name: string;
   readonly description: string;
   readonly version: string;
+  readonly category: string;
+  readonly recommendedFor: string;
+  readonly recommendedMotion: string;
+  readonly colorPalette: readonly [string, string, string];
+  readonly previewStyle: string;
 }
 
 export interface ProjectSummary {
