@@ -67,7 +67,8 @@ OPENAI_IMAGE_MODEL=gpt-image-2-2026-04-21
 → 浏览器直传原图到 S3 兼容端点
 → API 校验大小与 Magic Bytes 并完成上传(POST /v1/assets/:id/confirm)
 → 设置封面(POST /v1/projects/:id/cover)
-→ 选择风格 preset(GET /v1/style-presets)
+→ 选择风格 preset(GET /v1/style-presets，当前 95 种：15 个内置预设 + 80 个 OnePic 摄影写实模板)
+→ 按需查看实际编译 Prompt(GET /v1/style-presets/:key/prompt?referenceImageCount=1)
 → 启动 Graph 工作流(POST /v1/projects/:id/workflow-runs,input.styleKey,同事务写 Outbox)
 → AI Worker 按用户配置解析 Provider,编译 Prompt(含 prompt_version/prompt_hash)生成候选
 → 用户在工作流页选择 anchor
@@ -119,7 +120,7 @@ docs                 架构与 ADR
 - 为 OpenAI Provider 增加组织验证、限流、成本预算和评估集。
 - 为 Media Worker 构建包含 FFmpeg、ImageMagick、libheif 的固定镜像。
 
-用户级生图接口(OpenAI 兼容端点)已支持：在 `/settings` 配置后由 `worker-ai` 在服务端调用，密钥经 `SETTINGS_ENCRYPTION_KEY`(AES-256-GCM）加密落库。风格 preset 由 `packages/prompt-kit` 管理，修改蓝图必须递增 preset version。
+用户级生图接口(OpenAI 兼容端点)已支持：在 `/settings` 配置后由 `worker-ai` 在服务端调用，密钥经 `SETTINGS_ENCRYPTION_KEY`(AES-256-GCM）加密落库。风格 preset 由 `packages/prompt-kit` 管理，修改蓝图必须递增 preset version。风格列表只返回轻量元数据；完整 Prompt 由受认证的详情接口按参考图数量实时调用同一 `compilePrompt()` 编译，并返回 `promptVersion` 与 `promptHash`。OnePic 摄影写实目录通过 `pnpm --filter @live-photo-studio/prompt-kit generate:onepic -- /absolute/path/to/templates.json` 确定性重建。
 
 协作和代码规则以根目录 [`AGENTS.md`](./AGENTS.md) 为准。交付校验、未验证项和上线前清单见 [`DELIVERY_NOTES.md`](./DELIVERY_NOTES.md)，完整文件目录见 [`FILE_INDEX.md`](./FILE_INDEX.md)。
 

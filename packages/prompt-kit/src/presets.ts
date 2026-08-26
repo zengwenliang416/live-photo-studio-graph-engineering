@@ -7,6 +7,15 @@
  * deterministically outside the model (AGENTS.md §12).
  */
 
+import { ONEPIC_PHOTOGRAPHY_TEMPLATES } from "./onepic-photography-templates.generated.js";
+
+export interface StylePresetSource {
+  readonly project: "onepic-template-studio";
+  readonly templateId: string;
+  readonly promptHash: string;
+  readonly previewUrl: string | null;
+}
+
 export interface StylePreset {
   /** Stable identifier, e.g. "cinematic-portrait". Never renamed in place. */
   readonly key: string;
@@ -32,6 +41,8 @@ export interface StylePreset {
   readonly preserveRules: readonly string[];
   /** What must never appear in the output. */
   readonly forbiddenElements: readonly string[];
+  /** Provenance for imported prompt-library styles. */
+  readonly source?: StylePresetSource;
 }
 
 const SHARED_PRESERVE_RULES: readonly string[] = [
@@ -47,7 +58,7 @@ const SHARED_FORBIDDEN_ELEMENTS: readonly string[] = [
   "Date stamps and time overlays.",
 ];
 
-export const STYLE_PRESETS: readonly StylePreset[] = [
+const BUILT_IN_STYLE_PRESETS: readonly StylePreset[] = [
   {
     key: "cinematic-portrait",
     version: "v1",
@@ -406,6 +417,52 @@ export const STYLE_PRESETS: readonly StylePreset[] = [
       "Milky low-contrast haze across the entire frame and beauty-filter skin smoothing.",
     ],
   },
+];
+
+const ONEPIC_STYLE_PRESETS: readonly StylePreset[] =
+  ONEPIC_PHOTOGRAPHY_TEMPLATES.map((template) => ({
+    key: `onepic-${template.id}`,
+    version: "v1",
+    name: template.title,
+    description: template.description,
+    category: template.category,
+    recommendedFor: template.recommendedFor,
+    recommendedMotion: template.recommendedMotion,
+    colorPalette: template.colorPalette,
+    previewStyle: `onepic-${template.id}`,
+    visualBlueprint: [
+      "Use the following source template only as a transferable visual-treatment reference.",
+      "Learn its photographic medium, lens behavior, lighting, palette, texture, atmosphere and finishing language.",
+      "The uploaded images remain the only authority for subject matter, identity, headcount, pose, wardrobe, objects, setting, framing and visible facts.",
+      "Ignore or automatically adapt sample people, brands, places, slogans, fixed text, placeholders and requested substitutions from the source template.",
+      "",
+      `SOURCE TEMPLATE ${template.id} / ${template.title}`,
+      template.blueprint,
+    ].join("\n"),
+    preserveRules: [
+      ...SHARED_PRESERVE_RULES,
+      "Preserve the original pose, expression, wardrobe, props, scene, camera viewpoint and composition; transfer only the source template's visual treatment.",
+      "Treat named or described sample subjects in the source template as non-binding examples and never replace uploaded-image content with them.",
+    ],
+    forbiddenElements: [
+      ...SHARED_FORBIDDEN_ELEMENTS,
+      "Sample brands, sample slogans, sample place names and fixed copy inherited from the source template.",
+      "Template placeholder syntax or explanatory prompt text in the finished image.",
+    ],
+    source: {
+      project: "onepic-template-studio",
+      templateId: template.id,
+      promptHash: template.promptHash,
+      previewUrl:
+        template.previewPath === null
+          ? null
+          : `https://onepic.motion-cover.com/${template.previewPath}`,
+    },
+  }));
+
+export const STYLE_PRESETS: readonly StylePreset[] = [
+  ...BUILT_IN_STYLE_PRESETS,
+  ...ONEPIC_STYLE_PRESETS,
 ];
 
 export function findStylePreset(key: string): StylePreset | undefined {

@@ -1,4 +1,7 @@
+import { stylePresetPromptQuerySchema } from "@live-photo-studio/contracts";
 import { z } from "zod";
+
+export { stylePresetPromptQuerySchema };
 
 export const upsertImageProviderRequestSchema = z
   .object({

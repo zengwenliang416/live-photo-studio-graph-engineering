@@ -14,6 +14,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
+    "generate:onepic": "node scripts/import-onepic-photography-presets.mjs",
     "test": "tsx --test \"src/**/*.test.ts\""
   },
   "devDependencies": {

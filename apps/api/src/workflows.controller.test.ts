@@ -114,7 +114,7 @@ function expectProblem(
   assert.equal(response.body["code"], code);
 }
 
-test("openapi document publishes workflow and export download paths", async () => {
+test("openapi document publishes workflow, style prompt and export paths", async () => {
   const { app } = await createApp();
   const response = await request(app.getHttpServer())
     .get("/v1/openapi.json")
@@ -126,6 +126,8 @@ test("openapi document publishes workflow and export download paths", async () =
     "/v1/auth/login",
     "/v1/auth/session",
     "/v1/auth/logout",
+    "/v1/style-presets",
+    "/v1/style-presets/{key}/prompt",
     "/v1/projects/{projectId}/workflow-runs",
     "/v1/workflow-runs/{workflowRunId}",
     "/v1/workflow-runs/{workflowRunId}/human-tasks",

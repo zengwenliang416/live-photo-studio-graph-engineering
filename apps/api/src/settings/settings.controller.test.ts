@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import assert from "node:assert/strict";
 import test from "node:test";
+import { STYLE_PRESETS, compilePrompt } from "@live-photo-studio/prompt-kit";
 import { Test } from "@nestjs/testing";
 import request from "supertest";
 import { AppModule } from "../app.module.js";
@@ -179,7 +180,7 @@ test("style presets endpoint lists the complete visual catalog", async () => {
     .set("x-user-id", USER);
   assert.equal(response.status, 200);
   const items = response.body.data.items as Array<Record<string, unknown>>;
-  assert.equal(items.length, 15);
+  assert.equal(items.length, STYLE_PRESETS.length);
   for (const item of items) {
     assert.ok(typeof item["key"] === "string");
     assert.ok(typeof item["name"] === "string");
@@ -187,6 +188,72 @@ test("style presets endpoint lists the complete visual catalog", async () => {
     assert.ok(typeof item["category"] === "string");
     assert.ok(Array.isArray(item["colorPalette"]));
     assert.ok(typeof item["previewStyle"] === "string");
+    assert.ok("source" in item);
+    assert.ok(item["source"] === null || typeof item["source"] === "object");
   }
+  await app.close();
+});
+
+test("style preset prompt endpoint returns the compiled prompt for an authenticated user", async () => {
+  const { app } = await createApp();
+  const preset = STYLE_PRESETS[0];
+  assert.ok(preset);
+  const response = await request(app.getHttpServer())
+    .get(`/v1/style-presets/${preset.key}/prompt?referenceImageCount=3`)
+    .set("x-user-id", USER);
+
+  assert.equal(response.status, 200);
+  const expected = compilePrompt({ preset, referenceImageCount: 3 });
+  assert.deepEqual(response.body.data.preset.source, null);
+  assert.equal(response.body.data.preset.key, preset.key);
+  assert.equal(response.body.data.prompt, expected.prompt);
+  assert.equal(response.body.data.promptVersion, expected.promptVersion);
+  assert.equal(response.body.data.promptHash, expected.promptHash);
+  assert.equal(response.body.data.referenceImageCount, 3);
+  await app.close();
+});
+
+test("style preset prompt endpoint defaults the reference image count to one", async () => {
+  const { app } = await createApp();
+  const preset = STYLE_PRESETS[0];
+  assert.ok(preset);
+  const response = await request(app.getHttpServer())
+    .get(`/v1/style-presets/${preset.key}/prompt`)
+    .set("x-user-id", USER);
+
+  assert.equal(response.status, 200);
+  assert.equal(response.body.data.referenceImageCount, 1);
+  assert.match(response.body.data.prompt, /You receive 1 reference image\(s\)\./u);
+  await app.close();
+});
+
+test("style preset prompt endpoint rejects invalid reference image counts with 422", async () => {
+  const { app } = await createApp();
+  for (const value of ["0", "7", "1.5", "not-a-number"]) {
+    const response = await request(app.getHttpServer())
+      .get(
+        `/v1/style-presets/cinematic-portrait/prompt?referenceImageCount=${value}`,
+      )
+      .set("x-user-id", USER);
+    expectProblem(response, 422, "VALIDATION_FAILED");
+  }
+  await app.close();
+});
+
+test("style preset prompt endpoint returns a stable 404 for an unknown key", async () => {
+  const { app } = await createApp();
+  const response = await request(app.getHttpServer())
+    .get("/v1/style-presets/not-a-real-style/prompt")
+    .set("x-user-id", USER);
+  expectProblem(response, 404, "STYLE_PRESET_NOT_FOUND");
+  await app.close();
+});
+
+test("style preset prompt endpoint requires authentication", async () => {
+  const { app } = await createApp();
+  const response = await request(app.getHttpServer()).get(
+    "/v1/style-presets/cinematic-portrait/prompt",
+  );
+  expectProblem(response, 401, "AUTHENTICATION_REQUIRED");
   await app.close();
 });

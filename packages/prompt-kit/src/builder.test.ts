@@ -69,10 +69,13 @@ test("reference image count appears in the role section", () => {
 test("blueprints contain no placeholder variables", () => {
   for (const preset of STYLE_PRESETS) {
     assert.ok(
-      !preset.visualBlueprint.includes("["),
-      `${preset.key}: blueprint must not contain '[' placeholder syntax`,
+      !preset.visualBlueprint.includes("{argument name="),
+      `${preset.key}: unresolved argument placeholder`,
     );
-    assert.ok(!preset.visualBlueprint.includes("{"), `${preset.key}: blueprint must not contain '{'`);
+    assert.ok(
+      !preset.visualBlueprint.includes("REFERENCE_0"),
+      `${preset.key}: unresolved legacy image reference`,
+    );
   }
 });
 
@@ -114,6 +117,34 @@ test("every preset exposes complete visual catalog metadata", () => {
     assert.ok(preset.recommendedMotion.length > 0, `${preset.key}: missing motion`);
     assert.equal(preset.colorPalette.length, 3, `${preset.key}: palette must contain 3 colors`);
     assert.match(preset.previewStyle, /^[a-z0-9-]+$/u, `${preset.key}: invalid preview token`);
+  }
+});
+
+test("catalog includes all 80 provenance-bound OnePic photography templates", () => {
+  const imported = STYLE_PRESETS.filter(
+    (preset) => preset.source?.project === "onepic-template-studio",
+  );
+  assert.equal(imported.length, 80);
+  assert.equal(STYLE_PRESETS.length, 95);
+  assert.equal(
+    new Set(STYLE_PRESETS.map((preset) => preset.key)).size,
+    STYLE_PRESETS.length,
+  );
+  assert.equal(
+    new Set(imported.map((preset) => preset.source?.templateId)).size,
+    imported.length,
+  );
+  for (const preset of imported) {
+    assert.match(preset.key, /^onepic-(?:case|framework)-\d+$/u);
+    assert.match(preset.source?.promptHash ?? "", /^[0-9a-f]{64}$/u);
+    assert.ok(
+      preset.visualBlueprint.includes("only as a transferable visual-treatment reference"),
+    );
+    assert.ok(
+      preset.preserveRules.some((rule) =>
+        rule.includes("pose, expression, wardrobe, props, scene"),
+      ),
+    );
   }
 });
 

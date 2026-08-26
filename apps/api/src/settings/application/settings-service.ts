@@ -1,6 +1,12 @@
 import { safeLogEvent } from "@live-photo-studio/graph-contracts";
 import { decryptSecret, encryptSecret } from "@live-photo-studio/graph-runtime";
-import { STYLE_PRESETS } from "@live-photo-studio/prompt-kit";
+import type { StylePresetMetadata } from "@live-photo-studio/contracts";
+import {
+  STYLE_PRESETS,
+  compilePrompt,
+  findStylePreset,
+  type StylePreset,
+} from "@live-photo-studio/prompt-kit";
 import { ApplicationProblemError } from "../../http/problem-details.js";
 import { hashRequest } from "../../projects/application/canonical-json.js";
 import {
@@ -24,6 +30,32 @@ export interface UseCaseResult {
 
 function conflict(code: string, title: string): ApplicationProblemError {
   return new ApplicationProblemError(409, code, title);
+}
+
+function validateReferenceImageCount(value: number): void {
+  if (!Number.isInteger(value) || value < 1 || value > 6) {
+    throw new ApplicationProblemError(
+      422,
+      "VALIDATION_FAILED",
+      "Request validation failed.",
+      "referenceImageCount: must be an integer between 1 and 6.",
+    );
+  }
+}
+
+function toStylePresetMetadata(preset: StylePreset): StylePresetMetadata {
+  return {
+    key: preset.key,
+    name: preset.name,
+    description: preset.description,
+    version: preset.version,
+    category: preset.category,
+    recommendedFor: preset.recommendedFor,
+    recommendedMotion: preset.recommendedMotion,
+    colorPalette: preset.colorPalette,
+    previewStyle: preset.previewStyle,
+    source: preset.source ?? null,
+  };
 }
 
 /**
@@ -122,17 +154,39 @@ export class SettingsService {
       status: 200,
       body: {
         data: {
-          items: STYLE_PRESETS.map((preset) => ({
-            key: preset.key,
-            name: preset.name,
-            description: preset.description,
-            version: preset.version,
-            category: preset.category,
-            recommendedFor: preset.recommendedFor,
-            recommendedMotion: preset.recommendedMotion,
-            colorPalette: preset.colorPalette,
-            previewStyle: preset.previewStyle,
-          })),
+          items: STYLE_PRESETS.map(toStylePresetMetadata),
+        },
+      },
+    };
+  }
+
+  getStylePresetPrompt(params: {
+    key: string;
+    referenceImageCount: number;
+  }): UseCaseResult {
+    validateReferenceImageCount(params.referenceImageCount);
+    const preset = findStylePreset(params.key);
+    if (!preset) {
+      throw new ApplicationProblemError(
+        404,
+        "STYLE_PRESET_NOT_FOUND",
+        "Style preset not found.",
+      );
+    }
+
+    const compiled = compilePrompt({
+      preset,
+      referenceImageCount: params.referenceImageCount,
+    });
+    return {
+      status: 200,
+      body: {
+        data: {
+          preset: toStylePresetMetadata(preset),
+          prompt: compiled.prompt,
+          promptVersion: compiled.promptVersion,
+          promptHash: compiled.promptHash,
+          referenceImageCount: params.referenceImageCount,
         },
       },
     };

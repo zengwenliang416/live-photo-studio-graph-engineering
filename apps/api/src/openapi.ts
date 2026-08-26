@@ -122,6 +122,63 @@ export function buildOpenApiDocument(baseUrl: string): Record<string, unknown> {
           },
         },
       },
+      "/v1/style-presets": {
+        get: {
+          summary: "List lightweight style preset metadata.",
+          operationId: "listStylePresets",
+          responses: {
+            "200": jsonResponse(
+              dataEnvelope({
+                type: "object",
+                required: ["items"],
+                properties: {
+                  items: {
+                    type: "array",
+                    items: { $ref: "#/components/schemas/StylePresetMetadata" },
+                  },
+                },
+              }),
+            ),
+            "401": problemResponse("Authentication required."),
+          },
+        },
+      },
+      "/v1/style-presets/{key}/prompt": {
+        get: {
+          summary:
+            "Compile the exact model prompt for one style and reference-image count.",
+          operationId: "getStylePresetPrompt",
+          parameters: [
+            {
+              name: "key",
+              in: "path",
+              required: true,
+              schema: { type: "string" },
+            },
+            {
+              name: "referenceImageCount",
+              in: "query",
+              required: false,
+              schema: {
+                type: "integer",
+                minimum: 1,
+                maximum: 6,
+                default: 1,
+              },
+            },
+          ],
+          responses: {
+            "200": jsonResponse(
+              dataEnvelope({
+                $ref: "#/components/schemas/StylePresetPrompt",
+              }),
+            ),
+            "401": problemResponse("Authentication required."),
+            "404": problemResponse("Style preset not found."),
+            "422": problemResponse("Validation failed."),
+          },
+        },
+      },
       "/v1/projects/{projectId}/workflow-runs": {
         post: {
           summary: "Start a workflow run for a project.",
@@ -381,6 +438,85 @@ export function buildOpenApiDocument(baseUrl: string): Record<string, unknown> {
           properties: {
             user: { $ref: "#/components/schemas/AuthUser" },
             expiresAt: { type: "string", format: "date-time" },
+          },
+        },
+        StylePresetSource: {
+          type: "object",
+          required: ["project", "templateId", "promptHash", "previewUrl"],
+          properties: {
+            project: {
+              type: "string",
+              enum: ["onepic-template-studio"],
+            },
+            templateId: { type: "string" },
+            promptHash: {
+              type: "string",
+              pattern: "^[0-9a-f]{64}$",
+            },
+            previewUrl: {
+              type: "string",
+              format: "uri",
+              nullable: true,
+            },
+          },
+        },
+        StylePresetMetadata: {
+          type: "object",
+          required: [
+            "key",
+            "name",
+            "description",
+            "version",
+            "category",
+            "recommendedFor",
+            "recommendedMotion",
+            "colorPalette",
+            "previewStyle",
+            "source",
+          ],
+          properties: {
+            key: { type: "string" },
+            name: { type: "string" },
+            description: { type: "string" },
+            version: { type: "string" },
+            category: { type: "string" },
+            recommendedFor: { type: "string" },
+            recommendedMotion: { type: "string" },
+            colorPalette: {
+              type: "array",
+              minItems: 3,
+              maxItems: 3,
+              items: { type: "string" },
+            },
+            previewStyle: { type: "string" },
+            source: {
+              allOf: [{ $ref: "#/components/schemas/StylePresetSource" }],
+              nullable: true,
+            },
+          },
+        },
+        StylePresetPrompt: {
+          type: "object",
+          required: [
+            "preset",
+            "prompt",
+            "promptVersion",
+            "promptHash",
+            "referenceImageCount",
+          ],
+          properties: {
+            preset: { $ref: "#/components/schemas/StylePresetMetadata" },
+            prompt: { type: "string" },
+            promptVersion: { type: "string" },
+            promptHash: {
+              type: "string",
+              pattern: "^[0-9a-f]{64}$",
+            },
+            referenceImageCount: {
+              type: "integer",
+              minimum: 1,
+              maximum: 6,
+            },
           },
         },
         StartWorkflowRunRequest: {

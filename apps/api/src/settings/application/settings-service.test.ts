@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { decryptSecret } from "@live-photo-studio/graph-runtime";
+import {
+  STYLE_PRESETS,
+  compilePrompt,
+  findStylePreset,
+} from "@live-photo-studio/prompt-kit";
 import { ApplicationProblemError } from "../../http/problem-details.js";
 import { InMemorySettingsStore } from "../testing/in-memory-settings-store.js";
 import { SettingsService } from "./settings-service.js";
@@ -195,7 +200,7 @@ test("listStylePresets exposes the visual style catalog without prompt internals
       data: { items: Array<Record<string, unknown>> };
     }
   ).data;
-  assert.equal(data.items.length, 15);
+  assert.equal(data.items.length, STYLE_PRESETS.length);
   for (const item of data.items) {
     assert.deepEqual(
       Object.keys(item).sort(),
@@ -208,8 +213,94 @@ test("listStylePresets exposes the visual style catalog without prompt internals
         "previewStyle",
         "recommendedFor",
         "recommendedMotion",
+        "source",
         "version",
       ],
+    );
+    assert.deepEqual(
+      item["source"],
+      STYLE_PRESETS.find((preset) => preset.key === item["key"])?.source ?? null,
+    );
+  }
+});
+
+test("getStylePresetPrompt returns metadata and the compiled prompt provenance", () => {
+  const { service } = makeService(KEY_HEX);
+  const preset = findStylePreset("cinematic-portrait");
+  assert.ok(preset);
+  const expected = compilePrompt({ preset, referenceImageCount: 1 });
+
+  const result = service.getStylePresetPrompt({
+    key: preset.key,
+    referenceImageCount: 1,
+  });
+  assert.equal(result.status, 200);
+  const data = (
+    result.body as {
+      data: {
+        preset: Record<string, unknown>;
+        prompt: string;
+        promptVersion: string;
+        promptHash: string;
+        referenceImageCount: number;
+      };
+    }
+  ).data;
+  assert.equal(data.prompt, expected.prompt);
+  assert.equal(data.promptVersion, expected.promptVersion);
+  assert.equal(data.promptHash, expected.promptHash);
+  assert.equal(data.referenceImageCount, 1);
+  assert.equal(data.preset["key"], preset.key);
+  assert.equal(data.preset["source"], null);
+  assert.ok(!("visualBlueprint" in data.preset));
+  assert.ok(data.prompt.includes("You receive 1 reference image(s)."));
+});
+
+test("getStylePresetPrompt normalizes imported preset provenance", () => {
+  const { service } = makeService(KEY_HEX);
+  const preset = STYLE_PRESETS.find((value) => value.source !== undefined);
+  assert.ok(preset);
+  const result = service.getStylePresetPrompt({
+    key: preset.key,
+    referenceImageCount: 6,
+  });
+  const data = (
+    result.body as {
+      data: { preset: { source: unknown }; referenceImageCount: number };
+    }
+  ).data;
+  assert.deepEqual(data.preset.source, preset.source);
+  assert.equal(data.referenceImageCount, 6);
+});
+
+test("getStylePresetPrompt returns a stable not-found problem", () => {
+  const { service } = makeService(KEY_HEX);
+  assert.throws(
+    () =>
+      service.getStylePresetPrompt({
+        key: "does-not-exist",
+        referenceImageCount: 1,
+      }),
+    (error: unknown) => {
+      expectProblem(error, 404, "STYLE_PRESET_NOT_FOUND");
+      return true;
+    },
+  );
+});
+
+test("getStylePresetPrompt rejects reference image counts outside 1..6", () => {
+  const { service } = makeService(KEY_HEX);
+  for (const referenceImageCount of [0, 7, 1.5]) {
+    assert.throws(
+      () =>
+        service.getStylePresetPrompt({
+          key: "cinematic-portrait",
+          referenceImageCount,
+        }),
+      (error: unknown) => {
+        expectProblem(error, 422, "VALIDATION_FAILED");
+        return true;
+      },
     );
   }
 });

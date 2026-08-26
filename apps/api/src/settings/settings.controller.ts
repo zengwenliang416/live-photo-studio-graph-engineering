@@ -6,6 +6,8 @@ import {
   Headers,
   HttpCode,
   Inject,
+  Param,
+  Query,
   Put,
   Req,
 } from "@nestjs/common";
@@ -14,7 +16,10 @@ import {
   SettingsService,
   type UpsertImageProviderBody,
 } from "./application/settings-service.js";
-import { upsertImageProviderRequestSchema } from "./request-schemas.js";
+import {
+  stylePresetPromptQuerySchema,
+  upsertImageProviderRequestSchema,
+} from "./request-schemas.js";
 
 function requireIdempotencyKey(raw: string | undefined): string {
   if (!raw || raw.trim().length < 16) {
@@ -81,5 +86,17 @@ export class SettingsController {
   @Get("style-presets")
   listStylePresets(): unknown {
     return this.settings.listStylePresets().body;
+  }
+
+  @Get("style-presets/:key/prompt")
+  getStylePresetPrompt(
+    @Param("key") key: string,
+    @Query() query: unknown,
+  ): unknown {
+    const parsed = stylePresetPromptQuerySchema.parse(query ?? {});
+    return this.settings.getStylePresetPrompt({
+      key,
+      referenceImageCount: parsed.referenceImageCount,
+    }).body;
   }
 }
