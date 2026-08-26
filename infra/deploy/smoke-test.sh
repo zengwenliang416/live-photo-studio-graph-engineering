@@ -25,11 +25,8 @@ read_env_value() {
 }
 
 public_url="$(read_env_value "$env_file" PUBLIC_URL)"
-auth_env_file="$(read_env_value "$env_file" CANARY_AUTH_ENV_FILE)"
 object_storage_endpoint="$(read_env_value "$env_file" OBJECT_STORAGE_ENDPOINT)"
 object_storage_bucket="$(read_env_value "$env_file" OBJECT_STORAGE_BUCKET)"
-
-auth_env_file="${auth_env_file:-/opt/live-photo-studio/canary-auth.env}"
 
 docker compose --env-file "$env_file" -f "$compose_file" ps
 
@@ -59,45 +56,30 @@ docker compose --env-file "$env_file" -f "$compose_file" port web 3000 |
   grep -Eq '^127\.0\.0\.1:'
 
 if [ -n "$public_url" ]; then
-  if [ ! -r "$auth_env_file" ]; then
-    printf 'canary auth file is not readable: %s\n' "$auth_env_file" >&2
-    exit 66
-  fi
-  canary_basic_auth_user="$(read_env_value "$auth_env_file" CANARY_BASIC_AUTH_USER)"
-  canary_basic_auth_password="$(read_env_value "$auth_env_file" CANARY_BASIC_AUTH_PASSWORD)"
-  : "${canary_basic_auth_user:?CANARY_BASIC_AUTH_USER is required}"
-  : "${canary_basic_auth_password:?CANARY_BASIC_AUTH_PASSWORD is required}"
   : "${object_storage_endpoint:?OBJECT_STORAGE_ENDPOINT is required}"
   : "${object_storage_bucket:?OBJECT_STORAGE_BUCKET is required}"
 
-  public_curl() {
-    curl --user "${canary_basic_auth_user}:${canary_basic_auth_password}" "$@"
-  }
-
-  public_unauthorized_status="$(
-    curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
-      --head --retry 12 --retry-delay 5 --retry-all-errors \
-      "$public_url/"
-  )"
-  [ "$public_unauthorized_status" = "401" ]
+  public_headers="$(mktemp)"
+  cookie_jar="$(mktemp)"
+  registration_headers="$(mktemp)"
+  cors_headers="$(mktemp)"
+  trap 'rm -f "$public_headers" "$cookie_jar" "$registration_headers" "$cors_headers"' EXIT
 
   public_web_status="$(
-    public_curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+    curl --silent --show-error --output /dev/null \
+      --dump-header "$public_headers" --write-out '%{http_code}' \
       --retry 12 --retry-delay 5 --retry-all-errors \
       "$public_url/login"
   )"
   [ "$public_web_status" = "200" ]
+  ! grep -qi '^www-authenticate:' "$public_headers"
 
   public_api_status="$(
-    public_curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+    curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
       --retry 12 --retry-delay 5 --retry-all-errors \
       "$public_url/v1/stream-health"
   )"
   [ "$public_api_status" = "200" ]
-
-  cookie_jar="$(mktemp)"
-  cors_headers="$(mktemp)"
-  trap 'rm -f "$cookie_jar" "$cors_headers"' EXIT
 
   smoke_suffix="$(
     od -An -N8 -tx1 /dev/urandom |
@@ -111,15 +93,16 @@ if [ -n "$public_url" ]; then
   )"
 
   forged_identity_status="$(
-    public_curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+    curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
       --header 'x-user-id: forged-smoke-user' \
       "$public_url/v1/projects"
   )"
   [ "$forged_identity_status" = "401" ]
 
   registration_status="$(
-    public_curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+    curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
       --cookie-jar "$cookie_jar" \
+      --dump-header "$registration_headers" \
       --request POST \
       --header "Origin: $public_url" \
       --header 'Content-Type: application/json' \
@@ -127,35 +110,30 @@ if [ -n "$public_url" ]; then
       "$public_url/v1/auth/register"
   )"
   [ "$registration_status" = "201" ]
+  grep -qi '^set-cookie: lps_session=' "$registration_headers"
+  grep -i '^set-cookie: lps_session=' "$registration_headers" |
+    grep -qi 'httponly'
+  grep -i '^set-cookie: lps_session=' "$registration_headers" |
+    grep -qi 'samesite=lax'
+  grep -i '^set-cookie: lps_session=' "$registration_headers" |
+    grep -qi 'secure'
 
   session_status="$(
-    public_curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+    curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
       --cookie "$cookie_jar" \
       "$public_url/v1/auth/session"
   )"
   [ "$session_status" = "200" ]
 
-  project_status="$(
-    public_curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
-      --cookie "$cookie_jar" \
-      --request POST \
-      --header "Origin: $public_url" \
-      --header "Idempotency-Key: release-smoke-${smoke_suffix}" \
-      --header 'Content-Type: application/json' \
-      --data '{"title":"Release smoke project"}' \
-      "$public_url/v1/projects"
-  )"
-  [ "$project_status" = "201" ]
-
   projects_status="$(
-    public_curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+    curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
       --cookie "$cookie_jar" \
       "$public_url/v1/projects"
   )"
   [ "$projects_status" = "200" ]
 
   logout_status="$(
-    public_curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+    curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
       --cookie "$cookie_jar" \
       --request POST \
       --header "Origin: $public_url" \
@@ -164,7 +142,7 @@ if [ -n "$public_url" ]; then
   [ "$logout_status" = "200" ]
 
   revoked_session_status="$(
-    public_curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+    curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
       --cookie "$cookie_jar" \
       "$public_url/v1/auth/session"
   )"

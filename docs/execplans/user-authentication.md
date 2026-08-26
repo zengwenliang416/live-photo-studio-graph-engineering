@@ -20,6 +20,9 @@ authenticated user ID.
 - [x] 2026-08-25: Added unit, controller, security and responsive source tests.
 - [x] 2026-08-25: Ran focused checks, PostgreSQL migration verification,
   real API/browser E2E, and repository-wide build/check/test.
+- [x] 2026-08-26: Deployed email authentication through GitHub and Woodpecker,
+  removed production Nginx Basic Auth, and passed the public registration,
+  session, protected-resource and logout smoke checks.
 
 ## 3. Surprises and discoveries
 
@@ -79,8 +82,7 @@ Validation completed:
 
 Password reset and email verification remain intentionally absent until an
 outbound email identity provider and secure delivery contract exist. Production
-Basic Auth remains in place until a separately authorized deployment completes
-live registration, login, ownership and rollback checks.
+now uses application email authentication without an Nginx Basic Auth layer.
 
 ## 6. Repository context and orientation
 
@@ -138,8 +140,9 @@ git diff --check
 
 Migration `0008` uses create-if-missing statements and is recorded by the
 existing migration runner. Application rollback can restore the prior image,
-but Basic Auth must remain until the new application authentication has been
-deployed and verified. Database tables may remain unused after rollback.
+but a rollback to a pre-authentication image must also restore the saved Nginx
+Basic Auth configuration before traffic is admitted. Database tables may remain
+unused after rollback.
 
 ## 12. Interfaces and dependencies
 
@@ -160,10 +163,11 @@ deployed and verified. Database tables may remain unused after rollback.
 ## 14. Artifacts and operational notes
 
 Production must set `AUTH_COOKIE_SECURE=true`, `AUTH_ALLOWED_ORIGINS` to the
-public origin and a suitable session TTL. Nginx Basic Auth is removed only in a
-separately authorized deployment after live registration/login/ownership checks
-pass. `GRAPH_WORKFLOW_CANARY_USER_IDS` must be empty or contain real
-authenticated user UUIDs; the former `demo-user` value is not a valid account.
-The application throttle is account-scoped; the trusted production ingress must
-also enforce an IP-level rate limit for authentication endpoints rather than
-deriving client identity from untrusted forwarding headers inside the API.
+public origin and a suitable session TTL. The public Nginx route no longer
+references an htpasswd file; live registration, session restoration,
+authenticated project listing and logout are release smoke checks.
+`GRAPH_WORKFLOW_CANARY_USER_IDS` must be empty or contain real authenticated
+user UUIDs; the former `demo-user` value is not a valid account. The application
+throttle is account-scoped; the trusted production ingress must also enforce an
+IP-level rate limit for authentication endpoints rather than deriving client
+identity from untrusted forwarding headers inside the API.
