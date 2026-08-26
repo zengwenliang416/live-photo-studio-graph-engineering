@@ -10,6 +10,8 @@ import { PROJECT_TOKENS } from "./project-tokens.js";
 import { InMemoryWorkflowUnit } from "../testing/in-memory-workflow-unit.js";
 import type { OutboxQueuePair } from "../workflows/infrastructure/outbox-dispatcher.js";
 import { WORKFLOW_TOKENS } from "../workflows/workflow-tokens.js";
+import { SessionAuthGuard } from "../auth/session-auth.guard.js";
+import { testSessionAuthGuard } from "../testing/test-session-auth.guard.js";
 
 process.env["DATABASE_URL"] ??= "postgresql://unittest:invalid@localhost:5/db";
 process.env["REDIS_URL"] ??= "redis://unittest.invalid:6379";
@@ -32,6 +34,8 @@ async function createApp() {
   const moduleRef = await Test.createTestingModule({
     imports: [AppModule],
   })
+    .overrideProvider(SessionAuthGuard)
+    .useValue(testSessionAuthGuard)
     .overrideProvider(WORKFLOW_TOKENS.config)
     .useValue({
       PORT: 4000,

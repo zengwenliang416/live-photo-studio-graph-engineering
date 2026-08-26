@@ -3,14 +3,21 @@ import "dotenv/config";
 import { NestFactory } from "@nestjs/core";
 import type { NestExpressApplication } from "@nestjs/platform-express";
 import type { Pool } from "pg";
-import { loadApiConfig } from "./config.js";
+import { loadApiConfig, loadAuthConfig } from "./config.js";
 import { AppModule } from "./app.module.js";
 import { WORKFLOW_TOKENS } from "./workflows/workflow-tokens.js";
 import type { OutboxDispatcher } from "./workflows/infrastructure/outbox-dispatcher.js";
 
 async function bootstrap(): Promise<void> {
   const config = loadApiConfig();
+  const authConfig = loadAuthConfig();
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.enableCors({
+    credentials: true,
+    origin: authConfig.AUTH_ALLOWED_ORIGINS.split(",")
+      .map((value) => value.trim())
+      .filter((value) => value.length > 0),
+  });
   await app.listen(config.PORT, "0.0.0.0");
 
   const dispatcher = app.get<OutboxDispatcher>(

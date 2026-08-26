@@ -49,7 +49,7 @@ wait_for_service() {
 }
 
 wait_for_service api \
-  "fetch('http://127.0.0.1:4000/v1/stream-health',{headers:{'x-user-id':'health-check'}}).then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
+  "fetch('http://127.0.0.1:4000/v1/stream-health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
 wait_for_service web \
   "fetch('http://127.0.0.1:3000/projects').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
 
@@ -70,6 +70,10 @@ if [ -n "$public_url" ]; then
   : "${object_storage_endpoint:?OBJECT_STORAGE_ENDPOINT is required}"
   : "${object_storage_bucket:?OBJECT_STORAGE_BUCKET is required}"
 
+  public_curl() {
+    curl --user "${canary_basic_auth_user}:${canary_basic_auth_password}" "$@"
+  }
+
   public_unauthorized_status="$(
     curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
       --head --retry 12 --retry-delay 5 --retry-all-errors \
@@ -78,24 +82,94 @@ if [ -n "$public_url" ]; then
   [ "$public_unauthorized_status" = "401" ]
 
   public_web_status="$(
-    curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
-      --user "${canary_basic_auth_user}:${canary_basic_auth_password}" \
+    public_curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
       --retry 12 --retry-delay 5 --retry-all-errors \
-      "$public_url/projects"
+      "$public_url/login"
   )"
   [ "$public_web_status" = "200" ]
 
   public_api_status="$(
-    curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
-      --user "${canary_basic_auth_user}:${canary_basic_auth_password}" \
-      --header 'x-user-id: health-check' \
+    public_curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
       --retry 12 --retry-delay 5 --retry-all-errors \
       "$public_url/v1/stream-health"
   )"
   [ "$public_api_status" = "200" ]
 
+  cookie_jar="$(mktemp)"
   cors_headers="$(mktemp)"
-  trap 'rm -f "$cors_headers"' EXIT
+  trap 'rm -f "$cookie_jar" "$cors_headers"' EXIT
+
+  smoke_suffix="$(
+    od -An -N8 -tx1 /dev/urandom |
+      tr -d ' \n'
+  )"
+  smoke_email="release-smoke-${smoke_suffix}@example.invalid"
+  smoke_password="LpsSmoke-${smoke_suffix}-A9!"
+  registration_body="$(
+    printf '{"email":"%s","password":"%s","displayName":"Release Smoke"}' \
+      "$smoke_email" "$smoke_password"
+  )"
+
+  forged_identity_status="$(
+    public_curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+      --header 'x-user-id: forged-smoke-user' \
+      "$public_url/v1/projects"
+  )"
+  [ "$forged_identity_status" = "401" ]
+
+  registration_status="$(
+    public_curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+      --cookie-jar "$cookie_jar" \
+      --request POST \
+      --header "Origin: $public_url" \
+      --header 'Content-Type: application/json' \
+      --data "$registration_body" \
+      "$public_url/v1/auth/register"
+  )"
+  [ "$registration_status" = "201" ]
+
+  session_status="$(
+    public_curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+      --cookie "$cookie_jar" \
+      "$public_url/v1/auth/session"
+  )"
+  [ "$session_status" = "200" ]
+
+  project_status="$(
+    public_curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+      --cookie "$cookie_jar" \
+      --request POST \
+      --header "Origin: $public_url" \
+      --header "Idempotency-Key: release-smoke-${smoke_suffix}" \
+      --header 'Content-Type: application/json' \
+      --data '{"title":"Release smoke project"}' \
+      "$public_url/v1/projects"
+  )"
+  [ "$project_status" = "201" ]
+
+  projects_status="$(
+    public_curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+      --cookie "$cookie_jar" \
+      "$public_url/v1/projects"
+  )"
+  [ "$projects_status" = "200" ]
+
+  logout_status="$(
+    public_curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+      --cookie "$cookie_jar" \
+      --request POST \
+      --header "Origin: $public_url" \
+      "$public_url/v1/auth/logout"
+  )"
+  [ "$logout_status" = "200" ]
+
+  revoked_session_status="$(
+    public_curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+      --cookie "$cookie_jar" \
+      "$public_url/v1/auth/session"
+  )"
+  [ "$revoked_session_status" = "401" ]
+
   curl --fail --silent --show-error --output /dev/null \
     --dump-header "$cors_headers" \
     --request OPTIONS \

@@ -11,6 +11,7 @@ import type { Request } from "@nestjs/common";
 import { interval, map, mergeMap, type Observable } from "rxjs";
 import type { Pool } from "pg";
 import type { ApiConfig } from "../config.js";
+import { PublicRoute } from "../auth/public-route.js";
 import { WorkflowService } from "./application/workflow-service.js";
 import { WORKFLOW_TOKENS } from "./workflow-tokens.js";
 
@@ -78,6 +79,7 @@ export class WorkflowEventsController {
   }
 
   @Get("stream-health")
+  @PublicRoute()
   health(): string {
     return "ok";
   }

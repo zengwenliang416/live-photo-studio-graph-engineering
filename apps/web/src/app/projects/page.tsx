@@ -13,6 +13,7 @@ import {
   type ProjectSummary,
   WorkflowApiClient,
 } from "../../lib/api-client.js";
+import { AccountActions } from "../../components/auth/account-actions.js";
 import styles from "./projects.module.css";
 
 const dateFormatter = new Intl.DateTimeFormat("zh-CN", {
@@ -86,9 +87,12 @@ function ProjectsPanel(): React.JSX.Element {
           </span>
           <span className={styles.brandName}>Live Photo Studio</span>
         </div>
-        <Link className={styles.settingsLink} href="/settings">
-          生图设置
-        </Link>
+        <div className={styles.headerActions}>
+          <Link className={styles.settingsLink} href="/settings">
+            生图设置
+          </Link>
+          <AccountActions />
+        </div>
       </header>
 
       <div className={styles.content}>

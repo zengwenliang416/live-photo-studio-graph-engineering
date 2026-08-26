@@ -14,7 +14,13 @@ function jsonResponse(body: unknown, status = 200): Response {
   } as unknown as Response;
 }
 
-type Call = { method: string; path: string; key: string | undefined };
+type Call = {
+  method: string;
+  path: string;
+  key: string | undefined;
+  credentials: RequestCredentials | undefined;
+  userIdHeader: string | undefined;
+};
 
 function recordingClient() {
   const calls: Call[] = [];
@@ -38,6 +44,8 @@ function recordingClient() {
         method: String(init?.method),
         path,
         key: headers["idempotency-key"],
+        credentials: init?.credentials,
+        userIdHeader: headers["x-user-id"],
       });
       if (path.includes("/decisions")) {
         return jsonResponse({
@@ -49,7 +57,6 @@ function recordingClient() {
       });
     },
     baseUrl: "http://test",
-    userId: "u",
     keyStore,
   });
   return { client, calls, keyStore };
@@ -63,6 +70,13 @@ test("duplicate start clicks reuse the same idempotency key", async () => {
   assert.ok(calls[0]?.key);
   assert.equal(calls[0]?.key, calls[1]?.key);
   assert.match(String(calls[0]?.path), /\/v1\/projects\/p1\/workflow-runs$/u);
+});
+
+test("business requests use cookie credentials and never send x-user-id", async () => {
+  const { client, calls } = recordingClient();
+  await client.startWorkflowRun("p1");
+  assert.equal(calls[0]?.credentials, "include");
+  assert.equal(calls[0]?.userIdHeader, undefined);
 });
 
 test("decide keys are scoped per task and action", async () => {
@@ -111,7 +125,6 @@ test("latest export download requests a project-scoped short-lived grant", async
       });
     },
     baseUrl: "http://test",
-    userId: "u",
   });
 
   const result = await client.getLatestExportDownload(projectId);
@@ -133,7 +146,6 @@ test("problem+json responses raise typed errors", async () => {
         json: async () => ({ code: "IDEMPOTENCY_KEY_REUSED", title: "reused" }),
       }) as unknown as Response,
     baseUrl: "http://test",
-    userId: "u",
   });
   await assert.rejects(
     client.cancel("r"),
@@ -180,7 +192,6 @@ function projectRecordingClient(responder: (call: RecordedCall) => unknown) {
       return jsonResponse(responder(call), 201);
     },
     baseUrl: "http://test",
-    userId: "u",
     keyStore,
   });
   return { client, calls, keyStore };
@@ -246,7 +257,7 @@ test("default fetch keeps the browser global receiver", async () => {
   };
 
   try {
-    const client = new WorkflowApiClient({ baseUrl: "", userId: "u" });
+    const client = new WorkflowApiClient({ baseUrl: "" });
     await client.listProjects({ limit: 50 });
   } finally {
     globalThis.fetch = originalFetch;
@@ -331,19 +342,23 @@ test("setProjectCover posts the asset id with a per-project key", async () => {
 });
 
 test("uploadToSignedUrl PUTs the blob with only the signed headers", async () => {
-  const seen: { method: string; headers: Record<string, string>; size: number }[] =
-    [];
+  const seen: {
+    method: string;
+    headers: Record<string, string>;
+    size: number;
+    credentials: RequestCredentials | undefined;
+  }[] = [];
   const client = new WorkflowApiClient({
     fetchImpl: async (_input, init) => {
       seen.push({
         method: String(init?.method),
         headers: (init?.headers ?? {}) as Record<string, string>,
         size: (init?.body as Blob).size,
+        credentials: init?.credentials,
       });
       return { ok: true, status: 200 } as unknown as Response;
     },
     baseUrl: "http://test",
-    userId: "u",
   });
   await client.uploadToSignedUrl(
     "https://storage.example.test/signed/put",
@@ -353,7 +368,65 @@ test("uploadToSignedUrl PUTs the blob with only the signed headers", async () =>
   assert.equal(seen.length, 1);
   assert.equal(seen[0]?.method, "PUT");
   assert.equal(seen[0]?.size, 3);
+  assert.equal(seen[0]?.credentials, "omit");
   assert.deepEqual(seen[0]?.headers, { "content-type": "image/jpeg" });
+});
+
+test("auth methods use the shared session contract and credentialed requests", async () => {
+  const calls: Array<{
+    url: string;
+    method: string;
+    body: unknown;
+    credentials: RequestCredentials | undefined;
+  }> = [];
+  const client = new WorkflowApiClient({
+    baseUrl: "http://test",
+    fetchImpl: async (input, init) => {
+      calls.push({
+        url: String(input),
+        method: String(init?.method),
+        body:
+          typeof init?.body === "string"
+            ? (JSON.parse(init.body) as unknown)
+            : undefined,
+        credentials: init?.credentials,
+      });
+      if (String(input).endsWith("/logout")) {
+        return jsonResponse({ data: { signedOut: true } });
+      }
+      return jsonResponse({
+        data: {
+          user: {
+            userId: "00000000-0000-4000-8000-000000000001",
+            email: "owner@example.com",
+            displayName: "Owner",
+          },
+          expiresAt: "2026-08-25T12:00:00.000Z",
+        },
+      });
+    },
+  });
+  await client.register({
+    email: "owner@example.com",
+    password: "correct horse battery staple",
+    displayName: "Owner",
+  });
+  await client.login({
+    email: "owner@example.com",
+    password: "correct horse battery staple",
+  });
+  await client.getAuthSession();
+  await client.logout();
+  assert.deepEqual(
+    calls.map((call) => `${call.method} ${call.url}`),
+    [
+      "POST http://test/v1/auth/register",
+      "POST http://test/v1/auth/login",
+      "GET http://test/v1/auth/session",
+      "POST http://test/v1/auth/logout",
+    ],
+  );
+  assert.ok(calls.every((call) => call.credentials === "include"));
 });
 
 test("uploadToSignedUrl maps non-2xx to ApiProblemError", async () => {
@@ -361,7 +434,6 @@ test("uploadToSignedUrl maps non-2xx to ApiProblemError", async () => {
     fetchImpl: async () =>
       ({ ok: false, status: 403 }) as unknown as Response,
     baseUrl: "http://test",
-    userId: "u",
   });
   await assert.rejects(
     client.uploadToSignedUrl("https://storage.example.test/x", {}, new Blob()),
@@ -472,7 +544,6 @@ test("putImageProviderSettings retries reuse the key, success rotates it", async
       });
     },
     baseUrl: "http://test",
-    userId: "u",
     keyStore,
   });
   const body = {

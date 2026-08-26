@@ -1,6 +1,8 @@
 import { Module } from "@nestjs/common";
 import { APP_FILTER, APP_GUARD } from "@nestjs/core";
-import { DemoUserGuard } from "./http/demo-user.guard.js";
+import { AuthModule } from "./auth/auth.module.js";
+import { RequestOriginGuard } from "./auth/request-origin.guard.js";
+import { SessionAuthGuard } from "./auth/session-auth.guard.js";
 import { ProblemDetailsFilter } from "./http/problem-details.filter.js";
 import { AssetsModule } from "./assets/assets.module.js";
 import { ExportsModule } from "./exports/exports.module.js";
@@ -10,6 +12,7 @@ import { WorkflowsModule } from "./workflows/workflows.module.js";
 
 @Module({
   imports: [
+    AuthModule,
     WorkflowsModule,
     ExportsModule,
     ProjectsModule,
@@ -17,7 +20,10 @@ import { WorkflowsModule } from "./workflows/workflows.module.js";
     SettingsModule,
   ],
   providers: [
-    { provide: APP_GUARD, useClass: DemoUserGuard },
+    RequestOriginGuard,
+    SessionAuthGuard,
+    { provide: APP_GUARD, useExisting: RequestOriginGuard },
+    { provide: APP_GUARD, useExisting: SessionAuthGuard },
     { provide: APP_FILTER, useClass: ProblemDetailsFilter },
   ],
 })

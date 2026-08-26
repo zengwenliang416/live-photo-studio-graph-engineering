@@ -9,6 +9,8 @@ import type { ApiConfig } from "../config.js";
 import { InMemoryWorkflowUnit } from "../testing/in-memory-workflow-unit.js";
 import type { OutboxQueuePair } from "../workflows/infrastructure/outbox-dispatcher.js";
 import { WORKFLOW_TOKENS } from "../workflows/workflow-tokens.js";
+import { SessionAuthGuard } from "../auth/session-auth.guard.js";
+import { testSessionAuthGuard } from "../testing/test-session-auth.guard.js";
 import { EXPORT_TOKENS } from "./export-tokens.js";
 import type {
   ExportPackageRecord,
@@ -81,6 +83,8 @@ async function createApp(): Promise<{
   const moduleRef = await Test.createTestingModule({
     imports: [AppModule],
   })
+    .overrideProvider(SessionAuthGuard)
+    .useValue(testSessionAuthGuard)
     .overrideProvider(WORKFLOW_TOKENS.config)
     .useValue({
       PORT: 4000,

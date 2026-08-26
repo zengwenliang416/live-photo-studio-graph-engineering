@@ -18,7 +18,7 @@ export function useWorkflowEvents(
 ): void {
   const client = useMemo(
     () => new WorkflowApiClient(options),
-    [options.baseUrl, options.fetchImpl, options.keyStore, options.userId],
+    [options.baseUrl, options.fetchImpl, options.keyStore],
   );
   const callbackRef = useRef(onChanged);
   callbackRef.current = onChanged;

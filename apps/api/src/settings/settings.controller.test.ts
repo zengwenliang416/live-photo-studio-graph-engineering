@@ -10,6 +10,8 @@ import { PROJECT_TOKENS } from "../projects/project-tokens.js";
 import { InMemoryWorkflowUnit } from "../testing/in-memory-workflow-unit.js";
 import type { OutboxQueuePair } from "../workflows/infrastructure/outbox-dispatcher.js";
 import { WORKFLOW_TOKENS } from "../workflows/workflow-tokens.js";
+import { SessionAuthGuard } from "../auth/session-auth.guard.js";
+import { testSessionAuthGuard } from "../testing/test-session-auth.guard.js";
 import { SETTING_TOKENS } from "./setting-tokens.js";
 import { InMemorySettingsStore } from "./testing/in-memory-settings-store.js";
 
@@ -34,6 +36,8 @@ async function createApp() {
   const moduleRef = await Test.createTestingModule({
     imports: [AppModule],
   })
+    .overrideProvider(SessionAuthGuard)
+    .useValue(testSessionAuthGuard)
     .overrideProvider(WORKFLOW_TOKENS.config)
     .useValue({
       PORT: 4000,

@@ -13,6 +13,7 @@ import {
   ApiProblemError,
   WorkflowApiClient,
 } from "../../lib/api-client.js";
+import { AccountActions } from "../../components/auth/account-actions.js";
 import styles from "./settings.module.css";
 
 const DEFAULT_MODEL = "gpt-image-2";
@@ -116,9 +117,12 @@ function SettingsPanel(): React.JSX.Element {
           </span>
           <span className={styles.brandName}>Live Photo Studio</span>
         </div>
-        <Link className={styles.backLink} href="/projects">
-          返回项目列表
-        </Link>
+        <div className={styles.headerActions}>
+          <Link className={styles.backLink} href="/projects">
+            返回项目列表
+          </Link>
+          <AccountActions />
+        </div>
       </header>
 
       <div className={styles.content}>

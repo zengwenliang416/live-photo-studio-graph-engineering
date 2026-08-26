@@ -41,7 +41,7 @@ export interface UseWorkflowOptions extends ApiClientOptions {
 export function useWorkflow(options: UseWorkflowOptions) {
   const client = useMemo(
     () => new WorkflowApiClient(options),
-    [options.baseUrl, options.fetchImpl, options.keyStore, options.userId],
+    [options.baseUrl, options.fetchImpl, options.keyStore],
   );
   const queryClient = useQueryClient();
 

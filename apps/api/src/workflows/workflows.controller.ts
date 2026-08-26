@@ -16,6 +16,7 @@ import {
   startWorkflowRunRequestSchema,
 } from "./request-schemas.js";
 import { WORKFLOW_TOKENS } from "./workflow-tokens.js";
+import { PublicRoute } from "../auth/public-route.js";
 
 const uuidParamSchema = z.string().uuid();
 
@@ -155,6 +156,7 @@ export class WorkflowsController {
   }
 
   @Get("openapi.json")
+  @PublicRoute()
   getOpenApi(): Record<string, unknown> {
     return buildOpenApiDocument("/");
   }

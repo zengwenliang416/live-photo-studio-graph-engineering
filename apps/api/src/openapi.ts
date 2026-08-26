@@ -27,13 +27,6 @@ const idempotencyKeyParameter = {
   schema: { type: "string", minLength: 16 },
 };
 
-const userIdHeaderParameter = {
-  name: "x-user-id",
-  in: "header",
-  required: true,
-  schema: { type: "string" },
-};
-
 /**
  * Hand-maintained contract surface. The published paths mirror the ExecPlan
  * milestone; request bodies are validated by the Zod schemas at runtime.
@@ -54,12 +47,86 @@ export function buildOpenApiDocument(baseUrl: string): Record<string, unknown> {
         "Workflow command/query boundary. The Graph orchestrator owns phase transitions.",
     },
     servers: [{ url: baseUrl }],
+    security: [{ sessionCookie: [] }],
     paths: {
+      "/v1/auth/register": {
+        post: {
+          summary: "Create a user and issue an authenticated session.",
+          operationId: "register",
+          security: [],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/RegisterRequest" },
+              },
+            },
+          },
+          responses: {
+            "201": jsonResponse(
+              dataEnvelope({ $ref: "#/components/schemas/AuthSession" }),
+            ),
+            "409": problemResponse("Email already registered."),
+            "422": problemResponse("Validation failed."),
+          },
+        },
+      },
+      "/v1/auth/login": {
+        post: {
+          summary: "Verify credentials and issue an authenticated session.",
+          operationId: "login",
+          security: [],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/LoginRequest" },
+              },
+            },
+          },
+          responses: {
+            "200": jsonResponse(
+              dataEnvelope({ $ref: "#/components/schemas/AuthSession" }),
+            ),
+            "401": problemResponse("Invalid credentials."),
+            "429": problemResponse("Too many sign-in attempts."),
+            "422": problemResponse("Validation failed."),
+          },
+        },
+      },
+      "/v1/auth/session": {
+        get: {
+          summary: "Restore the current authenticated session.",
+          operationId: "getAuthSession",
+          responses: {
+            "200": jsonResponse(
+              dataEnvelope({ $ref: "#/components/schemas/AuthSession" }),
+            ),
+            "401": problemResponse("Authentication required."),
+          },
+        },
+      },
+      "/v1/auth/logout": {
+        post: {
+          summary: "Revoke the current session and clear its cookie.",
+          operationId: "logout",
+          responses: {
+            "200": jsonResponse(
+              dataEnvelope({
+                type: "object",
+                required: ["signedOut"],
+                properties: { signedOut: { type: "boolean", enum: [true] } },
+              }),
+            ),
+            "401": problemResponse("Authentication required."),
+          },
+        },
+      },
       "/v1/projects/{projectId}/workflow-runs": {
         post: {
           summary: "Start a workflow run for a project.",
           operationId: "startWorkflowRun",
-          parameters: [userIdHeaderParameter, idempotencyKeyParameter],
+          parameters: [idempotencyKeyParameter],
           requestBody: {
             required: true,
             content: {
@@ -83,7 +150,6 @@ export function buildOpenApiDocument(baseUrl: string): Record<string, unknown> {
           summary: "Read the workflow run projection.",
           operationId: "getWorkflowRun",
           parameters: [
-            userIdHeaderParameter,
             {
               name: "workflowRunId",
               in: "path",
@@ -103,7 +169,6 @@ export function buildOpenApiDocument(baseUrl: string): Record<string, unknown> {
           summary: "List human tasks of a workflow run.",
           operationId: "listHumanTasks",
           parameters: [
-            userIdHeaderParameter,
             {
               name: "workflowRunId",
               in: "path",
@@ -123,7 +188,6 @@ export function buildOpenApiDocument(baseUrl: string): Record<string, unknown> {
           summary: "Submit a decision for a pending human task.",
           operationId: "submitHumanTaskDecision",
           parameters: [
-            userIdHeaderParameter,
             idempotencyKeyParameter,
             {
               name: "humanTaskId",
@@ -157,7 +221,6 @@ export function buildOpenApiDocument(baseUrl: string): Record<string, unknown> {
           summary: "Request cooperative cancellation of a workflow run.",
           operationId: "cancelWorkflowRun",
           parameters: [
-            userIdHeaderParameter,
             idempotencyKeyParameter,
             {
               name: "workflowRunId",
@@ -189,7 +252,6 @@ export function buildOpenApiDocument(baseUrl: string): Record<string, unknown> {
           summary: "Create a short-lived signed download grant for the latest export.",
           operationId: "getLatestExportDownload",
           parameters: [
-            userIdHeaderParameter,
             {
               name: "projectId",
               in: "path",
@@ -212,7 +274,6 @@ export function buildOpenApiDocument(baseUrl: string): Record<string, unknown> {
           summary: "Read a bounded operator workflow projection.",
           operationId: "getWorkflowTriage",
           parameters: [
-            userIdHeaderParameter,
             {
               name: "workflowRunId",
               in: "path",
@@ -234,7 +295,6 @@ export function buildOpenApiDocument(baseUrl: string): Record<string, unknown> {
           summary: "Replay a persisted signal through the Outbox.",
           operationId: "replayWorkflowSignal",
           parameters: [
-            userIdHeaderParameter,
             {
               name: "workflowRunId",
               in: "path",
@@ -268,6 +328,13 @@ export function buildOpenApiDocument(baseUrl: string): Record<string, unknown> {
       },
     },
     components: {
+      securitySchemes: {
+        sessionCookie: {
+          type: "apiKey",
+          in: "cookie",
+          name: "lps_session",
+        },
+      },
       schemas: {
         ProblemDetails: {
           type: "object",
@@ -278,6 +345,42 @@ export function buildOpenApiDocument(baseUrl: string): Record<string, unknown> {
             status: { type: "integer" },
             code: { type: "string" },
             detail: { type: "string" },
+          },
+        },
+        RegisterRequest: {
+          type: "object",
+          required: ["email", "password", "displayName"],
+          additionalProperties: false,
+          properties: {
+            email: { type: "string", format: "email", maxLength: 254 },
+            password: { type: "string", minLength: 12, maxLength: 128 },
+            displayName: { type: "string", minLength: 1, maxLength: 80 },
+          },
+        },
+        LoginRequest: {
+          type: "object",
+          required: ["email", "password"],
+          additionalProperties: false,
+          properties: {
+            email: { type: "string", format: "email", maxLength: 254 },
+            password: { type: "string", minLength: 1, maxLength: 128 },
+          },
+        },
+        AuthUser: {
+          type: "object",
+          required: ["userId", "email", "displayName"],
+          properties: {
+            userId: { type: "string", format: "uuid" },
+            email: { type: "string", format: "email" },
+            displayName: { type: "string" },
+          },
+        },
+        AuthSession: {
+          type: "object",
+          required: ["user", "expiresAt"],
+          properties: {
+            user: { $ref: "#/components/schemas/AuthUser" },
+            expiresAt: { type: "string", format: "date-time" },
           },
         },
         StartWorkflowRunRequest: {

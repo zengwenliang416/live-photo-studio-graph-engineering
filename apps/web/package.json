@@ -10,6 +10,7 @@
     "test": "tsx --test \"src/**/*.test.ts\""
   },
   "dependencies": {
+    "@live-photo-studio/contracts": "workspace:*",
     "@live-photo-studio/graph-contracts": "workspace:*",
     "@tanstack/react-query": "^5.0.0",
     "next": "^15.0.0",

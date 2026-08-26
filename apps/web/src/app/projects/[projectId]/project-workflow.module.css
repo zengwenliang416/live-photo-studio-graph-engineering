@@ -74,6 +74,13 @@
   font-size: 11px;
 }
 
+.headerActions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
 .content {
   width: min(100%, 980px);
   margin: 0 auto;

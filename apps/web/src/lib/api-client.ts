@@ -1,4 +1,11 @@
 import { z } from "zod";
+import {
+  authSessionResponseSchema,
+  logoutResponseSchema,
+  type AuthSessionResponse,
+  type LoginRequest,
+  type RegisterRequest,
+} from "@live-photo-studio/contracts";
 
 const API_BASE = process.env["NEXT_PUBLIC_API_BASE"] ?? "http://localhost:4000";
 
@@ -178,10 +185,10 @@ export interface ApiClientOptions {
     /** Optional rotation hook used after a completed logical action. */
     remove?(actionId: string): void;
   };
-  readonly userId?: string;
 }
 
 const memoryKeys = new Map<string, string>();
+let unauthorizedRedirectInFlight = false;
 
 function readStoredKey(actionId: string): string | undefined {
   if (typeof window === "undefined") return memoryKeys.get(actionId);
@@ -246,13 +253,10 @@ export class WorkflowApiClient {
     set(actionId: string, key: string): void;
     remove?(actionId: string): void;
   };
-  private readonly userId: string;
-
   constructor(options: ApiClientOptions = {}) {
     this.impl = options.fetchImpl ?? globalThis.fetch.bind(globalThis);
     this.base = (options.baseUrl ?? API_BASE).replace(/\/$/u, "");
     this.keys = options.keyStore ?? defaultKeyStore;
-    this.userId = options.userId ?? "demo-user";
   }
 
   private async request<T>(
@@ -261,11 +265,12 @@ export class WorkflowApiClient {
     schema: z.ZodType<T>,
     body?: unknown,
     actionId?: string,
+    redirectOnUnauthorized = true,
   ): Promise<T> {
-    const headers: Record<string, string> = {
-      "content-type": "application/json",
-      "x-user-id": this.userId,
-    };
+    const headers: Record<string, string> = {};
+    if (body !== undefined) {
+      headers["content-type"] = "application/json";
+    }
     if (actionId) {
       let key = this.keys.get(actionId);
       if (!key) {
@@ -277,6 +282,7 @@ export class WorkflowApiClient {
     const response = await this.impl(`${this.base}${path}`, {
       method,
       headers,
+      credentials: "include",
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     });
     const contentType = response.headers.get("content-type") ?? "";
@@ -285,6 +291,17 @@ export class WorkflowApiClient {
         code?: string;
         title?: string;
       };
+      if (
+        response.status === 401 &&
+        redirectOnUnauthorized &&
+        typeof window !== "undefined" &&
+        window.location.pathname !== "/login" &&
+        !unauthorizedRedirectInFlight
+      ) {
+        unauthorizedRedirectInFlight = true;
+        const next = `${window.location.pathname}${window.location.search}`;
+        window.location.replace(`/login?next=${encodeURIComponent(next)}`);
+      }
       throw new ApiProblemError(
         response.status,
         problem.code ?? `HTTP_${response.status}`,
@@ -293,6 +310,50 @@ export class WorkflowApiClient {
     }
     const payload: unknown = await response.json();
     return schema.parse(payload);
+  }
+
+  register(input: RegisterRequest): Promise<AuthSessionResponse> {
+    return this.request(
+      "POST",
+      "/v1/auth/register",
+      authSessionResponseSchema,
+      input,
+      undefined,
+      false,
+    );
+  }
+
+  login(input: LoginRequest): Promise<AuthSessionResponse> {
+    return this.request(
+      "POST",
+      "/v1/auth/login",
+      authSessionResponseSchema,
+      input,
+      undefined,
+      false,
+    );
+  }
+
+  getAuthSession(): Promise<AuthSessionResponse> {
+    return this.request(
+      "GET",
+      "/v1/auth/session",
+      authSessionResponseSchema,
+      undefined,
+      undefined,
+      false,
+    );
+  }
+
+  logout(): Promise<{ data: { signedOut: true } }> {
+    return this.request(
+      "POST",
+      "/v1/auth/logout",
+      logoutResponseSchema,
+      undefined,
+      undefined,
+      false,
+    );
   }
 
   /**
@@ -555,6 +616,7 @@ export class WorkflowApiClient {
       method: "PUT",
       headers,
       body: file,
+      credentials: "omit",
     });
     if (!response.ok) {
       throw new ApiProblemError(

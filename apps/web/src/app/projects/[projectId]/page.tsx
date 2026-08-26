@@ -10,6 +10,7 @@ import {
 import { resolveWorkflowRunId } from "../../../lib/workflow-session.js";
 import { useWorkflow } from "../../../hooks/use-workflow.js";
 import { useWorkflowEvents } from "../../../hooks/use-workflow-events.js";
+import { AccountActions } from "../../../components/auth/account-actions.js";
 import styles from "./project-workflow.module.css";
 
 const GRAPH_ENABLED =
@@ -211,9 +212,12 @@ function ReviewPanel(): React.JSX.Element {
           <span className={styles.brandName}>Live Photo Studio</span>
           <span className={styles.badge}>Graph v1</span>
         </div>
-        <span className={styles.headerMeta}>
-          run {runId ? shortId(runId) : "pending"}
-        </span>
+        <div className={styles.headerActions}>
+          <span className={styles.headerMeta}>
+            run {runId ? shortId(runId) : "pending"}
+          </span>
+          <AccountActions />
+        </div>
       </header>
 
       <div className={styles.content}>

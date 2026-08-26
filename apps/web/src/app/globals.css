@@ -54,6 +54,40 @@ select {
   outline-offset: 3px;
 }
 
+.authGateState {
+  display: grid;
+  min-height: 100vh;
+  place-content: center;
+  justify-items: center;
+  gap: 14px;
+  padding: 24px;
+  color: var(--muted);
+  background:
+    radial-gradient(circle at 50% 35%, rgb(230 175 46 / 11%), transparent 24rem),
+    var(--canvas);
+  text-align: center;
+}
+
+.authGateState p {
+  margin: 0;
+}
+
+.authGateState button {
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid var(--accent);
+  border-radius: 11px;
+  color: #0a0a0b;
+  background: var(--accent);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.authGateMark {
+  color: var(--accent);
+  font-size: 36px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

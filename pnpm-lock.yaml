@@ -10,6 +10,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@live-photo-studio/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       '@live-photo-studio/database':
         specifier: workspace:*
         version: link:../../packages/database
@@ -126,6 +129,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@live-photo-studio/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       '@live-photo-studio/graph-contracts':
         specifier: workspace:*
         version: link:../../packages/graph-contracts
@@ -240,6 +246,22 @@ importers:
       '@types/pg':
         specifier: ^8.15.0
         version: 8.23.1
+      tsx:
+        specifier: ^4.20.0
+        version: 4.23.12
+      typescript:
+        specifier: ^5.9.0
+        version: 5.9.3
+
+  packages/contracts:
+    dependencies:
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.13.3
       tsx:
         specifier: ^4.20.0
         version: 4.23.12

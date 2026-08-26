@@ -28,3 +28,39 @@ export function loadApiConfig(
 ): ApiConfig {
   return apiConfigSchema.parse(environment);
 }
+
+export const authConfigSchema = z.object({
+  AUTH_SESSION_TTL_SECONDS: z.coerce
+    .number()
+    .int()
+    .min(300)
+    .max(31_536_000)
+    .default(604_800),
+  AUTH_MAX_SESSIONS_PER_USER: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(50)
+    .default(10),
+  AUTH_COOKIE_SECURE: z.enum(["true", "false"]).default("false"),
+  AUTH_ALLOWED_ORIGINS: z
+    .string()
+    .default("http://localhost:3000,http://127.0.0.1:3000"),
+});
+
+export type AuthConfig = z.infer<typeof authConfigSchema>;
+
+export function loadAuthConfig(
+  environment: NodeJS.ProcessEnv = process.env,
+): AuthConfig {
+  const config = authConfigSchema.parse(environment);
+  if (
+    environment["NODE_ENV"] === "production" &&
+    config.AUTH_COOKIE_SECURE !== "true"
+  ) {
+    throw new Error(
+      "AUTH_COOKIE_SECURE must be true when NODE_ENV=production.",
+    );
+  }
+  return config;
+}

@@ -60,6 +60,13 @@
   color: var(--text);
 }
 
+.headerActions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
 .content {
   width: min(100%, 720px);
   margin: 0 auto;

@@ -12,6 +12,8 @@ import {
   InMemoryWorkflowUnit,
 } from "./testing/in-memory-workflow-unit.js";
 import type { HumanTaskRow } from "./workflows/ports.js";
+import { SessionAuthGuard } from "./auth/session-auth.guard.js";
+import { testSessionAuthGuard } from "./testing/test-session-auth.guard.js";
 
 process.env["DATABASE_URL"] ??= "postgresql://unittest:invalid@localhost:5/db";
 process.env["REDIS_URL"] ??= "redis://unittest.invalid:6379";
@@ -65,6 +67,8 @@ async function createApp(input?: { graphWorkflowEnabled?: string }) {
   const moduleRef = await Test.createTestingModule({
     imports: [AppModule],
   })
+    .overrideProvider(SessionAuthGuard)
+    .useValue(testSessionAuthGuard)
     .overrideProvider(WORKFLOW_TOKENS.config)
     .useValue({
       PORT: 4000,
@@ -118,6 +122,10 @@ test("openapi document publishes workflow and export download paths", async () =
   assert.equal(response.status, 200);
   const paths = Object.keys(response.body.paths);
   for (const expected of [
+    "/v1/auth/register",
+    "/v1/auth/login",
+    "/v1/auth/session",
+    "/v1/auth/logout",
     "/v1/projects/{projectId}/workflow-runs",
     "/v1/workflow-runs/{workflowRunId}",
     "/v1/workflow-runs/{workflowRunId}/human-tasks",
@@ -127,6 +135,11 @@ test("openapi document publishes workflow and export download paths", async () =
   ]) {
     assert.ok(paths.includes(expected), `missing ${expected}`);
   }
+  assert.equal(
+    response.body.components.securitySchemes.sessionCookie.name,
+    "lps_session",
+  );
+  assert.doesNotMatch(JSON.stringify(response.body), /x-user-id/u);
   await app.close();
 });
 
