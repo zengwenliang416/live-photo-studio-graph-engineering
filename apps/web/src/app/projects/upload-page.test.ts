@@ -32,12 +32,10 @@ test("upload page starts the run with the style and persists the run id", () => 
 
 test("upload page offers a non-blocking style picker", () => {
   assert.match(pageSource, /listStylePresets/u);
-  assert.match(pageSource, /role="radiogroup"/u);
-  assert.match(pageSource, /选择风格/u);
-  assert.match(pageSource, /风格列表加载失败,不影响上传/u);
-  assert.match(pageSource, /preset\.recommendedFor/u);
-  assert.match(pageSource, /preset\.recommendedMotion/u);
-  assert.match(pageSource, /preset\.colorPalette/u);
+  assert.match(pageSource, /StyleCatalog/u);
+  assert.match(pageSource, /heading="选择系列风格"/u);
+  assert.match(pageSource, /selectedKey=\{styleKey\}/u);
+  assert.match(pageSource, /onSelect=\{setStyleKey\}/u);
 });
 
 test("upload page wires the intent, signed PUT and confirm pipeline", () => {

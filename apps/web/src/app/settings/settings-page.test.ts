@@ -53,6 +53,12 @@ test("settings page uses the centralized client with status and alert regions", 
   assert.doesNotMatch(pageSource, /\bfetch\(/u);
 });
 
+test("settings page exposes the full style catalog and compiled prompts", () => {
+  assert.match(pageSource, /listStylePresets/u);
+  assert.match(pageSource, /StyleCatalog/u);
+  assert.match(pageSource, /heading="风格与生图提示词"/u);
+});
+
 test("settings page uses a desktop split view and stays usable at 390px", () => {
   assert.match(
     styleSource,

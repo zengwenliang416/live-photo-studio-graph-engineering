@@ -51,6 +51,16 @@
   border-top: 1px solid var(--border);
 }
 
+.catalogPanel {
+  margin-top: 28px;
+  padding: 26px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background:
+    linear-gradient(145deg, rgb(28 28 31 / 96%), rgb(20 20 22 / 96%));
+  box-shadow: 0 22px 70px rgb(0 0 0 / 18%);
+}
+
 .contextPanel,
 .panel {
   border: 1px solid var(--border);
@@ -333,7 +343,8 @@
 
 @media (max-width: 560px) {
   .panel,
-  .contextPanel {
+  .contextPanel,
+  .catalogPanel {
     padding: 18px;
   }
 

@@ -13,6 +13,7 @@ import {
   WorkflowApiClient,
 } from "../../lib/api-client.js";
 import { AppShell } from "../../components/app-shell/app-shell.js";
+import { StyleCatalog } from "../../components/style-catalog/style-catalog.js";
 import styles from "./settings.module.css";
 
 const DEFAULT_MODEL = "gpt-image-2";
@@ -37,8 +38,13 @@ function SettingsPanel(): React.JSX.Element {
     queryKey: ["settings", "image-provider"],
     queryFn: () => client.getImageProviderSettings(),
   });
+  const stylePresetsQuery = useQuery({
+    queryKey: ["style-presets"],
+    queryFn: () => client.listStylePresets(),
+  });
 
   const settings = settingsQuery.data?.data;
+  const stylePresets = stylePresetsQuery.data?.data.items ?? [];
 
   // Populate the form from the server snapshot; the apiKey box always stays
   // empty because the key is never returned in plaintext.
@@ -337,6 +343,17 @@ function SettingsPanel(): React.JSX.Element {
             </section>
           </div>
         )}
+
+        <section className={styles.catalogPanel}>
+          <StyleCatalog
+            client={client}
+            presets={stylePresets}
+            isLoading={stylePresetsQuery.isLoading}
+            isError={stylePresetsQuery.isError}
+            onRetry={() => void stylePresetsQuery.refetch()}
+            heading="风格与生图提示词"
+          />
+        </section>
       </main>
     </AppShell>
   );

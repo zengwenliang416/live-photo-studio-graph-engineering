@@ -14,6 +14,7 @@ import {
 } from "../../../../lib/api-client.js";
 import { workflowRunStorageKey } from "../../../../lib/workflow-session.js";
 import { AppShell } from "../../../../components/app-shell/app-shell.js";
+import { StyleCatalog } from "../../../../components/style-catalog/style-catalog.js";
 import {
   advanceUploadItem,
   firstReadyAssetId,
@@ -61,7 +62,6 @@ function UploadPanel(): React.JSX.Element {
   const [isSettingCover, setIsSettingCover] = useState(false);
   const [coverError, setCoverError] = useState<string | null>(null);
   const [styleKey, setStyleKey] = useState<string | null>(null);
-  const [styleCategory, setStyleCategory] = useState("全部");
   const [isStarting, setIsStarting] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
 
@@ -76,14 +76,6 @@ function UploadPanel(): React.JSX.Element {
     queryFn: () => client.listStylePresets(),
   });
   const stylePresets = stylePresetsQuery.data?.data.items ?? [];
-  const styleCategories = [
-    "全部",
-    ...Array.from(new Set(stylePresets.map((preset) => preset.category))),
-  ];
-  const filteredStylePresets =
-    styleCategory === "全部"
-      ? stylePresets
-      : stylePresets.filter((preset) => preset.category === styleCategory);
 
   // Default to the first preset once the list arrives.
   useEffect(() => {
@@ -476,95 +468,17 @@ function UploadPanel(): React.JSX.Element {
           </div>
 
           <aside className={styles.inspector}>
-            <section className={styles.panel} aria-labelledby="style-title">
-              <div className={styles.panelHeading}>
-                <div>
-                  <span className={styles.panelIndex}>03 / STYLE STRATEGY</span>
-                  <h2 className={styles.sectionTitle} id="style-title">
-                    选择风格
-                  </h2>
-                </div>
-                <span className={styles.supported}>
-                  {stylePresets.length} 种
-                </span>
-              </div>
-              <div className={styles.categoryTabs} aria-label="风格分类">
-                {styleCategories.map((category) => (
-                  <button
-                    className={styles.categoryTab}
-                    data-active={styleCategory === category || undefined}
-                    key={category}
-                    type="button"
-                    onClick={() => setStyleCategory(category)}
-                  >
-                    {category}
-                  </button>
-                ))}
-              </div>
-              {stylePresetsQuery.isLoading && (
-                <p className={styles.status} role="status" aria-live="polite">
-                  正在加载风格列表…
-                </p>
-              )}
-              {stylePresetsQuery.isError && (
-                <div className={styles.error} role="alert">
-                  <p>风格列表加载失败,不影响上传;可重试后再开始生成。</p>
-                  <button
-                    className={styles.button}
-                    type="button"
-                    onClick={() => void stylePresetsQuery.refetch()}
-                  >
-                    重试
-                  </button>
-                </div>
-              )}
-              {filteredStylePresets.length > 0 && (
-                <div
-                  className={styles.styleGroup}
-                  role="radiogroup"
-                  aria-label="生成风格"
-                >
-                  {filteredStylePresets.map((preset) => (
-                    <label className={styles.styleCard} key={preset.key}>
-                      <input
-                        type="radio"
-                        name="style-preset"
-                        value={preset.key}
-                        checked={styleKey === preset.key}
-                        onChange={() => setStyleKey(preset.key)}
-                      />
-                      <span
-                        className={styles.stylePreview}
-                        data-preview={preset.previewStyle}
-                      >
-                        <span className={styles.styleCategory}>
-                          {preset.category}
-                        </span>
-                        <span className={styles.palette}>
-                          {preset.colorPalette.map((color) => (
-                            <span
-                              key={color}
-                              style={{ backgroundColor: color }}
-                            />
-                          ))}
-                        </span>
-                      </span>
-                      <span className={styles.styleBody}>
-                        <span className={styles.styleName}>{preset.name}</span>
-                        <span className={styles.styleDescription}>
-                          {preset.description}
-                        </span>
-                        <span className={styles.styleMeta}>
-                          适宜：{preset.recommendedFor}
-                        </span>
-                        <span className={styles.styleMotion}>
-                          推荐动态：{preset.recommendedMotion}
-                        </span>
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              )}
+            <section className={styles.panel} aria-label="风格策略">
+              <StyleCatalog
+                client={client}
+                presets={stylePresets}
+                isLoading={stylePresetsQuery.isLoading}
+                isError={stylePresetsQuery.isError}
+                onRetry={() => void stylePresetsQuery.refetch()}
+                selectedKey={styleKey}
+                onSelect={setStyleKey}
+                heading="选择系列风格"
+              />
             </section>
 
             <section className={`${styles.panel} ${styles.actionPanel}`}>

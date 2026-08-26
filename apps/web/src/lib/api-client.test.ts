@@ -136,6 +136,51 @@ test("latest export download requests a project-scoped short-lived grant", async
   ]);
 });
 
+test("style prompt detail requests the compiled prompt for a reference count", async () => {
+  const calls: string[] = [];
+  const client = new WorkflowApiClient({
+    fetchImpl: async (input, init) => {
+      calls.push(`${String(init?.method)} ${String(input)}`);
+      return jsonResponse({
+        data: {
+          preset: {
+            key: "onepic-case-529",
+            name: "云朵气球山脊旅行人像",
+            description: "旅行人像视觉蓝图",
+            version: "v1",
+            category: "自然旅行",
+            recommendedFor: "旅行、户外、自然",
+            recommendedMotion: "柔光呼吸",
+            colorPalette: ["#223431", "#6f9981", "#d8c18a"],
+            previewStyle: "onepic-case-529",
+            source: {
+              project: "onepic-template-studio",
+              templateId: "case-529",
+              promptHash: "a".repeat(64),
+              previewUrl:
+                "https://onepic.motion-cover.com/previews/case-529.webp",
+            },
+          },
+          referenceImageCount: 4,
+          prompt: "[System / Prompt]\ncompiled",
+          promptVersion:
+            "onepic-case-529@v1+style-extension.v1",
+          promptHash: "b".repeat(64),
+        },
+      });
+    },
+    baseUrl: "http://test",
+  });
+
+  const result = await client.getStylePresetPrompt("onepic-case-529", 4);
+
+  assert.equal(result.data.referenceImageCount, 4);
+  assert.equal(result.data.preset.source?.templateId, "case-529");
+  assert.deepEqual(calls, [
+    "GET http://test/v1/style-presets/onepic-case-529/prompt?referenceImageCount=4",
+  ]);
+});
+
 test("problem+json responses raise typed errors", async () => {
   const client = new WorkflowApiClient({
     fetchImpl: async () =>
@@ -585,6 +630,7 @@ test("listStylePresets returns preset items", async () => {
           recommendedMotion: "微距推近",
           colorPalette: ["#111111", "#777777", "#eeeeee"],
           previewStyle: "film",
+          source: null,
         },
       ],
     },

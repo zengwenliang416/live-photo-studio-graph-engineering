@@ -2,9 +2,12 @@ import { z } from "zod";
 import {
   authSessionResponseSchema,
   logoutResponseSchema,
+  stylePresetPromptResponseSchema,
+  stylePresetsResponseSchema,
   type AuthSessionResponse,
   type LoginRequest,
   type RegisterRequest,
+  type StylePresetMetadata,
 } from "@live-photo-studio/contracts";
 
 const API_BASE = process.env["NEXT_PUBLIC_API_BASE"] ?? "http://localhost:4000";
@@ -122,24 +125,6 @@ const imageProviderSaveResponseSchema = z.object({
 const imageProviderDeleteResponseSchema = z.object({
   data: z.object({ configured: z.literal(false) }),
 });
-const stylePresetsResponseSchema = z.object({
-  data: z.object({
-    items: z.array(
-      z.object({
-        key: z.string().min(1),
-        name: z.string().min(1),
-        description: z.string(),
-        version: z.string().min(1),
-        category: z.string().min(1),
-        recommendedFor: z.string().min(1),
-        recommendedMotion: z.string().min(1),
-        colorPalette: z.tuple([z.string(), z.string(), z.string()]),
-        previewStyle: z.string().min(1),
-      }),
-    ),
-  }),
-});
-
 export type WorkflowAction = "SELECT" | "REGENERATE" | "CANCEL";
 
 export type ProjectAssetStatus = "UPLOADING" | "READY" | "REJECTED";
@@ -147,17 +132,7 @@ export type ProjectAssetStatus = "UPLOADING" | "READY" | "REJECTED";
 export const IMAGE_PROVIDER_PUT_ACTION_ID = "settings:image-provider:put";
 export const IMAGE_PROVIDER_DELETE_ACTION_ID = "settings:image-provider:delete";
 
-export interface StylePreset {
-  readonly key: string;
-  readonly name: string;
-  readonly description: string;
-  readonly version: string;
-  readonly category: string;
-  readonly recommendedFor: string;
-  readonly recommendedMotion: string;
-  readonly colorPalette: readonly [string, string, string];
-  readonly previewStyle: string;
-}
+export type StylePreset = StylePresetMetadata;
 
 export interface ProjectSummary {
   readonly projectId: string;
@@ -448,6 +423,28 @@ export class WorkflowApiClient {
 
   listStylePresets(): Promise<{ data: { items: StylePreset[] } }> {
     return this.request("GET", "/v1/style-presets", stylePresetsResponseSchema);
+  }
+
+  getStylePresetPrompt(
+    key: string,
+    referenceImageCount = 1,
+  ): Promise<{
+    data: {
+      preset: StylePreset;
+      referenceImageCount: number;
+      prompt: string;
+      promptVersion: string;
+      promptHash: string;
+    };
+  }> {
+    const params = new URLSearchParams({
+      referenceImageCount: String(referenceImageCount),
+    });
+    return this.request(
+      "GET",
+      `/v1/style-presets/${encodeURIComponent(key)}/prompt?${params.toString()}`,
+      stylePresetPromptResponseSchema,
+    );
   }
 
   getWorkflowRun(workflowRunId: string): Promise<{
