@@ -28,10 +28,11 @@ function fakeResponse(status: number, body: unknown): Response {
 function makeProvider(options: {
   fetchImpl: typeof fetch;
   storage?: InMemoryObjectStorage;
+  baseUrl?: string;
 }) {
   const storage = options.storage ?? new InMemoryObjectStorage();
   const provider = new OpenAiCompatibleImageProvider({
-    baseUrl: "https://api.example.com/",
+    baseUrl: options.baseUrl ?? "https://api.example.com/",
     apiKey: "sk-test-key",
     model: "gpt-image-2",
     storage,
@@ -98,6 +99,24 @@ test("successful edit posts multipart fields and stores decoded images", async (
     storage.contentTypes.get("projects/p1/generations/r2/0.png"),
     "image/png",
   );
+});
+
+test("base URL may include the OpenAI-compatible /v1 prefix", async () => {
+  const calls: unknown[] = [];
+  const fetchImpl = (async (url: unknown) => {
+    calls.push(url);
+    return fakeResponse(200, {
+      data: [{ b64_json: Buffer.from(pngBytes(8, 8)).toString("base64") }],
+    });
+  }) as unknown as typeof fetch;
+  const { provider } = makeProvider({
+    fetchImpl,
+    baseUrl: "https://api.example.com/v1/",
+  });
+
+  await provider.generate(generationInput());
+
+  assert.deepEqual(calls, ["https://api.example.com/v1/images/edits"]);
 });
 
 test("401 and 403 map to non-retryable MODEL_AUTH_FAILED", async () => {

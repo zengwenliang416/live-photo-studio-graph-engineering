@@ -63,7 +63,7 @@ export class OpenAiCompatibleImageProvider implements ImageGenerationProvider {
     }
 
     const fetchImpl = this.options.fetchImpl ?? fetch;
-    const endpoint = `${this.options.baseUrl.replace(/\/+$/u, "")}/v1/images/edits`;
+    const endpoint = buildImageEditsEndpoint(this.options.baseUrl);
     let response: Response;
     try {
       response = await fetchImpl(endpoint, {
@@ -130,6 +130,11 @@ export class OpenAiCompatibleImageProvider implements ImageGenerationProvider {
     }
     return new ProviderFailureError("MODEL_REQUEST_INVALID", false);
   }
+}
+
+function buildImageEditsEndpoint(baseUrl: string): string {
+  const normalized = baseUrl.replace(/\/+$/u, "").replace(/\/v1$/u, "");
+  return `${normalized}/v1/images/edits`;
 }
 
 function parseImageResponse(payload: unknown): string[] {
