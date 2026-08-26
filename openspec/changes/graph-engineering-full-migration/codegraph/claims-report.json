@@ -1,10 +1,10 @@
 {
   "schema": "specnav.codegraph.claims_report.v1",
-  "generated_at": "2026-08-23T11:24:27.784Z",
+  "generated_at": "2026-08-25T13:40:08.943Z",
   "active_change": "graph-engineering-full-migration",
   "claims_file": "openspec/changes/graph-engineering-full-migration/codegraph/claims-map.json",
   "evidence_index": "openspec/changes/graph-engineering-full-migration/codegraph/evidence-index.json",
-  "claims_count": 6,
+  "claims_count": 12,
   "verified_claims": [
     "development:task-001-existing-graph-foundation",
     "development:task-002-durable-orchestration",
@@ -13,7 +13,21 @@
     "development:task-005-operations-security",
     "development:task-006-canary-validation"
   ],
-  "unverified_claims": [],
+  "unverified_claims": [
+    "verification:task-001-existing-graph-foundation",
+    "verification:task-002-durable-orchestration",
+    "verification:task-003-worker-facts",
+    "verification:task-004-web-projection",
+    "verification:task-005-operations-security",
+    "verification:task-006-canary-validation"
+  ],
   "blockers": [],
-  "warnings": []
+  "warnings": [
+    "codegraph:claim-unverified:verification:task-001-existing-graph-foundation",
+    "codegraph:claim-unverified:verification:task-002-durable-orchestration",
+    "codegraph:claim-unverified:verification:task-003-worker-facts",
+    "codegraph:claim-unverified:verification:task-004-web-projection",
+    "codegraph:claim-unverified:verification:task-005-operations-security",
+    "codegraph:claim-unverified:verification:task-006-canary-validation"
+  ]
 }

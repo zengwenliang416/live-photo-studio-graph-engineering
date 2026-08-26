@@ -2,11 +2,11 @@
   "schema": "specnav.task-acceptance-evidence.v2",
   "generated_by": "specnav-development/task-acceptance-evidence",
   "task_id": "006-canary-validation",
-  "generated_at": "2026-08-23T16:09:43.062Z",
-  "recorded_at": "2026-08-23T16:09:09.409Z",
+  "generated_at": "2026-08-25T13:39:56.537Z",
+  "recorded_at": "2026-08-25T13:39:34.965Z",
   "status": "approved",
-  "reviewed_git_head": "70ebe55817d92da054b15298a417a142d2f227b5",
-  "reviewed_git_tree": "d7673b86fc96dd45dc1cb62526ce0a001cbc8bba",
+  "reviewed_git_head": "6e14ba03dced4b4e6729b182f81fde0c977b0a85",
+  "reviewed_git_tree": "263adc7e9c6ed2149482b7f4d90a0fb408868334",
   "implementation_scope": {
     "included_patterns": [
       "apps/**",
@@ -20,19 +20,79 @@
         "path": "apps/api/package.json",
         "mode": "100644",
         "type": "blob",
-        "object_id": "8f5fff3cc9a9bd7113d39da73cfddefbdd7dcf67"
+        "object_id": "a5e896137baba85ad3e25e0868227849127bc6b6"
       },
       {
         "path": "apps/api/src/app.module.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "53bd27265dc7f0cec719790d2e9975b5cda8c07b"
+        "object_id": "ebf04facbac3027c01cb6d1fca746e22a88c5e2f"
+      },
+      {
+        "path": "apps/api/src/assets/application/asset-upload-service.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "880becf53f030f095567b1d888f034d275e0ac6f"
+      },
+      {
+        "path": "apps/api/src/assets/application/asset-upload-service.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "a82184ff671eff71ee3abbe886ab9309f28b41a0"
+      },
+      {
+        "path": "apps/api/src/assets/asset-tokens.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "541ca88bc884b0de848d9aabf4eccf3a66bf5628"
+      },
+      {
+        "path": "apps/api/src/assets/assets.controller.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "5d24f9dc399ff599c9d08c1eabeab1065959739e"
+      },
+      {
+        "path": "apps/api/src/assets/assets.controller.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "b24c77dfb2ab131fef1b434bb8c3475cffde4eaf"
+      },
+      {
+        "path": "apps/api/src/assets/assets.module.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "072f38717743e0dcc9cc0725849d49ab19b1c396"
+      },
+      {
+        "path": "apps/api/src/assets/infrastructure/pg-asset-store.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "000197a778153b6ef6c2ce633d555869bd382394"
+      },
+      {
+        "path": "apps/api/src/assets/ports.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "e20f193de932760dada8aaafc7e7c195fee38b0f"
+      },
+      {
+        "path": "apps/api/src/assets/request-schemas.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "55c015ca75039c78248ca3b80d6eb120afe0465f"
+      },
+      {
+        "path": "apps/api/src/assets/testing/in-memory-asset-store.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "aa4c335f6289378c43ec8aec6837cc1f568c3012"
       },
       {
         "path": "apps/api/src/config.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "d1c31b5d45d62d8819e0879a64298dac3ef0e0d8"
+        "object_id": "4aeff129940fd1f9b10e7dc222fe93030fbec537"
       },
       {
         "path": "apps/api/src/database/api-database.module.ts",
@@ -56,7 +116,7 @@
         "path": "apps/api/src/exports/export-packages.controller.test.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "b83acd317e29e85d3a63d48e35221313ba5133ea"
+        "object_id": "5fdeaceb6aa4e036eece27b771d9bfa9cd9aa6ab"
       },
       {
         "path": "apps/api/src/exports/export-packages.controller.ts",
@@ -86,7 +146,7 @@
         "path": "apps/api/src/exports/infrastructure/object-storage-signed-download-port.test.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "7ed4055142316bb95750ccbf7aaffda4d74955ad"
+        "object_id": "a7b255001a368d4cd991b81474025fec280e9279"
       },
       {
         "path": "apps/api/src/exports/infrastructure/object-storage-signed-download-port.ts",
@@ -137,6 +197,132 @@
         "object_id": "c6965d51a2e7677b1120a4219e572c371984e151"
       },
       {
+        "path": "apps/api/src/projects/application/canonical-json.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "ed892e4058ffe3785d951f7419334bd9f6239ce9"
+      },
+      {
+        "path": "apps/api/src/projects/application/project-service.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "d373981ee227932d265f42cefc99858e25cb2d77"
+      },
+      {
+        "path": "apps/api/src/projects/application/project-service.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "3b487297a7be96685837ecc53f2603efee9402d7"
+      },
+      {
+        "path": "apps/api/src/projects/infrastructure/pg-project-store.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "fa20c0eb86709b5a3c2acdc22d50d835b348c66e"
+      },
+      {
+        "path": "apps/api/src/projects/ports.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "24eafd50ff90774d9ba82ac0593ceadbc2bc72bf"
+      },
+      {
+        "path": "apps/api/src/projects/project-tokens.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "5386de84311db5c898b728029a8736502d87ebfa"
+      },
+      {
+        "path": "apps/api/src/projects/projects.controller.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "5e7f1bfa0781dd4210739105ff150d1bdb558159"
+      },
+      {
+        "path": "apps/api/src/projects/projects.controller.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "dcb540ddda4100b38b8cbf01e166d5a752ceba34"
+      },
+      {
+        "path": "apps/api/src/projects/projects.module.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "76b376d9efafa840ad837a666a1044d6d840c6a5"
+      },
+      {
+        "path": "apps/api/src/projects/request-schemas.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "a54b2266bd8d61e9a87f71db69306cc3b14ce422"
+      },
+      {
+        "path": "apps/api/src/projects/testing/in-memory-project-store.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "74006ecbacf05de307a23ce5f97b185b04d52515"
+      },
+      {
+        "path": "apps/api/src/settings/application/settings-service.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "04727d509edc13990cef2b08173c855748822378"
+      },
+      {
+        "path": "apps/api/src/settings/application/settings-service.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "3c9acc58c1f63404bcc97b2cde00ff4e5823eae6"
+      },
+      {
+        "path": "apps/api/src/settings/infrastructure/pg-settings-store.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "1ecac635640c90cc14fa30d106214fe3a1fd2d74"
+      },
+      {
+        "path": "apps/api/src/settings/ports.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "eeb12800208ed1dcb862b65d7dd9404958377919"
+      },
+      {
+        "path": "apps/api/src/settings/request-schemas.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "20afd2de657c375260a959b8f5f2ad6954419ffa"
+      },
+      {
+        "path": "apps/api/src/settings/setting-tokens.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "e56453af58f066456eba3964d362be36c1c87371"
+      },
+      {
+        "path": "apps/api/src/settings/settings.controller.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "1f4c0f4bc0e45898f6d0399daf3258fc1a34bdde"
+      },
+      {
+        "path": "apps/api/src/settings/settings.controller.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "c58cb9adf2e2c1eec68fc48123c04d8f05edb985"
+      },
+      {
+        "path": "apps/api/src/settings/settings.module.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "47c7ef3bf58c35b56b0cf52efe14cd95dc2e610a"
+      },
+      {
+        "path": "apps/api/src/settings/testing/in-memory-settings-store.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "c4f6af07cdc33b2f7994670849ca334a5298ddb4"
+      },
+      {
         "path": "apps/api/src/test-entrypoint.test.ts",
         "mode": "100644",
         "type": "blob",
@@ -164,7 +350,7 @@
         "path": "apps/api/src/workflows.controller.test.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "ffb3cf6238aef4aa3c0cd40469e176da09751b2f"
+        "object_id": "0426e10a4e07c1b3b93c5010e9d98ce583723129"
       },
       {
         "path": "apps/api/src/workflows/application/canonical-json.ts",
@@ -272,7 +458,7 @@
         "path": "apps/orchestrator/package.json",
         "mode": "100644",
         "type": "blob",
-        "object_id": "cf45b95efd560891b6ce82e5a5d46c0541bb3aee"
+        "object_id": "cbed6713d4aaeafef39b8ee3bbe448cb075cb91d"
       },
       {
         "path": "apps/orchestrator/src/application/graph-engine.ts",
@@ -314,7 +500,7 @@
         "path": "apps/orchestrator/src/graphs/live-photo-project/live-photo-project.graph.test.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "b66a021db5d8c1d5b16f36c430f8d810b659467f"
+        "object_id": "89c480665166c633be8bc6ddd996e570b7cd2dc0"
       },
       {
         "path": "apps/orchestrator/src/graphs/live-photo-project/live-photo-project.graph.ts",
@@ -326,19 +512,19 @@
         "path": "apps/orchestrator/src/graphs/live-photo-project/live-photo-project.state.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "5e2b60f61f8a9120f372a870657e64b1bf099d3e"
+        "object_id": "e493d3ece812942f630dc6664b7d67a9793cb73e"
       },
       {
         "path": "apps/orchestrator/src/graphs/live-photo-project/nodes.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "eb07576fbadfa4be1533309a4756a66375d79223"
+        "object_id": "5a489792c05a6ece88123aa10e6d43d4642b210d"
       },
       {
         "path": "apps/orchestrator/src/graphs/live-photo-project/ports.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "73f8fdcdf376e8deffcc7bd9cb6375ad4888d5a3"
+        "object_id": "90817619d2f50eaf5acfc201dbfd4694d9c023ad"
       },
       {
         "path": "apps/orchestrator/src/graphs/live-photo-project/signal-schemas.ts",
@@ -356,7 +542,7 @@
         "path": "apps/orchestrator/src/infrastructure/postgres-effects.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "a04bc35ae2ab3dbb788de50c35566b5858188cbb"
+        "object_id": "77f5254bbab9cd348a63ee39c3fbf71a77fed124"
       },
       {
         "path": "apps/orchestrator/src/infrastructure/workflow-repository.ts",
@@ -371,16 +557,46 @@
         "object_id": "6c803700a78a3d6a1c47ddb8b6ff9094173b41f3"
       },
       {
+        "path": "apps/orchestrator/src/setup-checkpoint.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "39c0686aed7db925fabfa40b73e9e5184d42408c"
+      },
+      {
         "path": "apps/orchestrator/tsconfig.json",
         "mode": "100644",
         "type": "blob",
         "object_id": "a72a807d5f98f2017dd06cb5b651e2ea2bef07f9"
       },
       {
+        "path": "apps/web/next.config.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "1c6baf980377e05c05d9f5b8f93958efdc890638"
+      },
+      {
         "path": "apps/web/package.json",
         "mode": "100644",
         "type": "blob",
-        "object_id": "b0607ca3785e6b5905f47e6b4e0c9a3644f266da"
+        "object_id": "778c058241891b92fc28d6c2cb488fc5248ae6fb"
+      },
+      {
+        "path": "apps/web/src/app/globals.css",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "fc926ad11670f275f79140b1563bb58b0b48fe88"
+      },
+      {
+        "path": "apps/web/src/app/layout.tsx",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "b36ec55d4d2e50e0ca7b2a42650f1449bfbfd992"
+      },
+      {
+        "path": "apps/web/src/app/page.tsx",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "8a2620b2f68b841d4a7506bd8aed17063ba88f1e"
       },
       {
         "path": "apps/web/src/app/project-page.test.ts",
@@ -401,6 +617,60 @@
         "object_id": "c576c5382dbc27445d47f55d1b23a9958a658c05"
       },
       {
+        "path": "apps/web/src/app/projects/[projectId]/upload/page.tsx",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "6c083e519673ba2446871a0537731f1e6a9d1360"
+      },
+      {
+        "path": "apps/web/src/app/projects/[projectId]/upload/upload.module.css",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "94f73f78df5db310679005f6b8a26b2b2102bb70"
+      },
+      {
+        "path": "apps/web/src/app/projects/page.tsx",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "c43f77c59f062f39c85586461838dbada98a812b"
+      },
+      {
+        "path": "apps/web/src/app/projects/projects-page.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "1dd15a40caf0e598445938128eb93031b3fe37cb"
+      },
+      {
+        "path": "apps/web/src/app/projects/projects.module.css",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "906f0829062323d7d0dd279b037cc65f0cdf2b6b"
+      },
+      {
+        "path": "apps/web/src/app/projects/upload-page.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "4f0bec9910a70ca4fb6b9cdbe0a44ebb683337c6"
+      },
+      {
+        "path": "apps/web/src/app/settings/page.tsx",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "d54c0d4f03fb0f31ada26a3fdcbd507903483e0e"
+      },
+      {
+        "path": "apps/web/src/app/settings/settings-page.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "0e3f59698366e0589ce7844b1857bda365236cfc"
+      },
+      {
+        "path": "apps/web/src/app/settings/settings.module.css",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "614f3a14926e980ed5f51abba0d733a6dd563f0c"
+      },
+      {
         "path": "apps/web/src/hooks/use-workflow-events.ts",
         "mode": "100644",
         "type": "blob",
@@ -416,13 +686,19 @@
         "path": "apps/web/src/lib/api-client.test.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "e100dfed390482ea4c156b27981d34f5a2cd8d03"
+        "object_id": "6aa43d898abaaf6bbad83680f8bac64616cd9333"
       },
       {
         "path": "apps/web/src/lib/api-client.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "5f8f173b37d3e9b8979fa2a4a1fec08a4990da99"
+        "object_id": "68de61577b9614d4545de12c4230971824979029"
+      },
+      {
+        "path": "apps/web/src/lib/upload-flow.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "ccdc64d56600d2deb3087d529dea7e68b98be975"
       },
       {
         "path": "apps/web/src/lib/workflow-session.test.ts",
@@ -446,31 +722,55 @@
         "path": "apps/web/tsconfig.json",
         "mode": "100644",
         "type": "blob",
-        "object_id": "abd0df1cf7d3ccec01201cec49d74b0bfefea460"
+        "object_id": "a312e3a34300bff10f84953093d3107b6108ff44"
       },
       {
         "path": "apps/worker-ai/package.json",
         "mode": "100644",
         "type": "blob",
-        "object_id": "3629b357e802591bf062d7f01416a7334af8947c"
+        "object_id": "128c469caaa04a751719c375eaab7c192f5987cb"
       },
       {
         "path": "apps/worker-ai/src/config.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "be601b458574c4f7d13bf178a93457d8026720cd"
+        "object_id": "1a9fb1dcf4f677048af7d317eb6e36f771679ab9"
       },
       {
         "path": "apps/worker-ai/src/generation-service.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "e19da09f5f9e7e6e205fa47836ea892df6cef3f8"
+        "object_id": "550e06197dab23e84c3a1934756a11a98ec00cab"
       },
       {
         "path": "apps/worker-ai/src/main.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "c79a6a08fdb2429806a48c33c283da8ce238ed63"
+        "object_id": "a1125f4994a6d848a4fe8435980a07838296f226"
+      },
+      {
+        "path": "apps/worker-ai/src/openai-compatible-provider.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "233862e457222a66d6f70a728b057ef0ba57743e"
+      },
+      {
+        "path": "apps/worker-ai/src/openai-compatible-provider.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "14c433e681318bcf37c34f5606c513f083d3b067"
+      },
+      {
+        "path": "apps/worker-ai/src/provider-resolver.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "f5b4ad25e0229bc076202bf685ca6a79dd7a3898"
+      },
+      {
+        "path": "apps/worker-ai/src/provider-resolver.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "668e65a16b4b752e2ba5c31a198273728f3a3b37"
       },
       {
         "path": "apps/worker-ai/src/provider.test.ts",
@@ -482,13 +782,13 @@
         "path": "apps/worker-ai/src/provider.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "6e52f113d6f02ec8a420a91f513d379a17d20441"
+        "object_id": "08bd17bbbbb1d700b8ce0672a72e407d746aabae"
       },
       {
         "path": "apps/worker-ai/src/worker-ai.integration.test.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "e201a1a768ee1355bda01b1f464833f2db2bfd34"
+        "object_id": "99007112037893209a439a743766607203a3c32d"
       },
       {
         "path": "apps/worker-ai/tsconfig.json",
@@ -569,10 +869,16 @@
         "object_id": "32987bf03d473c080a7b9a99c7b1b24042ab00ef"
       },
       {
+        "path": "docs/adr/0011-style-key-in-graph-state.md",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "7b90e205a5758f7c738a258651036a4c1c767f21"
+      },
+      {
         "path": "docs/execplans/graph-engineering-full-migration.md",
         "mode": "100644",
         "type": "blob",
-        "object_id": "dd83f17d8be6ac22a29bef1f52874bf6972642d2"
+        "object_id": "35b8018b8c5bea8c6044536e4a3b2966a9123c9e"
       },
       {
         "path": "docs/graph-engineering/evidence/canary-rollback.json",
@@ -683,6 +989,18 @@
         "object_id": "0c2520bdc00a6278909640403ced1c55ccb5679d"
       },
       {
+        "path": "packages/database/migrations/0006_project_assets.sql",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "4a6d0b321693777593ed5a36712ada287b78bbbb"
+      },
+      {
+        "path": "packages/database/migrations/0007_user_image_providers.sql",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "36901a0cf4299c9f96fc0d018dffbd6dd526fb8b"
+      },
+      {
         "path": "packages/database/package.json",
         "mode": "100644",
         "type": "blob",
@@ -743,10 +1061,16 @@
         "object_id": "648f0cbe8000551051ab2dffa7b1841778fb8390"
       },
       {
+        "path": "packages/graph-contracts/src/job-payloads.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "72b4f955460a9cea18d28f8f5f22e45c624e4efa"
+      },
+      {
         "path": "packages/graph-contracts/src/job-payloads.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "0ee2701f664919383100c50998bf8fbe16a60b11"
+        "object_id": "3e3878e9d67a529ee80e65663f08df213be242e6"
       },
       {
         "path": "packages/graph-contracts/src/node-definition.test.ts",
@@ -830,7 +1154,7 @@
         "path": "packages/graph-runtime/src/index.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "c78ce7fb5d5659d7f39f8bc5839b6c585d51670c"
+        "object_id": "67e65568cf0c39a09731c8e13220c3c72fdf84d1"
       },
       {
         "path": "packages/graph-runtime/src/interrupts.ts",
@@ -839,7 +1163,55 @@
         "object_id": "ff8bc61806ce0db74731c9cf29a13bd17970ddda"
       },
       {
+        "path": "packages/graph-runtime/src/secret-box.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "0edb13ac4e6087359472d3bcf42eac1e6f238380"
+      },
+      {
+        "path": "packages/graph-runtime/src/secret-box.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "15e32012720b90e35aa81d73cac980ba7cee9e3c"
+      },
+      {
         "path": "packages/graph-runtime/tsconfig.json",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "a72a807d5f98f2017dd06cb5b651e2ea2bef07f9"
+      },
+      {
+        "path": "packages/prompt-kit/package.json",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "2c2e3da63c69d9ce7d94ebdabfd02b45f8d4dfc4"
+      },
+      {
+        "path": "packages/prompt-kit/src/builder.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "7bee94839fda88eb323cd9f57868e82904bb7eb3"
+      },
+      {
+        "path": "packages/prompt-kit/src/builder.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "695cf51655d7c30020386e26accc1f5307e49a2b"
+      },
+      {
+        "path": "packages/prompt-kit/src/index.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "afd5a375d0e33ac4fb73601e693b06fc190592b9"
+      },
+      {
+        "path": "packages/prompt-kit/src/presets.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "a5a51ab8c99581f421734256c75bce508d3bf28a"
+      },
+      {
+        "path": "packages/prompt-kit/tsconfig.json",
         "mode": "100644",
         "type": "blob",
         "object_id": "a72a807d5f98f2017dd06cb5b651e2ea2bef07f9"
@@ -866,7 +1238,7 @@
         "path": "packages/storage/src/in-memory-object-storage.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "4cfa28366bf2cecd49357cbef0137275503c9b49"
+        "object_id": "376db87a81b3b1ac53f4caaad7796a6f16e6ff8a"
       },
       {
         "path": "packages/storage/src/index.ts",
@@ -878,19 +1250,19 @@
         "path": "packages/storage/src/ports.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "9c50f31225c302b4c54ca97daa9192f72fb3af0f"
+        "object_id": "195275377b8716488e99e94632d100b2f655a527"
       },
       {
         "path": "packages/storage/src/s3-object-storage.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "4e3bfce7c221ee7142caec34f93fe4cef2ef717f"
+        "object_id": "18424707b4d54b53d47665a37263c909edc47294"
       },
       {
         "path": "packages/storage/src/storage.test.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "e5d653764960435cc7e924e8a4df90636ff8f0d8"
+        "object_id": "94c2a3da3f4521c8b16e5a4cb9800b91c1105888"
       },
       {
         "path": "packages/storage/tsconfig.json",
@@ -902,10 +1274,10 @@
         "path": "pnpm-lock.yaml",
         "mode": "100644",
         "type": "blob",
-        "object_id": "525171c47bd111b23977e74188631727ceb63258"
+        "object_id": "33a984a1fb7175664d377cb8ffcf278c8697067c"
       }
     ],
-    "sha256": "3821454530ff3a2226477b9ae63392a709a21612ece5c63d3b83661ad2c3222a"
+    "sha256": "463a598fad8bc31e247bb25e5a56597099cc259dbeb9884a719095cfa0c40faf"
   },
   "artifacts": {
     "context": {
@@ -930,123 +1302,123 @@
   },
   "test_runs": [
     {
-      "id": "receipt-0c2418a0329803de4aa5256162ac09f95f0f364a71fbb995feaaaa2199a3d8eb",
-      "command": "pnpm check",
-      "assertion_ids": [
-        "A1:canary-validation",
-        "A2:canary-validation"
-      ],
-      "recorded_at": "2026-08-23T16:08:00.742Z",
-      "validation_receipt_sha256": "3f184104bb47a19ff88151254a25b9960b5027e1f50e66c9d106ba982f49e98c",
-      "evidence_log": {
-        "path": "development/evidence/255-006-canary-validation.log",
-        "sha256": "f83f6b9f1905a3c96918956b14d43734e541b36df1d6dce60ac2aa8cebea386b",
-        "size": 2101
-      }
-    },
-    {
-      "id": "receipt-0f1374e098ebd4633b01c77e173ed41da0d1e5092d2dac9a348fc43dccb9fc13",
+      "id": "receipt-28d1cfac28077405b26b6e9cd8efd364cfcf384df0dfead828c66f8548ad07be",
       "command": "pnpm graph:demo",
       "assertion_ids": [
         "A1:canary-validation",
         "A2:canary-validation"
       ],
-      "recorded_at": "2026-08-23T16:08:55.588Z",
-      "validation_receipt_sha256": "9a47dcf062912147ab2cfb5377d3879fc2b568357accbea097ef43967a7b8086",
+      "recorded_at": "2026-08-25T13:39:18.478Z",
+      "validation_receipt_sha256": "a895fcd995663b5065188008e6aae97df7a8f28b54f59754816fa5ba3f02adb0",
       "evidence_log": {
-        "path": "development/evidence/259-006-canary-validation.log",
-        "sha256": "fb92d7c19d602b44a63159b384a47a58ac7dd2ba64dd79f491e29582521d94a3",
-        "size": 1698
+        "path": "development/evidence/404-006-canary-validation.log",
+        "sha256": "e1cd938a27ef1fa6017d8da616f95c7457fdd98995dd1549d1228dc41d9ae460",
+        "size": 3433
       }
     },
     {
-      "id": "receipt-30171cda98d9a8ff5240b3add3f1441c22d12c41537e62e64ba76f744d7bdf97",
-      "command": "DATABASE_URL=postgresql://postgres@localhost:5432/postgres pnpm db:migrate",
-      "assertion_ids": [
-        "A1:canary-validation",
-        "A2:canary-validation"
-      ],
-      "recorded_at": "2026-08-23T16:09:09.247Z",
-      "validation_receipt_sha256": "f57477ed2adb9f658e24cb589eeea06d77d6de258f58e8d013118f5d6aca3a2e",
-      "evidence_log": {
-        "path": "development/evidence/260-006-canary-validation.log",
-        "sha256": "fa7221a92c06972e503551011e67faaba9e18bd237bd2d29a340cd7929a8c4b5",
-        "size": 1636
-      }
-    },
-    {
-      "id": "receipt-549df007e8fefee80d1af96dd650f16732cd762ce3b3f563f4af6c6b418facd1",
-      "command": "pnpm graph:check",
-      "assertion_ids": [
-        "A1:canary-validation",
-        "A2:canary-validation"
-      ],
-      "recorded_at": "2026-08-23T16:08:29.857Z",
-      "validation_receipt_sha256": "8cfedf3f3627b242f2c3602ccaa4337bf48593e4e2df3371319dcec5e929b8de",
-      "evidence_log": {
-        "path": "development/evidence/257-006-canary-validation.log",
-        "sha256": "e595aac3b01504dbc92228637804e62855b3da62fc1e152c21e6af818c9016df",
-        "size": 2432
-      }
-    },
-    {
-      "id": "receipt-59b94870a4e0c221b16aebd1b745b584873b880529dc8b3027d2e4dd024eedba",
-      "command": "pnpm graph:test",
-      "assertion_ids": [
-        "A1:canary-validation",
-        "A2:canary-validation"
-      ],
-      "recorded_at": "2026-08-23T16:08:45.676Z",
-      "validation_receipt_sha256": "392fc2d50b54d2c0060fda51706905319627ad66634fad37f3ae555f24b6ff0f",
-      "evidence_log": {
-        "path": "development/evidence/258-006-canary-validation.log",
-        "sha256": "10d13610704f33f3d02bab2679a570e9c496c97fcba8e9435261a4d273d819c7",
-        "size": 25602
-      }
-    },
-    {
-      "id": "receipt-79bce88737baa20ef6b83e1f194dacf991df0390fd18f8ad5de04cd321befd04",
-      "command": "pnpm install --frozen-lockfile",
-      "assertion_ids": [
-        "A1:canary-validation",
-        "A2:canary-validation"
-      ],
-      "recorded_at": "2026-08-23T16:07:48.343Z",
-      "validation_receipt_sha256": "091a31725497d769130de34e65dc30dc34530570f9e779cc9c6aa3cc62360af1",
-      "evidence_log": {
-        "path": "development/evidence/254-006-canary-validation.log",
-        "sha256": "c5c13ceae70ae982daa40fb007013b850580f1303e1d4f63e6679df9de4b3437",
-        "size": 350
-      }
-    },
-    {
-      "id": "receipt-9cea329de7c5c329ea5f96a86fa0b5757a5f64c67fa0d54228300afd1ff3e688",
+      "id": "receipt-3911d5b51df214e650b955de5b4f538c009ea3fa6ad1c63ce6d69e7702100551",
       "command": "git diff --check",
       "assertion_ids": [
         "A1:canary-validation",
         "A2:canary-validation"
       ],
-      "recorded_at": "2026-08-23T16:09:09.409Z",
-      "validation_receipt_sha256": "20c5720f4d405f64d1b9cbbd9d902c844d890b20b26a7347cacb19b32abd7061",
+      "recorded_at": "2026-08-25T13:39:34.965Z",
+      "validation_receipt_sha256": "9399d55a21a1ea13314ffd4aea5b48214b5947022a0d45d47c04108179c88447",
       "evidence_log": {
-        "path": "development/evidence/261-006-canary-validation.log",
-        "sha256": "988e9703bd3c44beb8f05d56d9dc5487799996e0a335b2a4ce85c75fe17bb4d8",
-        "size": 102
+        "path": "development/evidence/406-006-canary-validation.log",
+        "sha256": "94c754de2c904f368a3b23af819fe5b33b95c456734e36cc09149d3f631f1f36",
+        "size": 101
       }
     },
     {
-      "id": "receipt-c179623f534817e20880669aa5b84c78d2f2822e496c4f14fef536b87ff1aae2",
+      "id": "receipt-5352bd2655634eea83664493b1218ae131b05d7efe19ff5f7fc8374832ceb806",
+      "command": "pnpm check",
+      "assertion_ids": [
+        "A1:canary-validation",
+        "A2:canary-validation"
+      ],
+      "recorded_at": "2026-08-25T13:37:16.943Z",
+      "validation_receipt_sha256": "c1650c824a8d191ae60c9307cc489b96ccbb458083f2322a0f6c77c1da2647a1",
+      "evidence_log": {
+        "path": "development/evidence/400-006-canary-validation.log",
+        "sha256": "432cb45a3cdbb7b7eff9989c380d8851288557df2999e6f5a8367fe8b87229eb",
+        "size": 3923
+      }
+    },
+    {
+      "id": "receipt-7fc6856cf0fa25d68af9020b6cf7f7fa6bb9c3f5b56bae58017e5d1a6ed3794a",
+      "command": "pnpm graph:check",
+      "assertion_ids": [
+        "A1:canary-validation",
+        "A2:canary-validation"
+      ],
+      "recorded_at": "2026-08-25T13:38:32.259Z",
+      "validation_receipt_sha256": "ab4083c3bd3c98935201d10421b2cbc7c43425ad7ec28e156e6cb3acef5cd7b8",
+      "evidence_log": {
+        "path": "development/evidence/402-006-canary-validation.log",
+        "sha256": "17f27aff58ec3aa14d72571b7c0c625457be3201796e007ff1773fdd782b2133",
+        "size": 4254
+      }
+    },
+    {
+      "id": "receipt-b2f6d427413a06486ff379b3900e7b540645f76cd23c29cbd1aef04b373ba301",
       "command": "pnpm test",
       "assertion_ids": [
         "A1:canary-validation",
         "A2:canary-validation"
       ],
-      "recorded_at": "2026-08-23T16:08:15.280Z",
-      "validation_receipt_sha256": "c1695411ac594834d7b813dbe0c8ad2fb25cea454a115e271959c41f0d641342",
+      "recorded_at": "2026-08-25T13:37:58.441Z",
+      "validation_receipt_sha256": "3e24fa90e05733c5813a3ff38654e0a72142ce35506862e23acd19345ea6a9ba",
       "evidence_log": {
-        "path": "development/evidence/256-006-canary-validation.log",
-        "sha256": "65d5b716434bcf5c7c6a9ce26f00c705106d27bdfb835ca72dff04d4543cfe73",
-        "size": 25257
+        "path": "development/evidence/401-006-canary-validation.log",
+        "sha256": "32c41e73efa7cc55a5d007dfd82d020815183d1943f9b6bfc39158d8a56df843",
+        "size": 63363
+      }
+    },
+    {
+      "id": "receipt-b367624aa38f882ccbc778b1e02038bbef43889abd73a418c763fd06b98cedc4",
+      "command": "DATABASE_URL=postgresql://postgres@localhost:5432/postgres pnpm db:migrate",
+      "assertion_ids": [
+        "A1:canary-validation",
+        "A2:canary-validation"
+      ],
+      "recorded_at": "2026-08-25T13:39:34.865Z",
+      "validation_receipt_sha256": "322848571b380627e84d91d7e53cb03a3f1100c334098757c5517646628b060c",
+      "evidence_log": {
+        "path": "development/evidence/405-006-canary-validation.log",
+        "sha256": "38afc9fe7e1e28932a26d1e7957c2a3d0df56af9c23a27f533a4e278edf97008",
+        "size": 3370
+      }
+    },
+    {
+      "id": "receipt-ef8d50d8169dedb85085eb1d0279929f301bd16a0ee7807fb8fb7e4879873dfd",
+      "command": "pnpm install --frozen-lockfile",
+      "assertion_ids": [
+        "A1:canary-validation",
+        "A2:canary-validation"
+      ],
+      "recorded_at": "2026-08-25T13:36:36.389Z",
+      "validation_receipt_sha256": "c674e36b306d405aaf520f79daa1c89c4ee5d168944afc75b6e739f307c3b033",
+      "evidence_log": {
+        "path": "development/evidence/399-006-canary-validation.log",
+        "sha256": "74dc83c0b4934d3b5ef4980b8178fe1e33143577a864c378fdb6d51749fe783c",
+        "size": 350
+      }
+    },
+    {
+      "id": "receipt-ff79ba734c6a57d9e92d5da831f86b42b11f81f7d16203ea71a472c00c103f9e",
+      "command": "pnpm graph:test",
+      "assertion_ids": [
+        "A1:canary-validation",
+        "A2:canary-validation"
+      ],
+      "recorded_at": "2026-08-25T13:38:59.591Z",
+      "validation_receipt_sha256": "7dd7c58c0e16f718ff4d7c7465aa3ac995aa4a6225b3a8f16e147df8fb4d7667",
+      "evidence_log": {
+        "path": "development/evidence/403-006-canary-validation.log",
+        "sha256": "51754e85a51a7744a547f116968dec7fc997ba5e9d8041577a8cd24dfce20855",
+        "size": 63704
       }
     }
   ],
@@ -1056,14 +1428,14 @@
       "parent_id": "A1",
       "status": "passing",
       "test_run_ids": [
-        "receipt-0c2418a0329803de4aa5256162ac09f95f0f364a71fbb995feaaaa2199a3d8eb",
-        "receipt-0f1374e098ebd4633b01c77e173ed41da0d1e5092d2dac9a348fc43dccb9fc13",
-        "receipt-30171cda98d9a8ff5240b3add3f1441c22d12c41537e62e64ba76f744d7bdf97",
-        "receipt-549df007e8fefee80d1af96dd650f16732cd762ce3b3f563f4af6c6b418facd1",
-        "receipt-59b94870a4e0c221b16aebd1b745b584873b880529dc8b3027d2e4dd024eedba",
-        "receipt-79bce88737baa20ef6b83e1f194dacf991df0390fd18f8ad5de04cd321befd04",
-        "receipt-9cea329de7c5c329ea5f96a86fa0b5757a5f64c67fa0d54228300afd1ff3e688",
-        "receipt-c179623f534817e20880669aa5b84c78d2f2822e496c4f14fef536b87ff1aae2"
+        "receipt-28d1cfac28077405b26b6e9cd8efd364cfcf384df0dfead828c66f8548ad07be",
+        "receipt-3911d5b51df214e650b955de5b4f538c009ea3fa6ad1c63ce6d69e7702100551",
+        "receipt-5352bd2655634eea83664493b1218ae131b05d7efe19ff5f7fc8374832ceb806",
+        "receipt-7fc6856cf0fa25d68af9020b6cf7f7fa6bb9c3f5b56bae58017e5d1a6ed3794a",
+        "receipt-b2f6d427413a06486ff379b3900e7b540645f76cd23c29cbd1aef04b373ba301",
+        "receipt-b367624aa38f882ccbc778b1e02038bbef43889abd73a418c763fd06b98cedc4",
+        "receipt-ef8d50d8169dedb85085eb1d0279929f301bd16a0ee7807fb8fb7e4879873dfd",
+        "receipt-ff79ba734c6a57d9e92d5da831f86b42b11f81f7d16203ea71a472c00c103f9e"
       ],
       "direct_evidence": [],
       "reused_evidence": [],
@@ -1074,14 +1446,14 @@
       "parent_id": "A2",
       "status": "passing",
       "test_run_ids": [
-        "receipt-0c2418a0329803de4aa5256162ac09f95f0f364a71fbb995feaaaa2199a3d8eb",
-        "receipt-0f1374e098ebd4633b01c77e173ed41da0d1e5092d2dac9a348fc43dccb9fc13",
-        "receipt-30171cda98d9a8ff5240b3add3f1441c22d12c41537e62e64ba76f744d7bdf97",
-        "receipt-549df007e8fefee80d1af96dd650f16732cd762ce3b3f563f4af6c6b418facd1",
-        "receipt-59b94870a4e0c221b16aebd1b745b584873b880529dc8b3027d2e4dd024eedba",
-        "receipt-79bce88737baa20ef6b83e1f194dacf991df0390fd18f8ad5de04cd321befd04",
-        "receipt-9cea329de7c5c329ea5f96a86fa0b5757a5f64c67fa0d54228300afd1ff3e688",
-        "receipt-c179623f534817e20880669aa5b84c78d2f2822e496c4f14fef536b87ff1aae2"
+        "receipt-28d1cfac28077405b26b6e9cd8efd364cfcf384df0dfead828c66f8548ad07be",
+        "receipt-3911d5b51df214e650b955de5b4f538c009ea3fa6ad1c63ce6d69e7702100551",
+        "receipt-5352bd2655634eea83664493b1218ae131b05d7efe19ff5f7fc8374832ceb806",
+        "receipt-7fc6856cf0fa25d68af9020b6cf7f7fa6bb9c3f5b56bae58017e5d1a6ed3794a",
+        "receipt-b2f6d427413a06486ff379b3900e7b540645f76cd23c29cbd1aef04b373ba301",
+        "receipt-b367624aa38f882ccbc778b1e02038bbef43889abd73a418c763fd06b98cedc4",
+        "receipt-ef8d50d8169dedb85085eb1d0279929f301bd16a0ee7807fb8fb7e4879873dfd",
+        "receipt-ff79ba734c6a57d9e92d5da831f86b42b11f81f7d16203ea71a472c00c103f9e"
       ],
       "direct_evidence": [],
       "reused_evidence": [],

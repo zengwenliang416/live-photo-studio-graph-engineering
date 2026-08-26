@@ -1,6 +1,6 @@
 {
   "schema": "specnav.codegraph.evidence_query_plan.v1",
-  "generated_at": "2026-08-23T11:03:37.002Z",
+  "generated_at": "2026-08-25T13:10:51.575Z",
   "active_change": "graph-engineering-full-migration",
   "queries": [
     {
@@ -92,6 +92,96 @@
         "tests or verification commands"
       ],
       "command": "node \"$SPECNAV_CODEGRAPH_ROOT/scripts/codegraph-context.js\" --stage development --claim development:task-006-canary-validation --query \"<query>\" --write --json"
+    },
+    {
+      "id": "verification:task-001-existing-graph-foundation:evidence",
+      "claim_id": "verification:task-001-existing-graph-foundation",
+      "stage": "verification",
+      "task_id": "001-existing-graph-foundation",
+      "status": "planned",
+      "query": "Verify the implemented files, symbols, callers, tests, and requirement/prototype traceability for \"Preserve the approved Graph registry, shared payload contracts, additive\" in change \"graph-engineering-full-migration\". Return concrete file paths, symbols, relationships, and any missing implementation evidence.",
+      "expected_evidence": [
+        "file paths",
+        "symbols",
+        "call relationships",
+        "tests or verification commands"
+      ],
+      "command": "node \"$SPECNAV_CODEGRAPH_ROOT/scripts/codegraph-context.js\" --stage verification --claim verification:task-001-existing-graph-foundation --query \"<query>\" --write --json"
+    },
+    {
+      "id": "verification:task-002-durable-orchestration:evidence",
+      "claim_id": "verification:task-002-durable-orchestration",
+      "stage": "verification",
+      "task_id": "002-durable-orchestration",
+      "status": "planned",
+      "query": "Verify the implemented files, symbols, callers, tests, and requirement/prototype traceability for \"Complete the durable resume and signal boundary from a worker completion or\" in change \"graph-engineering-full-migration\". Return concrete file paths, symbols, relationships, and any missing implementation evidence.",
+      "expected_evidence": [
+        "file paths",
+        "symbols",
+        "call relationships",
+        "tests or verification commands"
+      ],
+      "command": "node \"$SPECNAV_CODEGRAPH_ROOT/scripts/codegraph-context.js\" --stage verification --claim verification:task-002-durable-orchestration --query \"<query>\" --write --json"
+    },
+    {
+      "id": "verification:task-003-worker-facts:evidence",
+      "claim_id": "verification:task-003-worker-facts",
+      "stage": "verification",
+      "task_id": "003-worker-facts",
+      "status": "planned",
+      "query": "Verify the implemented files, symbols, callers, tests, and requirement/prototype traceability for \"Complete the AI and media worker fact/signal boundary, including PostgreSQL\" in change \"graph-engineering-full-migration\". Return concrete file paths, symbols, relationships, and any missing implementation evidence.",
+      "expected_evidence": [
+        "file paths",
+        "symbols",
+        "call relationships",
+        "tests or verification commands"
+      ],
+      "command": "node \"$SPECNAV_CODEGRAPH_ROOT/scripts/codegraph-context.js\" --stage verification --claim verification:task-003-worker-facts --query \"<query>\" --write --json"
+    },
+    {
+      "id": "verification:task-004-web-projection:evidence",
+      "claim_id": "verification:task-004-web-projection",
+      "stage": "verification",
+      "task_id": "004-web-projection",
+      "status": "planned",
+      "query": "Verify the implemented files, symbols, callers, tests, and requirement/prototype traceability for \"Verify the web projection from URL state through typed queries, SSE\" in change \"graph-engineering-full-migration\". Return concrete file paths, symbols, relationships, and any missing implementation evidence.",
+      "expected_evidence": [
+        "file paths",
+        "symbols",
+        "call relationships",
+        "tests or verification commands"
+      ],
+      "command": "node \"$SPECNAV_CODEGRAPH_ROOT/scripts/codegraph-context.js\" --stage verification --claim verification:task-004-web-projection --query \"<query>\" --write --json"
+    },
+    {
+      "id": "verification:task-005-operations-security:evidence",
+      "claim_id": "verification:task-005-operations-security",
+      "stage": "verification",
+      "task_id": "005-operations-security",
+      "status": "planned",
+      "query": "Verify the implemented files, symbols, callers, tests, and requirement/prototype traceability for \"Add the smallest operational projection, structured context, redaction,\" in change \"graph-engineering-full-migration\". Return concrete file paths, symbols, relationships, and any missing implementation evidence.",
+      "expected_evidence": [
+        "file paths",
+        "symbols",
+        "call relationships",
+        "tests or verification commands"
+      ],
+      "command": "node \"$SPECNAV_CODEGRAPH_ROOT/scripts/codegraph-context.js\" --stage verification --claim verification:task-005-operations-security --query \"<query>\" --write --json"
+    },
+    {
+      "id": "verification:task-006-canary-validation:evidence",
+      "claim_id": "verification:task-006-canary-validation",
+      "stage": "verification",
+      "task_id": "006-canary-validation",
+      "status": "planned",
+      "query": "Verify the implemented files, symbols, callers, tests, and requirement/prototype traceability for \"Record canary thresholds, rollback commands, evidence artifacts and the final\" in change \"graph-engineering-full-migration\". Return concrete file paths, symbols, relationships, and any missing implementation evidence.",
+      "expected_evidence": [
+        "file paths",
+        "symbols",
+        "call relationships",
+        "tests or verification commands"
+      ],
+      "command": "node \"$SPECNAV_CODEGRAPH_ROOT/scripts/codegraph-context.js\" --stage verification --claim verification:task-006-canary-validation --query \"<query>\" --write --json"
     }
   ]
 }

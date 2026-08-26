@@ -1,0 +1,38 @@
+[
+  {
+    "id": "REQ-1",
+    "path": "openspec/changes/graph-engineering-full-migration/requirements.md",
+    "sha256": "b9ecef9fa76300caf8a89d1ee2e1bc856ad7a3e64cacdc77e5d25eb2306335c9",
+    "statement": "Workflow runs are restart-safe, single-writer and permanently bound to graphKey plus graphVersion."
+  },
+  {
+    "id": "REQ-2",
+    "path": "openspec/changes/graph-engineering-full-migration/requirements.md",
+    "sha256": "b9ecef9fa76300caf8a89d1ee2e1bc856ad7a3e64cacdc77e5d25eb2306335c9",
+    "statement": "Workers write domain facts and correlated signals while the orchestrator exclusively owns Graph-path routing."
+  },
+  {
+    "id": "REQ-3",
+    "path": "openspec/changes/graph-engineering-full-migration/requirements.md",
+    "sha256": "b9ecef9fa76300caf8a89d1ee2e1bc856ad7a3e64cacdc77e5d25eb2306335c9",
+    "statement": "The Web projection is authoritative, task actions are payload-gated and the export copy preserves the future iOS importer boundary."
+  },
+  {
+    "id": "REQ-4",
+    "path": "openspec/changes/graph-engineering-full-migration/requirements.md",
+    "sha256": "b9ecef9fa76300caf8a89d1ee2e1bc856ad7a3e64cacdc77e5d25eb2306335c9",
+    "statement": "A main push deploys a commit-addressed Node 24 image through the repository-scoped trusted Woodpecker agent."
+  },
+  {
+    "id": "REQ-5",
+    "path": "openspec/changes/graph-engineering-full-migration/requirements.md",
+    "sha256": "b9ecef9fa76300caf8a89d1ee2e1bc856ad7a3e64cacdc77e5d25eb2306335c9",
+    "statement": "The protected Cloudflare and Nginx boundary requires Basic Auth, same-origin API routing, private storage and exact RustFS CORS."
+  },
+  {
+    "id": "REQ-6",
+    "path": "openspec/changes/graph-engineering-full-migration/requirements.md",
+    "sha256": "b9ecef9fa76300caf8a89d1ee2e1bc856ad7a3e64cacdc77e5d25eb2306335c9",
+    "statement": "Rollback replaces only application services and preserves database, checkpoint, Outbox, Redis and object-storage state."
+  }
+]

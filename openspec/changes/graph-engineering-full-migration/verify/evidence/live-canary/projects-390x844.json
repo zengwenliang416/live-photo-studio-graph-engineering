@@ -1,0 +1,61 @@
+{
+  "capturedAt": "2026-08-25T15:29:50.936Z",
+  "commit": "fe5433fbb801c48d7b5d9c12e11577d84e008dcd",
+  "httpStatus": 200,
+  "title": "Live Photo Studio",
+  "url": "https://livephoto.motion-cover.com/projects",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "documentWidth": 390,
+  "horizontalOverflow": false,
+  "headings": [
+    "从一组照片开始。",
+    "创建项目"
+  ],
+  "buttons": [
+    {
+      "text": "创建项目",
+      "disabled": false,
+      "ariaLabel": null
+    }
+  ],
+  "links": [
+    {
+      "text": "",
+      "href": "https://livephoto.motion-cover.com/cdn-cgi/content?id=.rP2JF9k55SIWLcrwmskNnJH9eAhi7AxOMijfxdalOY-1787671786.3219411-1.2.1.1-V6PWaaiMc7HhRlig6bRI8IQo0aNVmL.jb_kxw2KlJoK_ZgJP_UDWmjNqwcmo8apc"
+    },
+    {
+      "text": "生图设置",
+      "href": "/settings"
+    }
+  ],
+  "inputs": [
+    {
+      "name": "project-title",
+      "type": "text",
+      "ariaLabel": null,
+      "labelledBy": null,
+      "hasAssociatedLabel": true
+    }
+  ],
+  "bodyText": "◌\nLive Photo Studio\n生图设置\n\n我的项目\n\n从一组照片开始。\n\n创建一个项目,上传照片并选择封面,然后进入生成工作流。\n\n创建项目\n项目名称(可选)\n创建项目\n\n还没有项目。先在上方创建一个项目,然后上传照片开始制作。",
+  "apiRequests": [
+    {
+      "method": "GET",
+      "url": "https://livephoto.motion-cover.com/v1/projects?limit=50",
+      "status": 200
+    }
+  ],
+  "requestFailures": [
+    {
+      "url": "https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496",
+      "errorText": "net::ERR_SSL_PROTOCOL_ERROR"
+    }
+  ],
+  "consoleErrors": [
+    "Failed to load resource: net::ERR_SSL_PROTOCOL_ERROR"
+  ],
+  "pageErrors": []
+}

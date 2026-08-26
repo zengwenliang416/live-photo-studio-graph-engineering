@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "change_id": "graph-engineering-full-migration",
-  "digest": "6617ecf2f031d674112a96a8c7ead4cbb71a9c0cf05f37ddc7f7b96583000db3",
+  "digest": "29826b2bcc44133f46102f675f0ea64ef18de15bd43dd299d49dfc1feed124c7",
   "assertion_count": 3,
-  "frozen_at": "2026-08-23T09:24:55.432Z"
+  "frozen_at": "2026-08-25T13:24:37Z"
 }

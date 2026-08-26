@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "change_id": "graph-engineering-full-migration",
+  "risk_tier": "standard",
+  "required_domains": [
+    "facticity",
+    "static",
+    "unit",
+    "redteam",
+    "e2e",
+    "sensory"
+  ],
+  "inputs": [
+    "requirements.md",
+    "acceptance.md",
+    "prototype/handoff.md",
+    "development/handoff-to-verify.md"
+  ],
+  "user_test_case_gate": {
+    "required": true,
+    "cases": "verify/user-test-cases.json",
+    "signoff": "verify/user-test-case-signoff.json",
+    "domain_matrix": "verify/domain-case-matrix.json"
+  },
+  "runtime_evidence_gate": {
+    "required": true,
+    "evidence": "verify/runtime-evidence.json",
+    "required_surfaces": [
+      "runtime",
+      "browser"
+    ],
+    "database_surface_required_when": "development/migrations/manifest.json required=true"
+  },
+  "changed_files": [],
+  "commands": [],
+  "manual_reviews": [
+    "sensory"
+  ]
+}

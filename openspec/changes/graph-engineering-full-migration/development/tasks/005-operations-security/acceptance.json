@@ -2,11 +2,11 @@
   "schema": "specnav.task-acceptance-evidence.v2",
   "generated_by": "specnav-development/task-acceptance-evidence",
   "task_id": "005-operations-security",
-  "generated_at": "2026-08-23T16:09:43.025Z",
-  "recorded_at": "2026-08-23T16:07:47.792Z",
+  "generated_at": "2026-08-25T13:39:56.471Z",
+  "recorded_at": "2026-08-25T13:36:35.117Z",
   "status": "approved",
-  "reviewed_git_head": "70ebe55817d92da054b15298a417a142d2f227b5",
-  "reviewed_git_tree": "d7673b86fc96dd45dc1cb62526ce0a001cbc8bba",
+  "reviewed_git_head": "6e14ba03dced4b4e6729b182f81fde0c977b0a85",
+  "reviewed_git_tree": "263adc7e9c6ed2149482b7f4d90a0fb408868334",
   "implementation_scope": {
     "included_patterns": [
       "apps/api/**",
@@ -21,19 +21,79 @@
         "path": "apps/api/package.json",
         "mode": "100644",
         "type": "blob",
-        "object_id": "8f5fff3cc9a9bd7113d39da73cfddefbdd7dcf67"
+        "object_id": "a5e896137baba85ad3e25e0868227849127bc6b6"
       },
       {
         "path": "apps/api/src/app.module.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "53bd27265dc7f0cec719790d2e9975b5cda8c07b"
+        "object_id": "ebf04facbac3027c01cb6d1fca746e22a88c5e2f"
+      },
+      {
+        "path": "apps/api/src/assets/application/asset-upload-service.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "880becf53f030f095567b1d888f034d275e0ac6f"
+      },
+      {
+        "path": "apps/api/src/assets/application/asset-upload-service.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "a82184ff671eff71ee3abbe886ab9309f28b41a0"
+      },
+      {
+        "path": "apps/api/src/assets/asset-tokens.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "541ca88bc884b0de848d9aabf4eccf3a66bf5628"
+      },
+      {
+        "path": "apps/api/src/assets/assets.controller.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "5d24f9dc399ff599c9d08c1eabeab1065959739e"
+      },
+      {
+        "path": "apps/api/src/assets/assets.controller.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "b24c77dfb2ab131fef1b434bb8c3475cffde4eaf"
+      },
+      {
+        "path": "apps/api/src/assets/assets.module.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "072f38717743e0dcc9cc0725849d49ab19b1c396"
+      },
+      {
+        "path": "apps/api/src/assets/infrastructure/pg-asset-store.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "000197a778153b6ef6c2ce633d555869bd382394"
+      },
+      {
+        "path": "apps/api/src/assets/ports.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "e20f193de932760dada8aaafc7e7c195fee38b0f"
+      },
+      {
+        "path": "apps/api/src/assets/request-schemas.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "55c015ca75039c78248ca3b80d6eb120afe0465f"
+      },
+      {
+        "path": "apps/api/src/assets/testing/in-memory-asset-store.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "aa4c335f6289378c43ec8aec6837cc1f568c3012"
       },
       {
         "path": "apps/api/src/config.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "d1c31b5d45d62d8819e0879a64298dac3ef0e0d8"
+        "object_id": "4aeff129940fd1f9b10e7dc222fe93030fbec537"
       },
       {
         "path": "apps/api/src/database/api-database.module.ts",
@@ -57,7 +117,7 @@
         "path": "apps/api/src/exports/export-packages.controller.test.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "b83acd317e29e85d3a63d48e35221313ba5133ea"
+        "object_id": "5fdeaceb6aa4e036eece27b771d9bfa9cd9aa6ab"
       },
       {
         "path": "apps/api/src/exports/export-packages.controller.ts",
@@ -87,7 +147,7 @@
         "path": "apps/api/src/exports/infrastructure/object-storage-signed-download-port.test.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "7ed4055142316bb95750ccbf7aaffda4d74955ad"
+        "object_id": "a7b255001a368d4cd991b81474025fec280e9279"
       },
       {
         "path": "apps/api/src/exports/infrastructure/object-storage-signed-download-port.ts",
@@ -138,6 +198,132 @@
         "object_id": "c6965d51a2e7677b1120a4219e572c371984e151"
       },
       {
+        "path": "apps/api/src/projects/application/canonical-json.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "ed892e4058ffe3785d951f7419334bd9f6239ce9"
+      },
+      {
+        "path": "apps/api/src/projects/application/project-service.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "d373981ee227932d265f42cefc99858e25cb2d77"
+      },
+      {
+        "path": "apps/api/src/projects/application/project-service.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "3b487297a7be96685837ecc53f2603efee9402d7"
+      },
+      {
+        "path": "apps/api/src/projects/infrastructure/pg-project-store.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "fa20c0eb86709b5a3c2acdc22d50d835b348c66e"
+      },
+      {
+        "path": "apps/api/src/projects/ports.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "24eafd50ff90774d9ba82ac0593ceadbc2bc72bf"
+      },
+      {
+        "path": "apps/api/src/projects/project-tokens.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "5386de84311db5c898b728029a8736502d87ebfa"
+      },
+      {
+        "path": "apps/api/src/projects/projects.controller.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "5e7f1bfa0781dd4210739105ff150d1bdb558159"
+      },
+      {
+        "path": "apps/api/src/projects/projects.controller.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "dcb540ddda4100b38b8cbf01e166d5a752ceba34"
+      },
+      {
+        "path": "apps/api/src/projects/projects.module.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "76b376d9efafa840ad837a666a1044d6d840c6a5"
+      },
+      {
+        "path": "apps/api/src/projects/request-schemas.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "a54b2266bd8d61e9a87f71db69306cc3b14ce422"
+      },
+      {
+        "path": "apps/api/src/projects/testing/in-memory-project-store.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "74006ecbacf05de307a23ce5f97b185b04d52515"
+      },
+      {
+        "path": "apps/api/src/settings/application/settings-service.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "04727d509edc13990cef2b08173c855748822378"
+      },
+      {
+        "path": "apps/api/src/settings/application/settings-service.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "3c9acc58c1f63404bcc97b2cde00ff4e5823eae6"
+      },
+      {
+        "path": "apps/api/src/settings/infrastructure/pg-settings-store.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "1ecac635640c90cc14fa30d106214fe3a1fd2d74"
+      },
+      {
+        "path": "apps/api/src/settings/ports.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "eeb12800208ed1dcb862b65d7dd9404958377919"
+      },
+      {
+        "path": "apps/api/src/settings/request-schemas.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "20afd2de657c375260a959b8f5f2ad6954419ffa"
+      },
+      {
+        "path": "apps/api/src/settings/setting-tokens.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "e56453af58f066456eba3964d362be36c1c87371"
+      },
+      {
+        "path": "apps/api/src/settings/settings.controller.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "1f4c0f4bc0e45898f6d0399daf3258fc1a34bdde"
+      },
+      {
+        "path": "apps/api/src/settings/settings.controller.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "c58cb9adf2e2c1eec68fc48123c04d8f05edb985"
+      },
+      {
+        "path": "apps/api/src/settings/settings.module.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "47c7ef3bf58c35b56b0cf52efe14cd95dc2e610a"
+      },
+      {
+        "path": "apps/api/src/settings/testing/in-memory-settings-store.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "c4f6af07cdc33b2f7994670849ca334a5298ddb4"
+      },
+      {
         "path": "apps/api/src/test-entrypoint.test.ts",
         "mode": "100644",
         "type": "blob",
@@ -165,7 +351,7 @@
         "path": "apps/api/src/workflows.controller.test.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "ffb3cf6238aef4aa3c0cd40469e176da09751b2f"
+        "object_id": "0426e10a4e07c1b3b93c5010e9d98ce583723129"
       },
       {
         "path": "apps/api/src/workflows/application/canonical-json.ts",
@@ -273,7 +459,7 @@
         "path": "apps/orchestrator/package.json",
         "mode": "100644",
         "type": "blob",
-        "object_id": "cf45b95efd560891b6ce82e5a5d46c0541bb3aee"
+        "object_id": "cbed6713d4aaeafef39b8ee3bbe448cb075cb91d"
       },
       {
         "path": "apps/orchestrator/src/application/graph-engine.ts",
@@ -315,7 +501,7 @@
         "path": "apps/orchestrator/src/graphs/live-photo-project/live-photo-project.graph.test.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "b66a021db5d8c1d5b16f36c430f8d810b659467f"
+        "object_id": "89c480665166c633be8bc6ddd996e570b7cd2dc0"
       },
       {
         "path": "apps/orchestrator/src/graphs/live-photo-project/live-photo-project.graph.ts",
@@ -327,19 +513,19 @@
         "path": "apps/orchestrator/src/graphs/live-photo-project/live-photo-project.state.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "5e2b60f61f8a9120f372a870657e64b1bf099d3e"
+        "object_id": "e493d3ece812942f630dc6664b7d67a9793cb73e"
       },
       {
         "path": "apps/orchestrator/src/graphs/live-photo-project/nodes.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "eb07576fbadfa4be1533309a4756a66375d79223"
+        "object_id": "5a489792c05a6ece88123aa10e6d43d4642b210d"
       },
       {
         "path": "apps/orchestrator/src/graphs/live-photo-project/ports.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "73f8fdcdf376e8deffcc7bd9cb6375ad4888d5a3"
+        "object_id": "90817619d2f50eaf5acfc201dbfd4694d9c023ad"
       },
       {
         "path": "apps/orchestrator/src/graphs/live-photo-project/signal-schemas.ts",
@@ -357,7 +543,7 @@
         "path": "apps/orchestrator/src/infrastructure/postgres-effects.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "a04bc35ae2ab3dbb788de50c35566b5858188cbb"
+        "object_id": "77f5254bbab9cd348a63ee39c3fbf71a77fed124"
       },
       {
         "path": "apps/orchestrator/src/infrastructure/workflow-repository.ts",
@@ -372,6 +558,12 @@
         "object_id": "6c803700a78a3d6a1c47ddb8b6ff9094173b41f3"
       },
       {
+        "path": "apps/orchestrator/src/setup-checkpoint.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "39c0686aed7db925fabfa40b73e9e5184d42408c"
+      },
+      {
         "path": "apps/orchestrator/tsconfig.json",
         "mode": "100644",
         "type": "blob",
@@ -381,25 +573,49 @@
         "path": "apps/worker-ai/package.json",
         "mode": "100644",
         "type": "blob",
-        "object_id": "3629b357e802591bf062d7f01416a7334af8947c"
+        "object_id": "128c469caaa04a751719c375eaab7c192f5987cb"
       },
       {
         "path": "apps/worker-ai/src/config.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "be601b458574c4f7d13bf178a93457d8026720cd"
+        "object_id": "1a9fb1dcf4f677048af7d317eb6e36f771679ab9"
       },
       {
         "path": "apps/worker-ai/src/generation-service.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "e19da09f5f9e7e6e205fa47836ea892df6cef3f8"
+        "object_id": "550e06197dab23e84c3a1934756a11a98ec00cab"
       },
       {
         "path": "apps/worker-ai/src/main.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "c79a6a08fdb2429806a48c33c283da8ce238ed63"
+        "object_id": "a1125f4994a6d848a4fe8435980a07838296f226"
+      },
+      {
+        "path": "apps/worker-ai/src/openai-compatible-provider.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "233862e457222a66d6f70a728b057ef0ba57743e"
+      },
+      {
+        "path": "apps/worker-ai/src/openai-compatible-provider.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "14c433e681318bcf37c34f5606c513f083d3b067"
+      },
+      {
+        "path": "apps/worker-ai/src/provider-resolver.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "f5b4ad25e0229bc076202bf685ca6a79dd7a3898"
+      },
+      {
+        "path": "apps/worker-ai/src/provider-resolver.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "668e65a16b4b752e2ba5c31a198273728f3a3b37"
       },
       {
         "path": "apps/worker-ai/src/provider.test.ts",
@@ -411,13 +627,13 @@
         "path": "apps/worker-ai/src/provider.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "6e52f113d6f02ec8a420a91f513d379a17d20441"
+        "object_id": "08bd17bbbbb1d700b8ce0672a72e407d746aabae"
       },
       {
         "path": "apps/worker-ai/src/worker-ai.integration.test.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "e201a1a768ee1355bda01b1f464833f2db2bfd34"
+        "object_id": "99007112037893209a439a743766607203a3c32d"
       },
       {
         "path": "apps/worker-ai/tsconfig.json",
@@ -498,10 +714,16 @@
         "object_id": "32987bf03d473c080a7b9a99c7b1b24042ab00ef"
       },
       {
+        "path": "docs/adr/0011-style-key-in-graph-state.md",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "7b90e205a5758f7c738a258651036a4c1c767f21"
+      },
+      {
         "path": "docs/execplans/graph-engineering-full-migration.md",
         "mode": "100644",
         "type": "blob",
-        "object_id": "dd83f17d8be6ac22a29bef1f52874bf6972642d2"
+        "object_id": "35b8018b8c5bea8c6044536e4a3b2966a9123c9e"
       },
       {
         "path": "docs/graph-engineering/evidence/canary-rollback.json",
@@ -594,10 +816,16 @@
         "object_id": "648f0cbe8000551051ab2dffa7b1841778fb8390"
       },
       {
+        "path": "packages/graph-contracts/src/job-payloads.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "72b4f955460a9cea18d28f8f5f22e45c624e4efa"
+      },
+      {
         "path": "packages/graph-contracts/src/job-payloads.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "0ee2701f664919383100c50998bf8fbe16a60b11"
+        "object_id": "3e3878e9d67a529ee80e65663f08df213be242e6"
       },
       {
         "path": "packages/graph-contracts/src/node-definition.test.ts",
@@ -642,7 +870,7 @@
         "object_id": "a72a807d5f98f2017dd06cb5b651e2ea2bef07f9"
       }
     ],
-    "sha256": "20b7db2d108e3cd6ad24066fd5755f6c8677cdb3af67cc8424ea669c3f8390ad"
+    "sha256": "2888a16dae65a6605f62e33b2bf7e145dc75666c02bac87caef6082c0884d7b0"
   },
   "artifacts": {
     "context": {
@@ -667,73 +895,73 @@
   },
   "test_runs": [
     {
-      "id": "receipt-2b89544eefe75dfb44e4e43939b9fe6c046a942793664bbcdba0807258c4a743",
+      "id": "receipt-1def59a7aebff1f0071e2718662c62900976b0bd87234759e3cd6b35b792c4fe",
       "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/worker-ai test",
       "assertion_ids": [
         "A3:operations-security"
       ],
-      "recorded_at": "2026-08-23T16:07:46.952Z",
-      "validation_receipt_sha256": "c125496586a1f48d1b4c253f248c7c5c36039155d73e3305c7a5756cca14597e",
+      "recorded_at": "2026-08-25T13:36:31.186Z",
+      "validation_receipt_sha256": "7ae92f2f1008839b12e6a2ab9a084abd9a24d28c5fb5015d256de5c5b41309bd",
       "evidence_log": {
-        "path": "development/evidence/251-005-operations-security.log",
-        "sha256": "500b0cba3add4c0b6933247ea4e6d19012bfee367845d99be5f64c7615f506b1",
-        "size": 2237
+        "path": "development/evidence/396-005-operations-security.log",
+        "sha256": "d83388923ca59ca040a22adf9efbd1ab140958bab3510a29dbbb59fddeb4caa9",
+        "size": 4433
       }
     },
     {
-      "id": "receipt-64ad3229423ff6c2fb9fd9aa4f184c22d2316d1c64cec7354ecfda775f2f5b31",
-      "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/worker-media test",
-      "assertion_ids": [
-        "A3:operations-security"
-      ],
-      "recorded_at": "2026-08-23T16:07:47.740Z",
-      "validation_receipt_sha256": "4a9e04734262dceea5be04fbc56e894542d72b8661d255244eed085b901f316e",
-      "evidence_log": {
-        "path": "development/evidence/252-005-operations-security.log",
-        "sha256": "c1d3561dfc8c906f11bc1948a1700cb9940a2565b21afc05d28c9d8a4e66d55c",
-        "size": 2944
-      }
-    },
-    {
-      "id": "receipt-a63481b172c177fd16a34484c7e62c7058cfa50c553756c989a6b24fac0e33db",
+      "id": "receipt-446a64e30e504e119ef69846d3f6cc51e64c565ad3533ddd4b2a1f7b893d9dfe",
       "command": "pnpm test",
       "assertion_ids": [
         "A3:operations-security"
       ],
-      "recorded_at": "2026-08-23T16:07:44.775Z",
-      "validation_receipt_sha256": "d39cd7d515cd2323a300b77a2636dc690c97f39467a7ade0f5cef75272555b08",
+      "recorded_at": "2026-08-25T13:36:26.956Z",
+      "validation_receipt_sha256": "b7c71d1a0693d95dee2bd30581153dbb7c409017d6f6a70042f0c6b53cbde4a2",
       "evidence_log": {
-        "path": "development/evidence/249-005-operations-security.log",
-        "sha256": "d5b9c3d4f6d7d2649ffa81bf76b91387b8563c82f78df78d5977b68d455ade40",
-        "size": 25254
+        "path": "development/evidence/394-005-operations-security.log",
+        "sha256": "285814f07b2eb02b621e33a1514148eefbc5527869e9c231ba557033389788de",
+        "size": 63410
       }
     },
     {
-      "id": "receipt-c7d77867d85988e03b4d54bc9733be81679c50aec4240cf52dd1be7aca61a50a",
+      "id": "receipt-58e2ba1503d87abca10a90ec531af76682535b179ab06137b8d11cc0f9457cdb",
       "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/orchestrator test",
       "assertion_ids": [
         "A3:operations-security"
       ],
-      "recorded_at": "2026-08-23T16:07:46.257Z",
-      "validation_receipt_sha256": "40c56988267247f86e5748c2a5edc27292fd7610338740384857e014cdb6469c",
+      "recorded_at": "2026-08-25T13:36:29.930Z",
+      "validation_receipt_sha256": "91129060b77fb81ab44f8f2ec8ef4fd4d0ba37db38c6336d2dd6542cb990fbb8",
       "evidence_log": {
-        "path": "development/evidence/250-005-operations-security.log",
-        "sha256": "75f7fb7daf04c5968c49d3f118dde160e7abf193c2cc2d882ce378b203508dcb",
-        "size": 2702
+        "path": "development/evidence/395-005-operations-security.log",
+        "sha256": "1068f95972432c223165cd7e4ab56a4a58b9d5e549c6d71cdc1a98d28d9b73e9",
+        "size": 3072
       }
     },
     {
-      "id": "receipt-d00f9d6dc731000ec06e77e1a0deb58504cb64658aba207b96c52276e7bff271",
+      "id": "receipt-6c59cd3fa643ca2ddb3e0d393c6eee3a8feb786c89ddaff29760fd7e7937d820",
+      "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/worker-media test",
+      "assertion_ids": [
+        "A3:operations-security"
+      ],
+      "recorded_at": "2026-08-25T13:36:34.995Z",
+      "validation_receipt_sha256": "b91f63e0a5412766290b923366841a45da343e619594c464a4fddb4d0604e29a",
+      "evidence_log": {
+        "path": "development/evidence/397-005-operations-security.log",
+        "sha256": "753b0a935bad0d1bcd42dd121d02c5229fbfe55a6ed8e9e5aa85d7c30a94ccab",
+        "size": 2965
+      }
+    },
+    {
+      "id": "receipt-a020cdda4c3b26073e7b2ef9af01bed67b856a98cb750353dfa202d064a845c4",
       "command": "git diff --check",
       "assertion_ids": [
         "A3:operations-security"
       ],
-      "recorded_at": "2026-08-23T16:07:47.792Z",
-      "validation_receipt_sha256": "cd9d10d5ec26fa342359c0ad6eb7d7f4153bc5d4ecc919b835bd6b5b0c58c797",
+      "recorded_at": "2026-08-25T13:36:35.117Z",
+      "validation_receipt_sha256": "7040307470330a8e41d686b0dd6dd21e30344c406cb3d1697c0c318ee258e190",
       "evidence_log": {
-        "path": "development/evidence/253-005-operations-security.log",
-        "sha256": "c9f123b907dab6eddbc5c1fc857bf4cf27536bba38581531e528cee609dc2499",
-        "size": 101
+        "path": "development/evidence/398-005-operations-security.log",
+        "sha256": "51f26186a399a2e5aa43a94c887885a0315eafe43449829d17cfe92db2311647",
+        "size": 102
       }
     }
   ],
@@ -743,11 +971,11 @@
       "parent_id": "A3",
       "status": "passing",
       "test_run_ids": [
-        "receipt-2b89544eefe75dfb44e4e43939b9fe6c046a942793664bbcdba0807258c4a743",
-        "receipt-64ad3229423ff6c2fb9fd9aa4f184c22d2316d1c64cec7354ecfda775f2f5b31",
-        "receipt-a63481b172c177fd16a34484c7e62c7058cfa50c553756c989a6b24fac0e33db",
-        "receipt-c7d77867d85988e03b4d54bc9733be81679c50aec4240cf52dd1be7aca61a50a",
-        "receipt-d00f9d6dc731000ec06e77e1a0deb58504cb64658aba207b96c52276e7bff271"
+        "receipt-1def59a7aebff1f0071e2718662c62900976b0bd87234759e3cd6b35b792c4fe",
+        "receipt-446a64e30e504e119ef69846d3f6cc51e64c565ad3533ddd4b2a1f7b893d9dfe",
+        "receipt-58e2ba1503d87abca10a90ec531af76682535b179ab06137b8d11cc0f9457cdb",
+        "receipt-6c59cd3fa643ca2ddb3e0d393c6eee3a8feb786c89ddaff29760fd7e7937d820",
+        "receipt-a020cdda4c3b26073e7b2ef9af01bed67b856a98cb750353dfa202d064a845c4"
       ],
       "direct_evidence": [],
       "reused_evidence": [],

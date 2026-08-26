@@ -1,0 +1,20 @@
+[
+  {
+    "id": "A1",
+    "path": "openspec/changes/graph-engineering-full-migration/acceptance.json",
+    "sha256": "e3a39ef8a2a496d0ade714cf534d098f3a3f6a5e1dd9497debdfb90073be3f5f",
+    "statement": "A workflow can restart, resume, consume duplicate signals once, and reach the correct terminal phase without duplicate business effects."
+  },
+  {
+    "id": "A2",
+    "path": "openspec/changes/graph-engineering-full-migration/acceptance.json",
+    "sha256": "e3a39ef8a2a496d0ade714cf534d098f3a3f6a5e1dd9497debdfb90073be3f5f",
+    "statement": "Workers write domain facts and correlated signals but do not own Graph-path phase transitions."
+  },
+  {
+    "id": "A3",
+    "path": "openspec/changes/graph-engineering-full-migration/acceptance.json",
+    "sha256": "e3a39ef8a2a496d0ade714cf534d098f3a3f6a5e1dd9497debdfb90073be3f5f",
+    "statement": "The protected canary preserves private media storage, ownership checks, redacted logs, mock-provider cost safety, authenticated ingress and data-preserving rollback."
+  }
+]

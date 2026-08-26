@@ -2,11 +2,11 @@
   "schema": "specnav.task-acceptance-evidence.v2",
   "generated_by": "specnav-development/task-acceptance-evidence",
   "task_id": "002-durable-orchestration",
-  "generated_at": "2026-08-23T16:09:42.893Z",
-  "recorded_at": "2026-08-23T16:07:29.269Z",
+  "generated_at": "2026-08-25T13:39:56.297Z",
+  "recorded_at": "2026-08-25T13:35:17.797Z",
   "status": "approved",
-  "reviewed_git_head": "70ebe55817d92da054b15298a417a142d2f227b5",
-  "reviewed_git_tree": "d7673b86fc96dd45dc1cb62526ce0a001cbc8bba",
+  "reviewed_git_head": "6e14ba03dced4b4e6729b182f81fde0c977b0a85",
+  "reviewed_git_tree": "263adc7e9c6ed2149482b7f4d90a0fb408868334",
   "implementation_scope": {
     "included_patterns": [
       "apps/api/**",
@@ -19,19 +19,79 @@
         "path": "apps/api/package.json",
         "mode": "100644",
         "type": "blob",
-        "object_id": "8f5fff3cc9a9bd7113d39da73cfddefbdd7dcf67"
+        "object_id": "a5e896137baba85ad3e25e0868227849127bc6b6"
       },
       {
         "path": "apps/api/src/app.module.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "53bd27265dc7f0cec719790d2e9975b5cda8c07b"
+        "object_id": "ebf04facbac3027c01cb6d1fca746e22a88c5e2f"
+      },
+      {
+        "path": "apps/api/src/assets/application/asset-upload-service.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "880becf53f030f095567b1d888f034d275e0ac6f"
+      },
+      {
+        "path": "apps/api/src/assets/application/asset-upload-service.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "a82184ff671eff71ee3abbe886ab9309f28b41a0"
+      },
+      {
+        "path": "apps/api/src/assets/asset-tokens.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "541ca88bc884b0de848d9aabf4eccf3a66bf5628"
+      },
+      {
+        "path": "apps/api/src/assets/assets.controller.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "5d24f9dc399ff599c9d08c1eabeab1065959739e"
+      },
+      {
+        "path": "apps/api/src/assets/assets.controller.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "b24c77dfb2ab131fef1b434bb8c3475cffde4eaf"
+      },
+      {
+        "path": "apps/api/src/assets/assets.module.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "072f38717743e0dcc9cc0725849d49ab19b1c396"
+      },
+      {
+        "path": "apps/api/src/assets/infrastructure/pg-asset-store.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "000197a778153b6ef6c2ce633d555869bd382394"
+      },
+      {
+        "path": "apps/api/src/assets/ports.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "e20f193de932760dada8aaafc7e7c195fee38b0f"
+      },
+      {
+        "path": "apps/api/src/assets/request-schemas.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "55c015ca75039c78248ca3b80d6eb120afe0465f"
+      },
+      {
+        "path": "apps/api/src/assets/testing/in-memory-asset-store.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "aa4c335f6289378c43ec8aec6837cc1f568c3012"
       },
       {
         "path": "apps/api/src/config.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "d1c31b5d45d62d8819e0879a64298dac3ef0e0d8"
+        "object_id": "4aeff129940fd1f9b10e7dc222fe93030fbec537"
       },
       {
         "path": "apps/api/src/database/api-database.module.ts",
@@ -55,7 +115,7 @@
         "path": "apps/api/src/exports/export-packages.controller.test.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "b83acd317e29e85d3a63d48e35221313ba5133ea"
+        "object_id": "5fdeaceb6aa4e036eece27b771d9bfa9cd9aa6ab"
       },
       {
         "path": "apps/api/src/exports/export-packages.controller.ts",
@@ -85,7 +145,7 @@
         "path": "apps/api/src/exports/infrastructure/object-storage-signed-download-port.test.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "7ed4055142316bb95750ccbf7aaffda4d74955ad"
+        "object_id": "a7b255001a368d4cd991b81474025fec280e9279"
       },
       {
         "path": "apps/api/src/exports/infrastructure/object-storage-signed-download-port.ts",
@@ -136,6 +196,132 @@
         "object_id": "c6965d51a2e7677b1120a4219e572c371984e151"
       },
       {
+        "path": "apps/api/src/projects/application/canonical-json.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "ed892e4058ffe3785d951f7419334bd9f6239ce9"
+      },
+      {
+        "path": "apps/api/src/projects/application/project-service.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "d373981ee227932d265f42cefc99858e25cb2d77"
+      },
+      {
+        "path": "apps/api/src/projects/application/project-service.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "3b487297a7be96685837ecc53f2603efee9402d7"
+      },
+      {
+        "path": "apps/api/src/projects/infrastructure/pg-project-store.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "fa20c0eb86709b5a3c2acdc22d50d835b348c66e"
+      },
+      {
+        "path": "apps/api/src/projects/ports.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "24eafd50ff90774d9ba82ac0593ceadbc2bc72bf"
+      },
+      {
+        "path": "apps/api/src/projects/project-tokens.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "5386de84311db5c898b728029a8736502d87ebfa"
+      },
+      {
+        "path": "apps/api/src/projects/projects.controller.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "5e7f1bfa0781dd4210739105ff150d1bdb558159"
+      },
+      {
+        "path": "apps/api/src/projects/projects.controller.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "dcb540ddda4100b38b8cbf01e166d5a752ceba34"
+      },
+      {
+        "path": "apps/api/src/projects/projects.module.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "76b376d9efafa840ad837a666a1044d6d840c6a5"
+      },
+      {
+        "path": "apps/api/src/projects/request-schemas.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "a54b2266bd8d61e9a87f71db69306cc3b14ce422"
+      },
+      {
+        "path": "apps/api/src/projects/testing/in-memory-project-store.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "74006ecbacf05de307a23ce5f97b185b04d52515"
+      },
+      {
+        "path": "apps/api/src/settings/application/settings-service.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "04727d509edc13990cef2b08173c855748822378"
+      },
+      {
+        "path": "apps/api/src/settings/application/settings-service.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "3c9acc58c1f63404bcc97b2cde00ff4e5823eae6"
+      },
+      {
+        "path": "apps/api/src/settings/infrastructure/pg-settings-store.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "1ecac635640c90cc14fa30d106214fe3a1fd2d74"
+      },
+      {
+        "path": "apps/api/src/settings/ports.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "eeb12800208ed1dcb862b65d7dd9404958377919"
+      },
+      {
+        "path": "apps/api/src/settings/request-schemas.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "20afd2de657c375260a959b8f5f2ad6954419ffa"
+      },
+      {
+        "path": "apps/api/src/settings/setting-tokens.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "e56453af58f066456eba3964d362be36c1c87371"
+      },
+      {
+        "path": "apps/api/src/settings/settings.controller.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "1f4c0f4bc0e45898f6d0399daf3258fc1a34bdde"
+      },
+      {
+        "path": "apps/api/src/settings/settings.controller.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "c58cb9adf2e2c1eec68fc48123c04d8f05edb985"
+      },
+      {
+        "path": "apps/api/src/settings/settings.module.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "47c7ef3bf58c35b56b0cf52efe14cd95dc2e610a"
+      },
+      {
+        "path": "apps/api/src/settings/testing/in-memory-settings-store.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "c4f6af07cdc33b2f7994670849ca334a5298ddb4"
+      },
+      {
         "path": "apps/api/src/test-entrypoint.test.ts",
         "mode": "100644",
         "type": "blob",
@@ -163,7 +349,7 @@
         "path": "apps/api/src/workflows.controller.test.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "ffb3cf6238aef4aa3c0cd40469e176da09751b2f"
+        "object_id": "0426e10a4e07c1b3b93c5010e9d98ce583723129"
       },
       {
         "path": "apps/api/src/workflows/application/canonical-json.ts",
@@ -271,7 +457,7 @@
         "path": "apps/orchestrator/package.json",
         "mode": "100644",
         "type": "blob",
-        "object_id": "cf45b95efd560891b6ce82e5a5d46c0541bb3aee"
+        "object_id": "cbed6713d4aaeafef39b8ee3bbe448cb075cb91d"
       },
       {
         "path": "apps/orchestrator/src/application/graph-engine.ts",
@@ -313,7 +499,7 @@
         "path": "apps/orchestrator/src/graphs/live-photo-project/live-photo-project.graph.test.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "b66a021db5d8c1d5b16f36c430f8d810b659467f"
+        "object_id": "89c480665166c633be8bc6ddd996e570b7cd2dc0"
       },
       {
         "path": "apps/orchestrator/src/graphs/live-photo-project/live-photo-project.graph.ts",
@@ -325,19 +511,19 @@
         "path": "apps/orchestrator/src/graphs/live-photo-project/live-photo-project.state.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "5e2b60f61f8a9120f372a870657e64b1bf099d3e"
+        "object_id": "e493d3ece812942f630dc6664b7d67a9793cb73e"
       },
       {
         "path": "apps/orchestrator/src/graphs/live-photo-project/nodes.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "eb07576fbadfa4be1533309a4756a66375d79223"
+        "object_id": "5a489792c05a6ece88123aa10e6d43d4642b210d"
       },
       {
         "path": "apps/orchestrator/src/graphs/live-photo-project/ports.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "73f8fdcdf376e8deffcc7bd9cb6375ad4888d5a3"
+        "object_id": "90817619d2f50eaf5acfc201dbfd4694d9c023ad"
       },
       {
         "path": "apps/orchestrator/src/graphs/live-photo-project/signal-schemas.ts",
@@ -355,7 +541,7 @@
         "path": "apps/orchestrator/src/infrastructure/postgres-effects.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "a04bc35ae2ab3dbb788de50c35566b5858188cbb"
+        "object_id": "77f5254bbab9cd348a63ee39c3fbf71a77fed124"
       },
       {
         "path": "apps/orchestrator/src/infrastructure/workflow-repository.ts",
@@ -370,6 +556,12 @@
         "object_id": "6c803700a78a3d6a1c47ddb8b6ff9094173b41f3"
       },
       {
+        "path": "apps/orchestrator/src/setup-checkpoint.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "39c0686aed7db925fabfa40b73e9e5184d42408c"
+      },
+      {
         "path": "apps/orchestrator/tsconfig.json",
         "mode": "100644",
         "type": "blob",
@@ -382,10 +574,16 @@
         "object_id": "32987bf03d473c080a7b9a99c7b1b24042ab00ef"
       },
       {
+        "path": "docs/adr/0011-style-key-in-graph-state.md",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "7b90e205a5758f7c738a258651036a4c1c767f21"
+      },
+      {
         "path": "docs/execplans/graph-engineering-full-migration.md",
         "mode": "100644",
         "type": "blob",
-        "object_id": "dd83f17d8be6ac22a29bef1f52874bf6972642d2"
+        "object_id": "35b8018b8c5bea8c6044536e4a3b2966a9123c9e"
       },
       {
         "path": "docs/graph-engineering/evidence/canary-rollback.json",
@@ -478,10 +676,16 @@
         "object_id": "648f0cbe8000551051ab2dffa7b1841778fb8390"
       },
       {
+        "path": "packages/graph-contracts/src/job-payloads.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "72b4f955460a9cea18d28f8f5f22e45c624e4efa"
+      },
+      {
         "path": "packages/graph-contracts/src/job-payloads.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "0ee2701f664919383100c50998bf8fbe16a60b11"
+        "object_id": "3e3878e9d67a529ee80e65663f08df213be242e6"
       },
       {
         "path": "packages/graph-contracts/src/node-definition.test.ts",
@@ -526,7 +730,7 @@
         "object_id": "a72a807d5f98f2017dd06cb5b651e2ea2bef07f9"
       }
     ],
-    "sha256": "5a2db64d6ef8ead25a7a8f6dcbafc3d3217621d75b46c87a3f8c79acb6211d0e"
+    "sha256": "69726d3f353e898570d1f9eb180e951f0b43a5eebd9e9f6ed84d6993400363d1"
   },
   "artifacts": {
     "context": {
@@ -551,59 +755,59 @@
   },
   "test_runs": [
     {
-      "id": "receipt-4759af3412662140bda0638d8a9d678d78000b914c423c59b1b5a75729554698",
-      "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/orchestrator test",
-      "assertion_ids": [
-        "A1:durable-orchestration"
-      ],
-      "recorded_at": "2026-08-23T16:07:18.698Z",
-      "validation_receipt_sha256": "972329c2cbb6aaf98e7c96bd7440b3352efd6d06f2cc7ef36089cb8f242cfd80",
-      "evidence_log": {
-        "path": "development/evidence/239-002-durable-orchestration.log",
-        "sha256": "08eb990f5f78a5fd96a500ee3dc587540eea06c6cc4e17905262aa9998deeac8",
-        "size": 2703
-      }
-    },
-    {
-      "id": "receipt-501c27c7b41c886a8f8d5b92a066d8396e73748e07f50514862b1cb92615975f",
-      "command": "pnpm --filter @live-photo-studio/api test",
-      "assertion_ids": [
-        "A1:durable-orchestration"
-      ],
-      "recorded_at": "2026-08-23T16:07:22.294Z",
-      "validation_receipt_sha256": "edf2897b725456d537a1b3b37bd20770af135d042018ca5658c57e70d35309b7",
-      "evidence_log": {
-        "path": "development/evidence/240-002-durable-orchestration.log",
-        "sha256": "8b68d8e50b1cc34351b2ffabf2ba7e33b0880b46ffabc289a6214fb459ff4a1e",
-        "size": 6934
-      }
-    },
-    {
-      "id": "receipt-6911565627b8118c027bfca8554a474ef002936e5395910a8f6f1577c8af7a76",
-      "command": "pnpm --filter @live-photo-studio/orchestrator test",
-      "assertion_ids": [
-        "A1:durable-orchestration"
-      ],
-      "recorded_at": "2026-08-23T16:07:15.764Z",
-      "validation_receipt_sha256": "edcf1da4e06cfe4c6ca7306a3de0ecc9485b79b34375b55a107bd6888f86c7eb",
-      "evidence_log": {
-        "path": "development/evidence/238-002-durable-orchestration.log",
-        "sha256": "333e9b70959f6d7fb3a8796fd312544afeb867d2fedc8271d3b8bc4e398c9d4f",
-        "size": 1308
-      }
-    },
-    {
-      "id": "receipt-aab2bdb1c03bd1e57221c29a857b82d68a208325caa06c2782c56e160ec06738",
+      "id": "receipt-06adad08e37b8de07bc1865de73d1b2ac2caa2e436f57246cfe77fa83f293d40",
       "command": "pnpm graph:demo",
       "assertion_ids": [
         "A1:durable-orchestration"
       ],
-      "recorded_at": "2026-08-23T16:07:29.269Z",
-      "validation_receipt_sha256": "7b4648896b18e93a3ee61e211014ca7c62718f309b6676539f165b348814fedd",
+      "recorded_at": "2026-08-25T13:35:17.797Z",
+      "validation_receipt_sha256": "632e31a7e9c557435a29fb757240d19daf565551326d3b2984845024a52bd1a9",
       "evidence_log": {
-        "path": "development/evidence/241-002-durable-orchestration.log",
-        "sha256": "797ca1acca817591be06bdecdef931f26462dca6b52fc4e1bc467bc6b5b3fb02",
-        "size": 1698
+        "path": "development/evidence/386-002-durable-orchestration.log",
+        "sha256": "236e7ed6059afcacb164b9b4e9811d3cbf55fe262f8ef6180824cf6a27a6a3e5",
+        "size": 3433
+      }
+    },
+    {
+      "id": "receipt-4e76d97e03171c40ff8aba00d287df5877f99978be3240be9923d38de15e4bb1",
+      "command": "pnpm --filter @live-photo-studio/orchestrator test",
+      "assertion_ids": [
+        "A1:durable-orchestration"
+      ],
+      "recorded_at": "2026-08-25T13:34:37.870Z",
+      "validation_receipt_sha256": "0ae5a600b50529c9a301484194d21fdc769a5ec7362c04151ab14539ba736c7e",
+      "evidence_log": {
+        "path": "development/evidence/383-002-durable-orchestration.log",
+        "sha256": "6b2f59efaab6ee2324cd00c085e50a5e9adfbedd2e36432caa806c304a50c574",
+        "size": 1678
+      }
+    },
+    {
+      "id": "receipt-5383fa9a19f83981c2355e956713d577beafde45d33aeb3c74a7206c66216269",
+      "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/orchestrator test",
+      "assertion_ids": [
+        "A1:durable-orchestration"
+      ],
+      "recorded_at": "2026-08-25T13:34:40.662Z",
+      "validation_receipt_sha256": "720d38cedd0d7a7ee1278a9d2c7b83fb5c3a1d84cea7e5848ebeef07e35cec08",
+      "evidence_log": {
+        "path": "development/evidence/384-002-durable-orchestration.log",
+        "sha256": "58b705c400b477e64cbb8c9563bef5c315b63bf642f3f05fd2d823de9bb74af1",
+        "size": 3073
+      }
+    },
+    {
+      "id": "receipt-b1172c6688fadb9ccd8fd49b665b74a7451c6aba8d9d32d42bf8a1a532a2ca45",
+      "command": "pnpm --filter @live-photo-studio/api test",
+      "assertion_ids": [
+        "A1:durable-orchestration"
+      ],
+      "recorded_at": "2026-08-25T13:34:49.632Z",
+      "validation_receipt_sha256": "3901cbbfa07aa630a2c75a686d0a184b5909e723760e8c6a6b668ef4c8d8f8e7",
+      "evidence_log": {
+        "path": "development/evidence/385-002-durable-orchestration.log",
+        "sha256": "6dba243dedc26a65fef80c9d61b26a4e266cf767b761fadba08754932fb51f10",
+        "size": 14672
       }
     }
   ],
@@ -613,10 +817,10 @@
       "parent_id": "A1",
       "status": "passing",
       "test_run_ids": [
-        "receipt-4759af3412662140bda0638d8a9d678d78000b914c423c59b1b5a75729554698",
-        "receipt-501c27c7b41c886a8f8d5b92a066d8396e73748e07f50514862b1cb92615975f",
-        "receipt-6911565627b8118c027bfca8554a474ef002936e5395910a8f6f1577c8af7a76",
-        "receipt-aab2bdb1c03bd1e57221c29a857b82d68a208325caa06c2782c56e160ec06738"
+        "receipt-06adad08e37b8de07bc1865de73d1b2ac2caa2e436f57246cfe77fa83f293d40",
+        "receipt-4e76d97e03171c40ff8aba00d287df5877f99978be3240be9923d38de15e4bb1",
+        "receipt-5383fa9a19f83981c2355e956713d577beafde45d33aeb3c74a7206c66216269",
+        "receipt-b1172c6688fadb9ccd8fd49b665b74a7451c6aba8d9d32d42bf8a1a532a2ca45"
       ],
       "direct_evidence": [],
       "reused_evidence": [],

@@ -1,0 +1,1071 @@
+{
+  "schema": "specnav.verification.case-snapshot.v1",
+  "id": "snapshot-60734d70c1802e059d7c5dcd",
+  "change_id": "graph-engineering-full-migration",
+  "snapshot_hash": "60734d70c1802e059d7c5dcdb612b256ed94516676c5561d206608199051d11c",
+  "cases": [
+    {
+      "schema": "specnav.verification.test-case.v1",
+      "id": "case-graph-durability",
+      "change_id": "graph-engineering-full-migration",
+      "requirement_ids": [
+        "REQ-1"
+      ],
+      "acceptance_ids": [
+        "A1"
+      ],
+      "title": "Validate durable versioned Graph execution",
+      "goal": "Prove restart, duplicate delivery, stale recovery and bounded repair do not create duplicate business effects.",
+      "actor": "verification-operator",
+      "priority": "P0",
+      "preconditions": [
+        "The reviewed code is exactly commit 6e14ba03dced4b4e6729b182f81fde0c977b0a85.",
+        "The test database is isolated from production."
+      ],
+      "steps": [
+        {
+          "id": "step-graph-tests",
+          "action": "Run the complete Graph test suite with PostgreSQL-backed integration tests enabled.",
+          "expected": "Restart, duplicate command and signal, stale recovery, old-version and bounded repair cases pass.",
+          "assertion_ids": [
+            "assert-graph-binding",
+            "assert-graph-replay-safety",
+            "assert-graph-bounded-repair"
+          ]
+        },
+        {
+          "id": "step-graph-evidence",
+          "action": "Inspect the resulting database facts and execution receipts.",
+          "expected": "Each run retains one graph binding and no duplicate domain effect is recorded.",
+          "assertion_ids": [
+            "assert-graph-binding",
+            "assert-graph-replay-safety"
+          ]
+        }
+      ],
+      "assertions": [
+        {
+          "id": "assert-graph-binding",
+          "statement": "Every workflow run remains bound to one graphKey and graphVersion across restart and resume.",
+          "expected": true,
+          "oracle": {
+            "type": "database_fact",
+            "human_signoff_allowed": false
+          },
+          "evidence_kinds": [
+            "command_output",
+            "database_fact"
+          ]
+        },
+        {
+          "id": "assert-graph-replay-safety",
+          "statement": "Duplicate commands and signals are consumed without duplicate business effects.",
+          "expected": true,
+          "oracle": {
+            "type": "database_fact",
+            "human_signoff_allowed": false
+          },
+          "evidence_kinds": [
+            "command_output",
+            "database_fact"
+          ]
+        },
+        {
+          "id": "assert-graph-bounded-repair",
+          "statement": "Repair loops are bounded and terminate in a human or terminal state.",
+          "expected": true,
+          "oracle": {
+            "type": "structured_comparison",
+            "human_signoff_allowed": false
+          },
+          "evidence_kinds": [
+            "command_output",
+            "structured_comparison"
+          ]
+        }
+      ],
+      "domains": {
+        "facticity": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-graph-binding",
+            "assert-graph-bounded-repair",
+            "assert-graph-replay-safety"
+          ],
+          "runner": "command"
+        },
+        "static": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-graph-binding",
+            "assert-graph-bounded-repair",
+            "assert-graph-replay-safety"
+          ],
+          "runner": "command"
+        },
+        "unit": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-graph-binding",
+            "assert-graph-bounded-repair",
+            "assert-graph-replay-safety"
+          ],
+          "runner": "command"
+        },
+        "redteam": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-graph-binding",
+            "assert-graph-bounded-repair",
+            "assert-graph-replay-safety"
+          ],
+          "runner": "command"
+        },
+        "e2e": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-graph-binding",
+            "assert-graph-bounded-repair",
+            "assert-graph-replay-safety"
+          ],
+          "runner": "command"
+        },
+        "sensory": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-graph-binding",
+            "assert-graph-bounded-repair",
+            "assert-graph-replay-safety"
+          ],
+          "runner": "command"
+        }
+      },
+      "runner": {
+        "kind": "command",
+        "timeout_ms": 1800000,
+        "entrypoint": "pnpm",
+        "args": [
+          "graph:test"
+        ],
+        "cwd": ".",
+        "env_keys": [
+          "DATABASE_URL",
+          "RUN_PG_TESTS"
+        ],
+        "requires_midscene": false
+      },
+      "evidence_policy": {
+        "allowed_kinds": [
+          "command_output",
+          "database_fact",
+          "structured_comparison"
+        ],
+        "required_kinds": [
+          "command_output",
+          "database_fact"
+        ],
+        "retain_on_failure": true,
+        "content_addressed": true
+      },
+      "status": "ready",
+      "created_at": "2026-08-25T13:41:39Z"
+    },
+    {
+      "schema": "specnav.verification.test-case.v1",
+      "id": "case-protected-ingress-storage",
+      "change_id": "graph-engineering-full-migration",
+      "requirement_ids": [
+        "REQ-5"
+      ],
+      "acceptance_ids": [
+        "A3"
+      ],
+      "title": "Validate protected ingress and private storage boundary",
+      "goal": "Prove unauthenticated access is rejected, authenticated Web and API succeed, and RustFS permits only the exact canary origin.",
+      "actor": "canary-operator",
+      "priority": "P0",
+      "preconditions": [
+        "Cloudflare DNS is proxied to the designated server.",
+        "Nginx loads Basic Auth from an operator-only file.",
+        "The RustFS bucket remains private."
+      ],
+      "steps": [
+        {
+          "id": "step-ingress-unauthorized",
+          "action": "Request the public canary without Basic Auth.",
+          "expected": "The request returns HTTP 401.",
+          "assertion_ids": [
+            "assert-ingress-401"
+          ]
+        },
+        {
+          "id": "step-ingress-authorized",
+          "action": "Request the Web and same-origin API with the approved Basic Auth credentials.",
+          "expected": "The Web project route and /v1/stream-health return HTTP 200.",
+          "assertion_ids": [
+            "assert-ingress-authenticated"
+          ]
+        },
+        {
+          "id": "step-storage-cors",
+          "action": "Run a RustFS preflight with Origin set to the public canary URL.",
+          "expected": "Access-Control-Allow-Origin exactly equals https://livephoto.motion-cover.com and unsigned object access remains denied.",
+          "assertion_ids": [
+            "assert-storage-cors-private"
+          ]
+        },
+        {
+          "id": "step-secret-review",
+          "action": "Inspect Compose, CI logs, browser responses and captured evidence for secret material.",
+          "expected": "No Basic Auth password, storage credential, encryption key, signed URL or full prompt is present.",
+          "assertion_ids": [
+            "assert-ingress-no-secrets"
+          ]
+        }
+      ],
+      "assertions": [
+        {
+          "id": "assert-ingress-401",
+          "statement": "An unauthenticated request to the protected canary returns HTTP 401.",
+          "expected": 401,
+          "oracle": {
+            "type": "api_fact",
+            "human_signoff_allowed": false
+          },
+          "evidence_kinds": [
+            "api_fact",
+            "command_output"
+          ]
+        },
+        {
+          "id": "assert-ingress-authenticated",
+          "statement": "Basic Auth reaches the Web and same-origin API with HTTP 200.",
+          "expected": 200,
+          "oracle": {
+            "type": "api_fact",
+            "human_signoff_allowed": false
+          },
+          "evidence_kinds": [
+            "api_fact",
+            "command_output",
+            "trace"
+          ]
+        },
+        {
+          "id": "assert-storage-cors-private",
+          "statement": "RustFS CORS allows only the exact canary origin while the bucket remains private.",
+          "expected": true,
+          "oracle": {
+            "type": "api_fact",
+            "human_signoff_allowed": false
+          },
+          "evidence_kinds": [
+            "api_fact",
+            "command_output",
+            "structured_comparison"
+          ]
+        },
+        {
+          "id": "assert-ingress-no-secrets",
+          "statement": "Application containers, CI logs, browser responses and evidence contain no protected credential values.",
+          "expected": true,
+          "oracle": {
+            "type": "human_signoff",
+            "human_signoff_allowed": true
+          },
+          "evidence_kinds": [
+            "human_signoff",
+            "log",
+            "screenshot"
+          ]
+        }
+      ],
+      "domains": {
+        "facticity": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-ingress-401",
+            "assert-ingress-authenticated",
+            "assert-ingress-no-secrets",
+            "assert-storage-cors-private"
+          ],
+          "runner": "command"
+        },
+        "static": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-ingress-401",
+            "assert-ingress-authenticated",
+            "assert-ingress-no-secrets",
+            "assert-storage-cors-private"
+          ],
+          "runner": "command"
+        },
+        "unit": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-ingress-401",
+            "assert-ingress-authenticated",
+            "assert-ingress-no-secrets",
+            "assert-storage-cors-private"
+          ],
+          "runner": "command"
+        },
+        "redteam": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-ingress-401",
+            "assert-ingress-authenticated",
+            "assert-ingress-no-secrets",
+            "assert-storage-cors-private"
+          ],
+          "runner": "command"
+        },
+        "e2e": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-ingress-401",
+            "assert-ingress-authenticated",
+            "assert-ingress-no-secrets",
+            "assert-storage-cors-private"
+          ],
+          "runner": "command"
+        },
+        "sensory": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-ingress-401",
+            "assert-ingress-authenticated",
+            "assert-ingress-no-secrets",
+            "assert-storage-cors-private"
+          ],
+          "runner": "command"
+        }
+      },
+      "runner": {
+        "kind": "command",
+        "timeout_ms": 600000,
+        "entrypoint": "sh",
+        "args": [
+          "infra/deploy/smoke-test.sh"
+        ],
+        "cwd": ".",
+        "env_keys": [
+          "COMPOSE_FILE",
+          "DEPLOY_ENV_FILE"
+        ],
+        "requires_midscene": false
+      },
+      "evidence_policy": {
+        "allowed_kinds": [
+          "api_fact",
+          "command_output",
+          "human_signoff",
+          "log",
+          "screenshot",
+          "structured_comparison",
+          "trace"
+        ],
+        "required_kinds": [
+          "api_fact",
+          "command_output",
+          "screenshot"
+        ],
+        "retain_on_failure": true,
+        "content_addressed": true
+      },
+      "status": "ready",
+      "created_at": "2026-08-25T13:41:39Z"
+    },
+    {
+      "schema": "specnav.verification.test-case.v1",
+      "id": "case-release-pipeline",
+      "change_id": "graph-engineering-full-migration",
+      "requirement_ids": [
+        "REQ-4"
+      ],
+      "acceptance_ids": [
+        "A3"
+      ],
+      "title": "Validate the commit-addressed Woodpecker deployment pipeline",
+      "goal": "Prove a main push is handled by the repository-scoped trusted agent and deploys one immutable Node 24 image after setup gates.",
+      "actor": "release-operator",
+      "priority": "P0",
+      "preconditions": [
+        "The repository snapshot is explicitly approved by the human reviewer.",
+        "The repository-scoped agent is labeled production-80.",
+        "The Woodpecker repository is trusted only for this repository."
+      ],
+      "steps": [
+        {
+          "id": "step-pipeline-static",
+          "action": "Validate Woodpecker YAML, Dockerfile, shell syntax and Compose expansion.",
+          "expected": "All deployment artifacts parse and the application image targets Node 24.",
+          "assertion_ids": [
+            "assert-pipeline-valid"
+          ]
+        },
+        {
+          "id": "step-pipeline-run",
+          "action": "Push the approved main commit and observe the matching Woodpecker run.",
+          "expected": "The run builds a commit-tagged image, executes migrations and checkpoint setup, then starts all five application services.",
+          "assertion_ids": [
+            "assert-pipeline-commit-binding",
+            "assert-pipeline-setup-order"
+          ]
+        },
+        {
+          "id": "step-pipeline-record",
+          "action": "Inspect the release record and running image labels.",
+          "expected": "The current and previous image records match the deployed commit and retain one rollback target.",
+          "assertion_ids": [
+            "assert-pipeline-commit-binding"
+          ]
+        }
+      ],
+      "assertions": [
+        {
+          "id": "assert-pipeline-valid",
+          "statement": "Woodpecker, Docker, shell and Compose deployment artifacts are valid and target Node 24.",
+          "expected": true,
+          "oracle": {
+            "type": "structured_comparison",
+            "human_signoff_allowed": false
+          },
+          "evidence_kinds": [
+            "command_output",
+            "structured_comparison"
+          ]
+        },
+        {
+          "id": "assert-pipeline-commit-binding",
+          "statement": "The deployed image tag and OCI revision are derived from the approved Git commit.",
+          "expected": true,
+          "oracle": {
+            "type": "structured_comparison",
+            "human_signoff_allowed": false
+          },
+          "evidence_kinds": [
+            "command_output",
+            "log",
+            "structured_comparison"
+          ]
+        },
+        {
+          "id": "assert-pipeline-setup-order",
+          "statement": "Application migrations and LangGraph checkpoint setup complete before application services are replaced.",
+          "expected": true,
+          "oracle": {
+            "type": "database_fact",
+            "human_signoff_allowed": false
+          },
+          "evidence_kinds": [
+            "command_output",
+            "database_fact",
+            "log"
+          ]
+        }
+      ],
+      "domains": {
+        "facticity": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-pipeline-commit-binding",
+            "assert-pipeline-setup-order",
+            "assert-pipeline-valid"
+          ],
+          "runner": "command"
+        },
+        "static": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-pipeline-commit-binding",
+            "assert-pipeline-setup-order",
+            "assert-pipeline-valid"
+          ],
+          "runner": "command"
+        },
+        "unit": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-pipeline-commit-binding",
+            "assert-pipeline-setup-order",
+            "assert-pipeline-valid"
+          ],
+          "runner": "command"
+        },
+        "redteam": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-pipeline-commit-binding",
+            "assert-pipeline-setup-order",
+            "assert-pipeline-valid"
+          ],
+          "runner": "command"
+        },
+        "e2e": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-pipeline-commit-binding",
+            "assert-pipeline-setup-order",
+            "assert-pipeline-valid"
+          ],
+          "runner": "command"
+        },
+        "sensory": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-pipeline-commit-binding",
+            "assert-pipeline-setup-order",
+            "assert-pipeline-valid"
+          ],
+          "runner": "command"
+        }
+      },
+      "runner": {
+        "kind": "command",
+        "timeout_ms": 1800000,
+        "entrypoint": "sh",
+        "args": [
+          "-c",
+          "sh -n infra/deploy/*.sh && git diff --check && DEPLOY_ENV_FILE=\"$PWD/infra/deploy/.env.production.example\" docker compose --env-file \"$PWD/infra/deploy/.env.production.example\" -f infra/deploy/docker-compose.production.yml config --quiet"
+        ],
+        "cwd": ".",
+        "env_keys": [],
+        "requires_midscene": false
+      },
+      "evidence_policy": {
+        "allowed_kinds": [
+          "command_output",
+          "database_fact",
+          "log",
+          "structured_comparison"
+        ],
+        "required_kinds": [
+          "command_output",
+          "log"
+        ],
+        "retain_on_failure": true,
+        "content_addressed": true
+      },
+      "status": "ready",
+      "created_at": "2026-08-25T13:41:39Z"
+    },
+    {
+      "schema": "specnav.verification.test-case.v1",
+      "id": "case-rollback-preservation",
+      "change_id": "graph-engineering-full-migration",
+      "requirement_ids": [
+        "REQ-6"
+      ],
+      "acceptance_ids": [
+        "A1",
+        "A3"
+      ],
+      "title": "Validate data-preserving canary rollback",
+      "goal": "Prove rollback switches only application images, preserves durable state and returns the protected canary to a healthy state.",
+      "actor": "release-operator",
+      "priority": "P0",
+      "preconditions": [
+        "A previous commit-addressed application image exists locally on the server.",
+        "At least one durable workflow record and release record exist before rollback.",
+        "Rollback is explicitly authorized and monitored."
+      ],
+      "steps": [
+        {
+          "id": "step-rollback-baseline",
+          "action": "Record current image, persistent volume identities and durable workflow facts.",
+          "expected": "The baseline identifies the current and previous image without exposing credentials.",
+          "assertion_ids": [
+            "assert-rollback-target"
+          ]
+        },
+        {
+          "id": "step-rollback-apply",
+          "action": "Run the repository rollback script with the recorded previous image.",
+          "expected": "Only API, Web, Orchestrator, AI Worker and Media Worker switch image.",
+          "assertion_ids": [
+            "assert-rollback-target",
+            "assert-rollback-data-preserved"
+          ]
+        },
+        {
+          "id": "step-rollback-smoke",
+          "action": "Run authenticated public smoke and inspect durable state after rollback.",
+          "expected": "Protected ingress is healthy and database, checkpoint, Outbox, Redis and object-storage state remain present.",
+          "assertion_ids": [
+            "assert-rollback-data-preserved",
+            "assert-rollback-health"
+          ]
+        }
+      ],
+      "assertions": [
+        {
+          "id": "assert-rollback-target",
+          "statement": "Rollback switches the five application services to the recorded previous commit-addressed image.",
+          "expected": true,
+          "oracle": {
+            "type": "structured_comparison",
+            "human_signoff_allowed": false
+          },
+          "evidence_kinds": [
+            "command_output",
+            "log",
+            "structured_comparison"
+          ]
+        },
+        {
+          "id": "assert-rollback-data-preserved",
+          "statement": "Rollback does not delete PostgreSQL, checkpoint, Outbox, Redis or object-storage state.",
+          "expected": true,
+          "oracle": {
+            "type": "database_fact",
+            "human_signoff_allowed": false
+          },
+          "evidence_kinds": [
+            "command_output",
+            "database_fact",
+            "log"
+          ]
+        },
+        {
+          "id": "assert-rollback-health",
+          "statement": "The rolled-back protected canary passes authenticated Web, API and storage smoke checks.",
+          "expected": true,
+          "oracle": {
+            "type": "api_fact",
+            "human_signoff_allowed": true
+          },
+          "evidence_kinds": [
+            "api_fact",
+            "command_output",
+            "human_signoff"
+          ]
+        }
+      ],
+      "domains": {
+        "facticity": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-rollback-data-preserved",
+            "assert-rollback-health",
+            "assert-rollback-target"
+          ],
+          "runner": "command"
+        },
+        "static": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-rollback-data-preserved",
+            "assert-rollback-health",
+            "assert-rollback-target"
+          ],
+          "runner": "command"
+        },
+        "unit": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-rollback-data-preserved",
+            "assert-rollback-health",
+            "assert-rollback-target"
+          ],
+          "runner": "command"
+        },
+        "redteam": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-rollback-data-preserved",
+            "assert-rollback-health",
+            "assert-rollback-target"
+          ],
+          "runner": "command"
+        },
+        "e2e": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-rollback-data-preserved",
+            "assert-rollback-health",
+            "assert-rollback-target"
+          ],
+          "runner": "command"
+        },
+        "sensory": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-rollback-data-preserved",
+            "assert-rollback-health",
+            "assert-rollback-target"
+          ],
+          "runner": "command"
+        }
+      },
+      "runner": {
+        "kind": "command",
+        "timeout_ms": 900000,
+        "entrypoint": "sh",
+        "args": [
+          "-c",
+          "infra/deploy/rollback.sh \"$PREVIOUS_IMAGE\""
+        ],
+        "cwd": ".",
+        "env_keys": [
+          "COMPOSE_FILE",
+          "DEPLOY_ENV_FILE",
+          "PREVIOUS_IMAGE"
+        ],
+        "requires_midscene": false
+      },
+      "evidence_policy": {
+        "allowed_kinds": [
+          "api_fact",
+          "command_output",
+          "database_fact",
+          "human_signoff",
+          "log",
+          "structured_comparison"
+        ],
+        "required_kinds": [
+          "api_fact",
+          "command_output",
+          "database_fact"
+        ],
+        "retain_on_failure": true,
+        "content_addressed": true
+      },
+      "status": "ready",
+      "created_at": "2026-08-25T13:41:39Z"
+    },
+    {
+      "schema": "specnav.verification.test-case.v1",
+      "id": "case-web-product-boundary",
+      "change_id": "graph-engineering-full-migration",
+      "requirement_ids": [
+        "REQ-3"
+      ],
+      "acceptance_ids": [
+        "A1",
+        "A3"
+      ],
+      "title": "Validate Web projection and protected-canary product boundary",
+      "goal": "Prove refresh recovery, task-payload action gating, mobile accessibility and honest export positioning.",
+      "actor": "protected-canary-user",
+      "priority": "P0",
+      "preconditions": [
+        "The browser is authenticated through Basic Auth.",
+        "The deployment remains AI_PROVIDER=mock.",
+        "The workflow uses the configured demo canary user."
+      ],
+      "steps": [
+        {
+          "id": "step-web-refresh",
+          "action": "Open a project workflow, refresh the page and resume from the API projection.",
+          "expected": "The current stage and pending human task are recovered without browser-owned workflow authority.",
+          "assertion_ids": [
+            "assert-web-projection"
+          ]
+        },
+        {
+          "id": "step-web-actions",
+          "action": "Exercise allowed and undeclared review actions, including a repeated submission.",
+          "expected": "Only task-declared actions are submitted and repeated writes replay the same idempotent result.",
+          "assertion_ids": [
+            "assert-web-action-gating"
+          ]
+        },
+        {
+          "id": "step-web-sensory",
+          "action": "Review the protected canary at 390px and inspect export wording.",
+          "expected": "Controls remain accessible and the ZIP is described as a package for a future iOS importer, not a Photos-library Live Photo.",
+          "assertion_ids": [
+            "assert-web-product-copy"
+          ]
+        }
+      ],
+      "assertions": [
+        {
+          "id": "assert-web-projection",
+          "statement": "Refresh and reopen recover the workflow from the API projection; SSE only invalidates queries.",
+          "expected": true,
+          "oracle": {
+            "type": "api_fact",
+            "human_signoff_allowed": false
+          },
+          "evidence_kinds": [
+            "api_fact",
+            "command_output",
+            "trace"
+          ]
+        },
+        {
+          "id": "assert-web-action-gating",
+          "statement": "Only task-payload actions are enabled and idempotency prevents duplicate writes.",
+          "expected": true,
+          "oracle": {
+            "type": "structured_comparison",
+            "human_signoff_allowed": false
+          },
+          "evidence_kinds": [
+            "command_output",
+            "structured_comparison",
+            "trace"
+          ]
+        },
+        {
+          "id": "assert-web-product-copy",
+          "statement": "The 390px experience is accessible and does not claim PhotoKit or general-public production readiness.",
+          "expected": true,
+          "oracle": {
+            "type": "human_signoff",
+            "human_signoff_allowed": true
+          },
+          "evidence_kinds": [
+            "human_signoff",
+            "screenshot"
+          ]
+        }
+      ],
+      "domains": {
+        "facticity": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-web-action-gating",
+            "assert-web-product-copy",
+            "assert-web-projection"
+          ],
+          "runner": "command"
+        },
+        "static": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-web-action-gating",
+            "assert-web-product-copy",
+            "assert-web-projection"
+          ],
+          "runner": "command"
+        },
+        "unit": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-web-action-gating",
+            "assert-web-product-copy",
+            "assert-web-projection"
+          ],
+          "runner": "command"
+        },
+        "redteam": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-web-action-gating",
+            "assert-web-product-copy",
+            "assert-web-projection"
+          ],
+          "runner": "command"
+        },
+        "e2e": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-web-action-gating",
+            "assert-web-product-copy",
+            "assert-web-projection"
+          ],
+          "runner": "command"
+        },
+        "sensory": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-web-action-gating",
+            "assert-web-product-copy",
+            "assert-web-projection"
+          ],
+          "runner": "command"
+        }
+      },
+      "runner": {
+        "kind": "command",
+        "timeout_ms": 900000,
+        "entrypoint": "pnpm",
+        "args": [
+          "--filter",
+          "@live-photo-studio/web",
+          "test"
+        ],
+        "cwd": ".",
+        "env_keys": [
+          "CANARY_BASIC_AUTH_PASSWORD",
+          "CANARY_BASIC_AUTH_USER",
+          "PUBLIC_URL"
+        ],
+        "requires_midscene": false
+      },
+      "evidence_policy": {
+        "allowed_kinds": [
+          "api_fact",
+          "command_output",
+          "human_signoff",
+          "screenshot",
+          "structured_comparison",
+          "trace"
+        ],
+        "required_kinds": [
+          "command_output",
+          "screenshot"
+        ],
+        "retain_on_failure": true,
+        "content_addressed": true
+      },
+      "status": "ready",
+      "created_at": "2026-08-25T13:41:39Z"
+    },
+    {
+      "schema": "specnav.verification.test-case.v1",
+      "id": "case-worker-ownership",
+      "change_id": "graph-engineering-full-migration",
+      "requirement_ids": [
+        "REQ-2"
+      ],
+      "acceptance_ids": [
+        "A2"
+      ],
+      "title": "Validate worker facts and orchestrator ownership",
+      "goal": "Prove workers persist facts before signals and never choose Graph-path phases.",
+      "actor": "verification-operator",
+      "priority": "P0",
+      "preconditions": [
+        "The test database and queues are isolated from production."
+      ],
+      "steps": [
+        {
+          "id": "step-worker-tests",
+          "action": "Run AI Worker, Media Worker, API and orchestrator tests.",
+          "expected": "Workers persist idempotent facts and correlated signals while routing remains in apps/orchestrator.",
+          "assertion_ids": [
+            "assert-worker-facts-first",
+            "assert-worker-no-routing"
+          ]
+        },
+        {
+          "id": "step-worker-static",
+          "action": "Inspect dependency and phase-ownership evidence.",
+          "expected": "No worker or API implementation invokes compiled graphs or owns Graph-path phase transitions.",
+          "assertion_ids": [
+            "assert-worker-no-routing"
+          ]
+        }
+      ],
+      "assertions": [
+        {
+          "id": "assert-worker-facts-first",
+          "statement": "Workers persist domain facts before publishing correlated completion or failure signals.",
+          "expected": true,
+          "oracle": {
+            "type": "database_fact",
+            "human_signoff_allowed": false
+          },
+          "evidence_kinds": [
+            "command_output",
+            "database_fact"
+          ]
+        },
+        {
+          "id": "assert-worker-no-routing",
+          "statement": "Only apps/orchestrator owns Graph-path routing and project phase transitions.",
+          "expected": true,
+          "oracle": {
+            "type": "structured_comparison",
+            "human_signoff_allowed": false
+          },
+          "evidence_kinds": [
+            "command_output",
+            "structured_comparison"
+          ]
+        }
+      ],
+      "domains": {
+        "facticity": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-worker-facts-first",
+            "assert-worker-no-routing"
+          ],
+          "runner": "command"
+        },
+        "static": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-worker-facts-first",
+            "assert-worker-no-routing"
+          ],
+          "runner": "command"
+        },
+        "unit": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-worker-facts-first",
+            "assert-worker-no-routing"
+          ],
+          "runner": "command"
+        },
+        "redteam": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-worker-facts-first",
+            "assert-worker-no-routing"
+          ],
+          "runner": "command"
+        },
+        "e2e": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-worker-facts-first",
+            "assert-worker-no-routing"
+          ],
+          "runner": "command"
+        },
+        "sensory": {
+          "mode": "required",
+          "assertion_ids": [
+            "assert-worker-facts-first",
+            "assert-worker-no-routing"
+          ],
+          "runner": "command"
+        }
+      },
+      "runner": {
+        "kind": "command",
+        "timeout_ms": 1800000,
+        "entrypoint": "pnpm",
+        "args": [
+          "test"
+        ],
+        "cwd": ".",
+        "env_keys": [
+          "DATABASE_URL",
+          "RUN_PG_TESTS"
+        ],
+        "requires_midscene": false
+      },
+      "evidence_policy": {
+        "allowed_kinds": [
+          "command_output",
+          "database_fact",
+          "structured_comparison"
+        ],
+        "required_kinds": [
+          "command_output",
+          "structured_comparison"
+        ],
+        "retain_on_failure": true,
+        "content_addressed": true
+      },
+      "status": "ready",
+      "created_at": "2026-08-25T13:41:39Z"
+    }
+  ],
+  "created_at": "2026-08-25T13:41:39Z",
+  "created_by": {
+    "id": "codex-case-planner",
+    "kind": "service"
+  },
+  "requirements_hash": "70fbfe6c05ea20e07af495ced79aef44dbe61360bd19f8828a62f736c9498b86",
+  "acceptance_hash": "ffb3d717dffa073a35bc337684f34c5ee05fd7c9745279573ec5798c57295232"
+}

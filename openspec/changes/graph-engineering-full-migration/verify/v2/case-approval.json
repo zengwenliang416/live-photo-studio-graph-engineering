@@ -1,0 +1,14 @@
+{
+  "schema": "specnav.verification.case-approval.v1",
+  "id": "approval-snapshot-60734d70c1802e059d7c5dcd",
+  "change_id": "graph-engineering-full-migration",
+  "snapshot_id": "snapshot-60734d70c1802e059d7c5dcd",
+  "snapshot_hash": "60734d70c1802e059d7c5dcdb612b256ed94516676c5561d206608199051d11c",
+  "decision": "approved",
+  "reviewer": {
+    "id": "zengwenliang416",
+    "kind": "human"
+  },
+  "decided_at": "2026-08-25T14:11:22Z",
+  "comment": "Explicitly approved by the user for protected canary deployment and verification."
+}

@@ -1,6 +1,6 @@
 {
   "schema": "specnav.codegraph.claims.v1",
-  "generated_at": "2026-08-23T11:03:37.001Z",
+  "generated_at": "2026-08-25T13:10:51.575Z",
   "active_change": "graph-engineering-full-migration",
   "claims": [
     {
@@ -175,6 +175,180 @@
       ],
       "query_ids": [
         "development:task-006-canary-validation:evidence"
+      ]
+    },
+    {
+      "id": "verification:task-001-existing-graph-foundation",
+      "kind": "verification-task-traceability",
+      "stage": "verification",
+      "task_id": "001-existing-graph-foundation",
+      "text": "Preserve the approved Graph registry, shared payload contracts, additive",
+      "required": true,
+      "source": "specnav-codegraph-plan",
+      "source_paths": [
+        "openspec/changes/graph-engineering-full-migration/development/tasks/001-existing-graph-foundation/brief.md",
+        "openspec/changes/graph-engineering-full-migration/development/tasks/001-existing-graph-foundation/context.json"
+      ],
+      "expected_evidence": [
+        "Focused tests or command output",
+        "Task report",
+        "Spec review",
+        "Quality review"
+      ],
+      "allowed_files": [
+        "apps/api/**",
+        "apps/orchestrator/**",
+        "packages/database/**",
+        "packages/graph-contracts/**",
+        "packages/graph-runtime/**",
+        "docs/**"
+      ],
+      "query_ids": [
+        "verification:task-001-existing-graph-foundation:evidence"
+      ]
+    },
+    {
+      "id": "verification:task-002-durable-orchestration",
+      "kind": "verification-task-traceability",
+      "stage": "verification",
+      "task_id": "002-durable-orchestration",
+      "text": "Complete the durable resume and signal boundary from a worker completion or",
+      "required": true,
+      "source": "specnav-codegraph-plan",
+      "source_paths": [
+        "openspec/changes/graph-engineering-full-migration/development/tasks/002-durable-orchestration/brief.md",
+        "openspec/changes/graph-engineering-full-migration/development/tasks/002-durable-orchestration/context.json"
+      ],
+      "expected_evidence": [
+        "Focused tests or command output",
+        "Task report",
+        "Spec review",
+        "Quality review"
+      ],
+      "allowed_files": [
+        "apps/orchestrator/**",
+        "apps/api/**",
+        "packages/graph-contracts/**",
+        "docs/**"
+      ],
+      "query_ids": [
+        "verification:task-002-durable-orchestration:evidence"
+      ]
+    },
+    {
+      "id": "verification:task-003-worker-facts",
+      "kind": "verification-task-traceability",
+      "stage": "verification",
+      "task_id": "003-worker-facts",
+      "text": "Complete the AI and media worker fact/signal boundary, including PostgreSQL",
+      "required": true,
+      "source": "specnav-codegraph-plan",
+      "source_paths": [
+        "openspec/changes/graph-engineering-full-migration/development/tasks/003-worker-facts/brief.md",
+        "openspec/changes/graph-engineering-full-migration/development/tasks/003-worker-facts/context.json"
+      ],
+      "expected_evidence": [
+        "Focused tests or command output",
+        "Task report",
+        "Spec review",
+        "Quality review"
+      ],
+      "allowed_files": [
+        "apps/worker-ai/**",
+        "apps/worker-media/**",
+        "packages/database/**",
+        "packages/graph-contracts/**",
+        "docs/**"
+      ],
+      "query_ids": [
+        "verification:task-003-worker-facts:evidence"
+      ]
+    },
+    {
+      "id": "verification:task-004-web-projection",
+      "kind": "verification-task-traceability",
+      "stage": "verification",
+      "task_id": "004-web-projection",
+      "text": "Verify the web projection from URL state through typed queries, SSE",
+      "required": true,
+      "source": "specnav-codegraph-plan",
+      "source_paths": [
+        "openspec/changes/graph-engineering-full-migration/development/tasks/004-web-projection/brief.md",
+        "openspec/changes/graph-engineering-full-migration/development/tasks/004-web-projection/context.json"
+      ],
+      "expected_evidence": [
+        "Focused tests or command output",
+        "Task report",
+        "Spec review",
+        "Quality review"
+      ],
+      "allowed_files": [
+        "apps/web/**",
+        "apps/api/**",
+        "packages/graph-contracts/**",
+        "docs/**"
+      ],
+      "query_ids": [
+        "verification:task-004-web-projection:evidence"
+      ]
+    },
+    {
+      "id": "verification:task-005-operations-security",
+      "kind": "verification-task-traceability",
+      "stage": "verification",
+      "task_id": "005-operations-security",
+      "text": "Add the smallest operational projection, structured context, redaction,",
+      "required": true,
+      "source": "specnav-codegraph-plan",
+      "source_paths": [
+        "openspec/changes/graph-engineering-full-migration/development/tasks/005-operations-security/brief.md",
+        "openspec/changes/graph-engineering-full-migration/development/tasks/005-operations-security/context.json"
+      ],
+      "expected_evidence": [
+        "Focused tests or command output",
+        "Task report",
+        "Spec review",
+        "Quality review"
+      ],
+      "allowed_files": [
+        "apps/api/**",
+        "apps/orchestrator/**",
+        "apps/worker-ai/**",
+        "apps/worker-media/**",
+        "packages/graph-contracts/**",
+        "docs/**"
+      ],
+      "query_ids": [
+        "verification:task-005-operations-security:evidence"
+      ]
+    },
+    {
+      "id": "verification:task-006-canary-validation",
+      "kind": "verification-task-traceability",
+      "stage": "verification",
+      "task_id": "006-canary-validation",
+      "text": "Record canary thresholds, rollback commands, evidence artifacts and the final",
+      "required": true,
+      "source": "specnav-codegraph-plan",
+      "source_paths": [
+        "openspec/changes/graph-engineering-full-migration/development/tasks/006-canary-validation/brief.md",
+        "openspec/changes/graph-engineering-full-migration/development/tasks/006-canary-validation/context.json"
+      ],
+      "expected_evidence": [
+        "Focused tests or command output",
+        "Task report",
+        "Spec review",
+        "Quality review"
+      ],
+      "allowed_files": [
+        "docs/**",
+        "package.json",
+        "pnpm-lock.yaml",
+        "apps/**",
+        "packages/**"
+      ],
+      "query_ids": [
+        "verification:task-006-canary-validation:evidence"
       ]
     }
   ]

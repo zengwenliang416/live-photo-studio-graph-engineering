@@ -2,11 +2,11 @@
   "schema": "specnav.task-acceptance-evidence.v2",
   "generated_by": "specnav-development/task-acceptance-evidence",
   "task_id": "003-worker-facts",
-  "generated_at": "2026-08-23T16:09:42.929Z",
-  "recorded_at": "2026-08-23T16:07:31.862Z",
+  "generated_at": "2026-08-25T13:39:56.361Z",
+  "recorded_at": "2026-08-25T13:35:26.474Z",
   "status": "approved",
-  "reviewed_git_head": "70ebe55817d92da054b15298a417a142d2f227b5",
-  "reviewed_git_tree": "d7673b86fc96dd45dc1cb62526ce0a001cbc8bba",
+  "reviewed_git_head": "6e14ba03dced4b4e6729b182f81fde0c977b0a85",
+  "reviewed_git_tree": "263adc7e9c6ed2149482b7f4d90a0fb408868334",
   "implementation_scope": {
     "included_patterns": [
       "apps/worker-ai/**",
@@ -20,25 +20,49 @@
         "path": "apps/worker-ai/package.json",
         "mode": "100644",
         "type": "blob",
-        "object_id": "3629b357e802591bf062d7f01416a7334af8947c"
+        "object_id": "128c469caaa04a751719c375eaab7c192f5987cb"
       },
       {
         "path": "apps/worker-ai/src/config.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "be601b458574c4f7d13bf178a93457d8026720cd"
+        "object_id": "1a9fb1dcf4f677048af7d317eb6e36f771679ab9"
       },
       {
         "path": "apps/worker-ai/src/generation-service.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "e19da09f5f9e7e6e205fa47836ea892df6cef3f8"
+        "object_id": "550e06197dab23e84c3a1934756a11a98ec00cab"
       },
       {
         "path": "apps/worker-ai/src/main.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "c79a6a08fdb2429806a48c33c283da8ce238ed63"
+        "object_id": "a1125f4994a6d848a4fe8435980a07838296f226"
+      },
+      {
+        "path": "apps/worker-ai/src/openai-compatible-provider.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "233862e457222a66d6f70a728b057ef0ba57743e"
+      },
+      {
+        "path": "apps/worker-ai/src/openai-compatible-provider.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "14c433e681318bcf37c34f5606c513f083d3b067"
+      },
+      {
+        "path": "apps/worker-ai/src/provider-resolver.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "f5b4ad25e0229bc076202bf685ca6a79dd7a3898"
+      },
+      {
+        "path": "apps/worker-ai/src/provider-resolver.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "668e65a16b4b752e2ba5c31a198273728f3a3b37"
       },
       {
         "path": "apps/worker-ai/src/provider.test.ts",
@@ -50,13 +74,13 @@
         "path": "apps/worker-ai/src/provider.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "6e52f113d6f02ec8a420a91f513d379a17d20441"
+        "object_id": "08bd17bbbbb1d700b8ce0672a72e407d746aabae"
       },
       {
         "path": "apps/worker-ai/src/worker-ai.integration.test.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "e201a1a768ee1355bda01b1f464833f2db2bfd34"
+        "object_id": "99007112037893209a439a743766607203a3c32d"
       },
       {
         "path": "apps/worker-ai/tsconfig.json",
@@ -137,10 +161,16 @@
         "object_id": "32987bf03d473c080a7b9a99c7b1b24042ab00ef"
       },
       {
+        "path": "docs/adr/0011-style-key-in-graph-state.md",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "7b90e205a5758f7c738a258651036a4c1c767f21"
+      },
+      {
         "path": "docs/execplans/graph-engineering-full-migration.md",
         "mode": "100644",
         "type": "blob",
-        "object_id": "dd83f17d8be6ac22a29bef1f52874bf6972642d2"
+        "object_id": "35b8018b8c5bea8c6044536e4a3b2966a9123c9e"
       },
       {
         "path": "docs/graph-engineering/evidence/canary-rollback.json",
@@ -245,6 +275,18 @@
         "object_id": "0c2520bdc00a6278909640403ced1c55ccb5679d"
       },
       {
+        "path": "packages/database/migrations/0006_project_assets.sql",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "4a6d0b321693777593ed5a36712ada287b78bbbb"
+      },
+      {
+        "path": "packages/database/migrations/0007_user_image_providers.sql",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "36901a0cf4299c9f96fc0d018dffbd6dd526fb8b"
+      },
+      {
         "path": "packages/database/package.json",
         "mode": "100644",
         "type": "blob",
@@ -305,10 +347,16 @@
         "object_id": "648f0cbe8000551051ab2dffa7b1841778fb8390"
       },
       {
+        "path": "packages/graph-contracts/src/job-payloads.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "72b4f955460a9cea18d28f8f5f22e45c624e4efa"
+      },
+      {
         "path": "packages/graph-contracts/src/job-payloads.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "0ee2701f664919383100c50998bf8fbe16a60b11"
+        "object_id": "3e3878e9d67a529ee80e65663f08df213be242e6"
       },
       {
         "path": "packages/graph-contracts/src/node-definition.test.ts",
@@ -353,7 +401,7 @@
         "object_id": "a72a807d5f98f2017dd06cb5b651e2ea2bef07f9"
       }
     ],
-    "sha256": "f90c17cc96380f9e1ebb1e6c694ba1e10a05bf4552787b71e9931cc4c783cb76"
+    "sha256": "61efdbd4a6bd4b265950dc848ea94e36a4ddd7ba2a579eeee1feb430c1453a26"
   },
   "artifacts": {
     "context": {
@@ -378,59 +426,59 @@
   },
   "test_runs": [
     {
-      "id": "receipt-1fcbe4ee6f3d8c97fb2c54c4886b332701e889e69eb18653b62af3195602d3f5",
-      "command": "pnpm --filter @live-photo-studio/worker-ai test",
-      "assertion_ids": [
-        "A2:worker-facts"
-      ],
-      "recorded_at": "2026-08-23T16:07:31.275Z",
-      "validation_receipt_sha256": "4e92bd73d42e02d3ac7da0d1d2ce1b54cfbbe1402b493d3e7a7eeced26acd1b3",
-      "evidence_log": {
-        "path": "development/evidence/244-003-worker-facts.log",
-        "sha256": "9baffbe8c319f64b8545d86558b773f3603ba9a6708cbcc7aa009ec9596b4760",
-        "size": 1109
-      }
-    },
-    {
-      "id": "receipt-2bbdec9522392a15e0bf9018ecbc8f8127192e4bb8d0237a8a68312550e0d83e",
-      "command": "pnpm --filter @live-photo-studio/worker-media test",
-      "assertion_ids": [
-        "A2:worker-facts"
-      ],
-      "recorded_at": "2026-08-23T16:07:31.862Z",
-      "validation_receipt_sha256": "d260e37320061e091ab161e8c75854edea349f9cb02b32bc909e171ab6f6ec7d",
-      "evidence_log": {
-        "path": "development/evidence/245-003-worker-facts.log",
-        "sha256": "2a128cb9f9d8cec302eb06ae5bec6177dc6ab6f11d34b69991e457c12bd385e1",
-        "size": 1291
-      }
-    },
-    {
-      "id": "receipt-a7a795b09d40af90b233baeee50d63ba5d4e25c9be496f282ed8b67da00003e1",
+      "id": "receipt-a805e1ad5d4b9e92abe9ddec5712796dcf551da2c5bde300d915ce4244cd9117",
       "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/worker-media test",
       "assertion_ids": [
         "A2:worker-facts"
       ],
-      "recorded_at": "2026-08-23T16:07:30.773Z",
-      "validation_receipt_sha256": "e1310bd8bad1e3809ffd769e959c26a88cda3fc270fd50dcb9bc30b9d4be1256",
+      "recorded_at": "2026-08-25T13:35:23.815Z",
+      "validation_receipt_sha256": "b028d94f95e99deed832eb7d13170b3a2bf43d0eb2a3e9e9d3dc85d7e7da6aa9",
       "evidence_log": {
-        "path": "development/evidence/243-003-worker-facts.log",
-        "sha256": "f20f4dcb8f7dff4a522ce729bee91ff2fd643eeb2ca865605bc7e12ad1ba5354",
-        "size": 2950
+        "path": "development/evidence/388-003-worker-facts.log",
+        "sha256": "7ea84a3d3fd34ea2077676e329032c48f3c423b4af0e65cc72cbf45f225bd429",
+        "size": 2965
       }
     },
     {
-      "id": "receipt-fc4b328bea3a1c0981126f57793b87c24ef13863f68713b273a5c0f3c0cb1f37",
+      "id": "receipt-ab94349207163e7373a40ad04478fbbc0469d823942ac6060c954d3b01d6ed03",
       "command": "RUN_PG_TESTS=1 pnpm --filter @live-photo-studio/worker-ai test",
       "assertion_ids": [
         "A2:worker-facts"
       ],
-      "recorded_at": "2026-08-23T16:07:29.978Z",
-      "validation_receipt_sha256": "0ad965a7a4e5c93391351be957dde8922f24dbd194e2f0e91cccdcda0354536d",
+      "recorded_at": "2026-08-25T13:35:19.703Z",
+      "validation_receipt_sha256": "46709723208e2c3f56e2f27a0a56b575a7d127ef5b2beb32ac728611da960959",
       "evidence_log": {
-        "path": "development/evidence/242-003-worker-facts.log",
-        "sha256": "96059ef4bb4bf48dd2df5a10a90411d0fc32edadaca91cdac80eec0826f25ba9",
-        "size": 2226
+        "path": "development/evidence/387-003-worker-facts.log",
+        "sha256": "591e3733b2a37e2e5279106cbcd4476beb02ae6b4b5229083b8f74e0ada64a74",
+        "size": 4441
+      }
+    },
+    {
+      "id": "receipt-b37adda72689b404e641aa86b8357612a5d8a80973b98a5307996c0cec047889",
+      "command": "pnpm --filter @live-photo-studio/worker-ai test",
+      "assertion_ids": [
+        "A2:worker-facts"
+      ],
+      "recorded_at": "2026-08-25T13:35:25.009Z",
+      "validation_receipt_sha256": "607ca1b727931c12da3fa373fad53b890bf58667cc6b0262371091a59565a5c5",
+      "evidence_log": {
+        "path": "development/evidence/389-003-worker-facts.log",
+        "sha256": "b6540dae4d565668768de5fb9403cc714c28355dc2a1a24801f5eba05a8887cd",
+        "size": 3305
+      }
+    },
+    {
+      "id": "receipt-bfb243a1b18f4a9c586980c9035c696d02fe9f2f07fa3b6aacd7eebecdc56d7a",
+      "command": "pnpm --filter @live-photo-studio/worker-media test",
+      "assertion_ids": [
+        "A2:worker-facts"
+      ],
+      "recorded_at": "2026-08-25T13:35:26.474Z",
+      "validation_receipt_sha256": "72b41cadb14eeeb2666de28c91837fec957ed256b044b6dcdc9e8a27e3a439ec",
+      "evidence_log": {
+        "path": "development/evidence/390-003-worker-facts.log",
+        "sha256": "399b17c0ae86ff42c770d694802c9c09186da67c2f99c6a72631f7ae5cc9bb42",
+        "size": 1289
       }
     }
   ],
@@ -440,10 +488,10 @@
       "parent_id": "A2",
       "status": "passing",
       "test_run_ids": [
-        "receipt-1fcbe4ee6f3d8c97fb2c54c4886b332701e889e69eb18653b62af3195602d3f5",
-        "receipt-2bbdec9522392a15e0bf9018ecbc8f8127192e4bb8d0237a8a68312550e0d83e",
-        "receipt-a7a795b09d40af90b233baeee50d63ba5d4e25c9be496f282ed8b67da00003e1",
-        "receipt-fc4b328bea3a1c0981126f57793b87c24ef13863f68713b273a5c0f3c0cb1f37"
+        "receipt-a805e1ad5d4b9e92abe9ddec5712796dcf551da2c5bde300d915ce4244cd9117",
+        "receipt-ab94349207163e7373a40ad04478fbbc0469d823942ac6060c954d3b01d6ed03",
+        "receipt-b37adda72689b404e641aa86b8357612a5d8a80973b98a5307996c0cec047889",
+        "receipt-bfb243a1b18f4a9c586980c9035c696d02fe9f2f07fa3b6aacd7eebecdc56d7a"
       ],
       "direct_evidence": [],
       "reused_evidence": [],

@@ -2,11 +2,11 @@
   "schema": "specnav.task-acceptance-evidence.v2",
   "generated_by": "specnav-development/task-acceptance-evidence",
   "task_id": "004-web-projection",
-  "generated_at": "2026-08-23T16:09:42.988Z",
-  "recorded_at": "2026-08-23T16:07:34.866Z",
+  "generated_at": "2026-08-25T13:39:56.411Z",
+  "recorded_at": "2026-08-25T13:35:38.219Z",
   "status": "approved",
-  "reviewed_git_head": "70ebe55817d92da054b15298a417a142d2f227b5",
-  "reviewed_git_tree": "d7673b86fc96dd45dc1cb62526ce0a001cbc8bba",
+  "reviewed_git_head": "6e14ba03dced4b4e6729b182f81fde0c977b0a85",
+  "reviewed_git_tree": "263adc7e9c6ed2149482b7f4d90a0fb408868334",
   "implementation_scope": {
     "included_patterns": [
       "apps/api/**",
@@ -19,19 +19,79 @@
         "path": "apps/api/package.json",
         "mode": "100644",
         "type": "blob",
-        "object_id": "8f5fff3cc9a9bd7113d39da73cfddefbdd7dcf67"
+        "object_id": "a5e896137baba85ad3e25e0868227849127bc6b6"
       },
       {
         "path": "apps/api/src/app.module.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "53bd27265dc7f0cec719790d2e9975b5cda8c07b"
+        "object_id": "ebf04facbac3027c01cb6d1fca746e22a88c5e2f"
+      },
+      {
+        "path": "apps/api/src/assets/application/asset-upload-service.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "880becf53f030f095567b1d888f034d275e0ac6f"
+      },
+      {
+        "path": "apps/api/src/assets/application/asset-upload-service.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "a82184ff671eff71ee3abbe886ab9309f28b41a0"
+      },
+      {
+        "path": "apps/api/src/assets/asset-tokens.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "541ca88bc884b0de848d9aabf4eccf3a66bf5628"
+      },
+      {
+        "path": "apps/api/src/assets/assets.controller.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "5d24f9dc399ff599c9d08c1eabeab1065959739e"
+      },
+      {
+        "path": "apps/api/src/assets/assets.controller.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "b24c77dfb2ab131fef1b434bb8c3475cffde4eaf"
+      },
+      {
+        "path": "apps/api/src/assets/assets.module.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "072f38717743e0dcc9cc0725849d49ab19b1c396"
+      },
+      {
+        "path": "apps/api/src/assets/infrastructure/pg-asset-store.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "000197a778153b6ef6c2ce633d555869bd382394"
+      },
+      {
+        "path": "apps/api/src/assets/ports.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "e20f193de932760dada8aaafc7e7c195fee38b0f"
+      },
+      {
+        "path": "apps/api/src/assets/request-schemas.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "55c015ca75039c78248ca3b80d6eb120afe0465f"
+      },
+      {
+        "path": "apps/api/src/assets/testing/in-memory-asset-store.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "aa4c335f6289378c43ec8aec6837cc1f568c3012"
       },
       {
         "path": "apps/api/src/config.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "d1c31b5d45d62d8819e0879a64298dac3ef0e0d8"
+        "object_id": "4aeff129940fd1f9b10e7dc222fe93030fbec537"
       },
       {
         "path": "apps/api/src/database/api-database.module.ts",
@@ -55,7 +115,7 @@
         "path": "apps/api/src/exports/export-packages.controller.test.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "b83acd317e29e85d3a63d48e35221313ba5133ea"
+        "object_id": "5fdeaceb6aa4e036eece27b771d9bfa9cd9aa6ab"
       },
       {
         "path": "apps/api/src/exports/export-packages.controller.ts",
@@ -85,7 +145,7 @@
         "path": "apps/api/src/exports/infrastructure/object-storage-signed-download-port.test.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "7ed4055142316bb95750ccbf7aaffda4d74955ad"
+        "object_id": "a7b255001a368d4cd991b81474025fec280e9279"
       },
       {
         "path": "apps/api/src/exports/infrastructure/object-storage-signed-download-port.ts",
@@ -136,6 +196,132 @@
         "object_id": "c6965d51a2e7677b1120a4219e572c371984e151"
       },
       {
+        "path": "apps/api/src/projects/application/canonical-json.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "ed892e4058ffe3785d951f7419334bd9f6239ce9"
+      },
+      {
+        "path": "apps/api/src/projects/application/project-service.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "d373981ee227932d265f42cefc99858e25cb2d77"
+      },
+      {
+        "path": "apps/api/src/projects/application/project-service.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "3b487297a7be96685837ecc53f2603efee9402d7"
+      },
+      {
+        "path": "apps/api/src/projects/infrastructure/pg-project-store.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "fa20c0eb86709b5a3c2acdc22d50d835b348c66e"
+      },
+      {
+        "path": "apps/api/src/projects/ports.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "24eafd50ff90774d9ba82ac0593ceadbc2bc72bf"
+      },
+      {
+        "path": "apps/api/src/projects/project-tokens.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "5386de84311db5c898b728029a8736502d87ebfa"
+      },
+      {
+        "path": "apps/api/src/projects/projects.controller.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "5e7f1bfa0781dd4210739105ff150d1bdb558159"
+      },
+      {
+        "path": "apps/api/src/projects/projects.controller.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "dcb540ddda4100b38b8cbf01e166d5a752ceba34"
+      },
+      {
+        "path": "apps/api/src/projects/projects.module.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "76b376d9efafa840ad837a666a1044d6d840c6a5"
+      },
+      {
+        "path": "apps/api/src/projects/request-schemas.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "a54b2266bd8d61e9a87f71db69306cc3b14ce422"
+      },
+      {
+        "path": "apps/api/src/projects/testing/in-memory-project-store.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "74006ecbacf05de307a23ce5f97b185b04d52515"
+      },
+      {
+        "path": "apps/api/src/settings/application/settings-service.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "04727d509edc13990cef2b08173c855748822378"
+      },
+      {
+        "path": "apps/api/src/settings/application/settings-service.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "3c9acc58c1f63404bcc97b2cde00ff4e5823eae6"
+      },
+      {
+        "path": "apps/api/src/settings/infrastructure/pg-settings-store.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "1ecac635640c90cc14fa30d106214fe3a1fd2d74"
+      },
+      {
+        "path": "apps/api/src/settings/ports.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "eeb12800208ed1dcb862b65d7dd9404958377919"
+      },
+      {
+        "path": "apps/api/src/settings/request-schemas.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "20afd2de657c375260a959b8f5f2ad6954419ffa"
+      },
+      {
+        "path": "apps/api/src/settings/setting-tokens.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "e56453af58f066456eba3964d362be36c1c87371"
+      },
+      {
+        "path": "apps/api/src/settings/settings.controller.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "1f4c0f4bc0e45898f6d0399daf3258fc1a34bdde"
+      },
+      {
+        "path": "apps/api/src/settings/settings.controller.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "c58cb9adf2e2c1eec68fc48123c04d8f05edb985"
+      },
+      {
+        "path": "apps/api/src/settings/settings.module.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "47c7ef3bf58c35b56b0cf52efe14cd95dc2e610a"
+      },
+      {
+        "path": "apps/api/src/settings/testing/in-memory-settings-store.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "c4f6af07cdc33b2f7994670849ca334a5298ddb4"
+      },
+      {
         "path": "apps/api/src/test-entrypoint.test.ts",
         "mode": "100644",
         "type": "blob",
@@ -163,7 +349,7 @@
         "path": "apps/api/src/workflows.controller.test.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "ffb3cf6238aef4aa3c0cd40469e176da09751b2f"
+        "object_id": "0426e10a4e07c1b3b93c5010e9d98ce583723129"
       },
       {
         "path": "apps/api/src/workflows/application/canonical-json.ts",
@@ -262,10 +448,34 @@
         "object_id": "86757ea4e99139dd0a31be073654391e80f63cb2"
       },
       {
+        "path": "apps/web/next.config.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "1c6baf980377e05c05d9f5b8f93958efdc890638"
+      },
+      {
         "path": "apps/web/package.json",
         "mode": "100644",
         "type": "blob",
-        "object_id": "b0607ca3785e6b5905f47e6b4e0c9a3644f266da"
+        "object_id": "778c058241891b92fc28d6c2cb488fc5248ae6fb"
+      },
+      {
+        "path": "apps/web/src/app/globals.css",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "fc926ad11670f275f79140b1563bb58b0b48fe88"
+      },
+      {
+        "path": "apps/web/src/app/layout.tsx",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "b36ec55d4d2e50e0ca7b2a42650f1449bfbfd992"
+      },
+      {
+        "path": "apps/web/src/app/page.tsx",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "8a2620b2f68b841d4a7506bd8aed17063ba88f1e"
       },
       {
         "path": "apps/web/src/app/project-page.test.ts",
@@ -286,6 +496,60 @@
         "object_id": "c576c5382dbc27445d47f55d1b23a9958a658c05"
       },
       {
+        "path": "apps/web/src/app/projects/[projectId]/upload/page.tsx",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "6c083e519673ba2446871a0537731f1e6a9d1360"
+      },
+      {
+        "path": "apps/web/src/app/projects/[projectId]/upload/upload.module.css",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "94f73f78df5db310679005f6b8a26b2b2102bb70"
+      },
+      {
+        "path": "apps/web/src/app/projects/page.tsx",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "c43f77c59f062f39c85586461838dbada98a812b"
+      },
+      {
+        "path": "apps/web/src/app/projects/projects-page.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "1dd15a40caf0e598445938128eb93031b3fe37cb"
+      },
+      {
+        "path": "apps/web/src/app/projects/projects.module.css",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "906f0829062323d7d0dd279b037cc65f0cdf2b6b"
+      },
+      {
+        "path": "apps/web/src/app/projects/upload-page.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "4f0bec9910a70ca4fb6b9cdbe0a44ebb683337c6"
+      },
+      {
+        "path": "apps/web/src/app/settings/page.tsx",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "d54c0d4f03fb0f31ada26a3fdcbd507903483e0e"
+      },
+      {
+        "path": "apps/web/src/app/settings/settings-page.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "0e3f59698366e0589ce7844b1857bda365236cfc"
+      },
+      {
+        "path": "apps/web/src/app/settings/settings.module.css",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "614f3a14926e980ed5f51abba0d733a6dd563f0c"
+      },
+      {
         "path": "apps/web/src/hooks/use-workflow-events.ts",
         "mode": "100644",
         "type": "blob",
@@ -301,13 +565,19 @@
         "path": "apps/web/src/lib/api-client.test.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "e100dfed390482ea4c156b27981d34f5a2cd8d03"
+        "object_id": "6aa43d898abaaf6bbad83680f8bac64616cd9333"
       },
       {
         "path": "apps/web/src/lib/api-client.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "5f8f173b37d3e9b8979fa2a4a1fec08a4990da99"
+        "object_id": "68de61577b9614d4545de12c4230971824979029"
+      },
+      {
+        "path": "apps/web/src/lib/upload-flow.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "ccdc64d56600d2deb3087d529dea7e68b98be975"
       },
       {
         "path": "apps/web/src/lib/workflow-session.test.ts",
@@ -331,7 +601,7 @@
         "path": "apps/web/tsconfig.json",
         "mode": "100644",
         "type": "blob",
-        "object_id": "abd0df1cf7d3ccec01201cec49d74b0bfefea460"
+        "object_id": "a312e3a34300bff10f84953093d3107b6108ff44"
       },
       {
         "path": "docs/adr/0010-graph-control-plane.md",
@@ -340,10 +610,16 @@
         "object_id": "32987bf03d473c080a7b9a99c7b1b24042ab00ef"
       },
       {
+        "path": "docs/adr/0011-style-key-in-graph-state.md",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "7b90e205a5758f7c738a258651036a4c1c767f21"
+      },
+      {
         "path": "docs/execplans/graph-engineering-full-migration.md",
         "mode": "100644",
         "type": "blob",
-        "object_id": "dd83f17d8be6ac22a29bef1f52874bf6972642d2"
+        "object_id": "35b8018b8c5bea8c6044536e4a3b2966a9123c9e"
       },
       {
         "path": "docs/graph-engineering/evidence/canary-rollback.json",
@@ -436,10 +712,16 @@
         "object_id": "648f0cbe8000551051ab2dffa7b1841778fb8390"
       },
       {
+        "path": "packages/graph-contracts/src/job-payloads.test.ts",
+        "mode": "100644",
+        "type": "blob",
+        "object_id": "72b4f955460a9cea18d28f8f5f22e45c624e4efa"
+      },
+      {
         "path": "packages/graph-contracts/src/job-payloads.ts",
         "mode": "100644",
         "type": "blob",
-        "object_id": "0ee2701f664919383100c50998bf8fbe16a60b11"
+        "object_id": "3e3878e9d67a529ee80e65663f08df213be242e6"
       },
       {
         "path": "packages/graph-contracts/src/node-definition.test.ts",
@@ -484,7 +766,7 @@
         "object_id": "a72a807d5f98f2017dd06cb5b651e2ea2bef07f9"
       }
     ],
-    "sha256": "3244380dbdc92756a9c544025c44229a7937d44351e4f05c7fdbf45f08a33450"
+    "sha256": "9a9ee8b2add6084b62caf9a82c8f3eafd4c579573adcb82d379fdfd0b1124ecc"
   },
   "artifacts": {
     "context": {
@@ -509,45 +791,45 @@
   },
   "test_runs": [
     {
-      "id": "receipt-44e674bab442ea85c4639b2e94387b164bb239929d5414a67093ba0a3600c806",
+      "id": "receipt-1fd44e6393f07a16bb7c6df5b81ca246cf221475ff15f29af54d29eb5f8bf71a",
       "command": "pnpm --filter @live-photo-studio/api test",
       "assertion_ids": [
         "A1:web-projection"
       ],
-      "recorded_at": "2026-08-23T16:07:34.809Z",
-      "validation_receipt_sha256": "250857dab9aa43a36ca2f2898e1ab8a2ceef98fcea817da55bd70dcdbec55073",
+      "recorded_at": "2026-08-25T13:35:38.111Z",
+      "validation_receipt_sha256": "fb0ada927b3ff3f102e11f5bfbdff30c4cb8acc104f7bf5e2cc44c427ff6521b",
       "evidence_log": {
-        "path": "development/evidence/247-004-web-projection.log",
-        "sha256": "764b47b6fe0df998eae14d069ce1a41923f6a192052384337b2f1a63cc16f507",
-        "size": 6931
+        "path": "development/evidence/392-004-web-projection.log",
+        "sha256": "69c5fcf42a0d6df2c41b0a98f3537b6e2e3aedb5f7fd671b02cf743a20fd76ea",
+        "size": 14672
       }
     },
     {
-      "id": "receipt-5a15a3432c4bf05fd25118de9505814034c4d0e933981153953b931208b66460",
+      "id": "receipt-336a7555367a17542d5de881ee1d3732f9f1f21444dbd5885351c6228e3132e5",
       "command": "pnpm --filter @live-photo-studio/web test",
       "assertion_ids": [
         "A1:web-projection"
       ],
-      "recorded_at": "2026-08-23T16:07:32.374Z",
-      "validation_receipt_sha256": "4290f2663c89bd08f1be953194d148728d9c5c175a07d82d5d22f9631e6ff742",
+      "recorded_at": "2026-08-25T13:35:27.758Z",
+      "validation_receipt_sha256": "31285c597d47542aabf1b9295e0f88702e74d8e84b172180a65b8bf5f594ceba",
       "evidence_log": {
-        "path": "development/evidence/246-004-web-projection.log",
-        "sha256": "0519f0db81f380fdda99d464d569ff6d6d4a2d0a5a436e614fbd102cd81131a3",
-        "size": 2843
+        "path": "development/evidence/391-004-web-projection.log",
+        "sha256": "83fcd636db5de09ebd70e676da288cc2dd40543185a08e6713c2c85732d8c87a",
+        "size": 10756
       }
     },
     {
-      "id": "receipt-7c333b05695da4b81805a3253d9da08ccbf3c34c044415fd0002d5b9b9a4c453",
+      "id": "receipt-94c10a2ee122f98886e6be2b0115fe3d7262533b03d543846d56e6b2e368b47f",
       "command": "git diff --check",
       "assertion_ids": [
         "A1:web-projection"
       ],
-      "recorded_at": "2026-08-23T16:07:34.866Z",
-      "validation_receipt_sha256": "4e10bc46482aab0c48142ea025c0e89c900293cd24c396e1130d6c813d94d091",
+      "recorded_at": "2026-08-25T13:35:38.219Z",
+      "validation_receipt_sha256": "96c93e241b6752cacafaddba58193ad5ec4d79dc1a018e81bee6651de416ab99",
       "evidence_log": {
-        "path": "development/evidence/248-004-web-projection.log",
-        "sha256": "efd7d4b1fc8ff9c35c0dba1955609f994df980f31424667335e3dc99f6749bb1",
-        "size": 101
+        "path": "development/evidence/393-004-web-projection.log",
+        "sha256": "1ce12cd59c5c1af187d4f2502b1c8c63523f9f5e5f4a80d9894171af93293f26",
+        "size": 102
       }
     }
   ],
@@ -557,9 +839,9 @@
       "parent_id": "A1",
       "status": "passing",
       "test_run_ids": [
-        "receipt-44e674bab442ea85c4639b2e94387b164bb239929d5414a67093ba0a3600c806",
-        "receipt-5a15a3432c4bf05fd25118de9505814034c4d0e933981153953b931208b66460",
-        "receipt-7c333b05695da4b81805a3253d9da08ccbf3c34c044415fd0002d5b9b9a4c453"
+        "receipt-1fd44e6393f07a16bb7c6df5b81ca246cf221475ff15f29af54d29eb5f8bf71a",
+        "receipt-336a7555367a17542d5de881ee1d3732f9f1f21444dbd5885351c6228e3132e5",
+        "receipt-94c10a2ee122f98886e6be2b0115fe3d7262533b03d543846d56e6b2e368b47f"
       ],
       "direct_evidence": [],
       "reused_evidence": [],
