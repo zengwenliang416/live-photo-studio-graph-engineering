@@ -3,6 +3,7 @@ import { withTransaction } from "@live-photo-studio/database";
 import { ApplicationProblemError } from "../../http/problem-details.js";
 import {
   IdempotencyConflictError,
+  type GenerationOutputRow,
   type HumanTaskRow,
   type StoredIdempotentResponse,
   type WorkflowRunRow,
@@ -217,6 +218,32 @@ class PgWorkflowTx implements WorkflowTx {
         createdAt: (row["created_at"] as Date).toISOString(),
       };
     });
+  }
+
+  async listGenerationOutputsForRun(
+    runId: string,
+    outputIds: readonly string[],
+  ): Promise<readonly GenerationOutputRow[]> {
+    if (outputIds.length === 0) return [];
+    const result = await this.client.query<{
+      id: string;
+      storage_key: string;
+      width: number;
+      height: number;
+    }>(
+      `SELECT o.id, o.storage_key, o.width, o.height
+         FROM generation_outputs o
+         JOIN generation_batches b ON b.id = o.batch_id
+        WHERE b.workflow_run_id = $1::uuid
+          AND o.id = ANY($2::uuid[])`,
+      [runId, outputIds],
+    );
+    return result.rows.map((row) => ({
+      id: row.id,
+      storageKey: row.storage_key,
+      width: row.width,
+      height: row.height,
+    }));
   }
 
   async findTaskById(taskId: string): Promise<{

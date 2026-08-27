@@ -80,8 +80,8 @@ function ReviewPanel(): React.JSX.Element {
   useWorkflowEvents(runId, workflow.refresh);
 
   useEffect(() => {
-    setSelectedOutputId(workflow.candidateOutputIds[0] ?? "");
-  }, [workflow.candidateOutputIds]);
+    setSelectedOutputId(workflow.candidates[0]?.outputId ?? "");
+  }, [workflow.candidates]);
 
   const retry = useCallback(() => {
     if (sessionError) {
@@ -268,25 +268,38 @@ function ReviewPanel(): React.JSX.Element {
                   从候选中选定一张作为后续系列延展的视觉锚点。
                 </p>
                 <div className={styles.candidateList}>
-                  {workflow.candidateOutputIds.map((outputId, index) => (
-                    <label className={styles.candidate} key={outputId}>
+                  {workflow.candidates.map((candidate, index) => (
+                    <label className={styles.candidate} key={candidate.outputId}>
                       <input
                         type="radio"
                         name="anchor-output"
-                        value={outputId}
-                        checked={selectedOutputId === outputId}
-                        onChange={() => setSelectedOutputId(outputId)}
+                        value={candidate.outputId}
+                        checked={selectedOutputId === candidate.outputId}
+                        onChange={() => setSelectedOutputId(candidate.outputId)}
                       />
-                      <span
-                        className={styles.candidateVisual}
-                        data-variant={index % 4}
-                      >
-                        <span>候选 {String.fromCharCode(65 + index)}</span>
-                        <code>{shortId(outputId)}</code>
+                      <span className={styles.candidateVisual}>
+                        {candidate.previewUrl ? (
+                          <img
+                            src={candidate.previewUrl}
+                            alt={`候选 ${String.fromCharCode(65 + index)}`}
+                            width={candidate.width}
+                            height={candidate.height}
+                          />
+                        ) : (
+                          <span className={styles.candidateUnavailable}>
+                            预览暂不可用
+                          </span>
+                        )}
+                        <span className={styles.candidateBadge}>
+                          候选 {String.fromCharCode(65 + index)}
+                        </span>
+                        <code>{shortId(candidate.outputId)}</code>
                       </span>
                       <span className={styles.candidateBody}>
-                        <strong>光影变奏 {index + 1}</strong>
-                        <small>点击卡片选择此候选作为系列视觉基准。</small>
+                        <strong>
+                          {candidate.width} × {candidate.height}
+                        </strong>
+                        <small>点击真实生成图，选择为系列视觉基准。</small>
                       </span>
                     </label>
                   ))}

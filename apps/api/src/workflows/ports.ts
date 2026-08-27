@@ -37,6 +37,20 @@ export interface HumanTaskRow {
   readonly createdAt: string;
 }
 
+export interface GenerationOutputRow {
+  readonly id: string;
+  readonly storageKey: string;
+  readonly width: number;
+  readonly height: number;
+}
+
+export interface WorkflowCandidatePreviewSignerPort {
+  sign(objectKey: string): Promise<{
+    readonly url: string;
+    readonly expiresAt: string;
+  }>;
+}
+
 export interface OutboxEventInput {
   readonly aggregateType: string;
   readonly aggregateId: string;
@@ -72,6 +86,10 @@ export interface WorkflowTx {
   }): Promise<void>;
   findRunById(runId: string): Promise<WorkflowRunRow | null>;
   listHumanTasksForRun(runId: string): Promise<readonly HumanTaskRow[]>;
+  listGenerationOutputsForRun(
+    runId: string,
+    outputIds: readonly string[],
+  ): Promise<readonly GenerationOutputRow[]>;
   findTaskById(
     taskId: string,
   ): Promise<{

@@ -51,6 +51,13 @@ function seed(unit: InMemoryWorkflowUnit): void {
     createdAt: new Date().toISOString(),
   };
   unit.seedTask(task, USER);
+  unit.seedGenerationOutput({
+    id: OUTPUT_ID,
+    workflowRunId: RUN_ID,
+    storageKey: `projects/${PROJECT_ID}/generations/r0/0.png`,
+    width: 1448,
+    height: 1086,
+  });
 }
 
 async function createApp(input?: { graphWorkflowEnabled?: string }) {
@@ -94,6 +101,13 @@ async function createApp(input?: { graphWorkflowEnabled?: string }) {
     .useValue({})
     .overrideProvider(WORKFLOW_TOKENS.workflowUnit)
     .useValue(unit)
+    .overrideProvider(WORKFLOW_TOKENS.candidatePreviewSigner)
+    .useValue({
+      sign: async () => ({
+        url: "https://storage.example.test/candidate",
+        expiresAt: "2026-08-27T09:00:00.000Z",
+      }),
+    })
     .overrideProvider(WORKFLOW_TOKENS.outboxQueues)
     .useValue(fakeQueues)
     .compile();
@@ -249,6 +263,15 @@ test("decision endpoint validates action, ownership and pending state", async ()
     "SELECT",
     "REGENERATE",
     "CANCEL",
+  ]);
+  assert.deepEqual(tasks.body.data[0].candidates, [
+    {
+      outputId: OUTPUT_ID,
+      previewUrl: "https://storage.example.test/candidate",
+      previewExpiresAt: "2026-08-27T09:00:00.000Z",
+      width: 1448,
+      height: 1086,
+    },
   ]);
   await app.close();
 });

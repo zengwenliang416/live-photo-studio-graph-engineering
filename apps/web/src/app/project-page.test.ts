@@ -25,9 +25,16 @@ test("project page keeps workflow authority on the server", () => {
   assert.doesNotMatch(pageSource, /mockWorkflowOrchestrator|DemoZipBuilder|indexedDB/u);
 });
 
+test("human review renders signed candidate images instead of CSS mock art", () => {
+  assert.match(pageSource, /src=\{candidate\.previewUrl\}/u);
+  assert.match(pageSource, /candidate\.width/u);
+  assert.match(pageSource, /candidate\.height/u);
+  assert.doesNotMatch(styleSource, /candidateVisual\[data-variant/u);
+});
+
 test("desktop workbench and mobile accessibility evidence are both present", () => {
   assert.match(styleSource, /grid-template-columns: minmax\(0, 1\.4fr\)/u);
-  assert.match(styleSource, /grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/u);
+  assert.match(styleSource, /repeat\(auto-fit, minmax\(min\(280px, 100%\), 1fr\)\)/u);
   assert.match(styleSource, /@media \(max-width: 390px\)/u);
   assert.match(styleSource, /min-height: 44px/u);
   assert.match(styleSource, /:focus-visible/u);

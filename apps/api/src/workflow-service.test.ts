@@ -14,7 +14,12 @@ const PROJECT_ID = "3f2504e0-4f89-11d3-9a0c-0305e82c3301";
 function createService() {
   const unit = new InMemoryWorkflowUnit();
   unit.seedProject(PROJECT_ID, USER);
-  const service = new WorkflowService(unit);
+  const service = new WorkflowService(unit, {
+    sign: async () => ({
+      url: "https://storage.example.test/candidate",
+      expiresAt: "2026-08-27T09:00:00.000Z",
+    }),
+  });
   return { unit, service };
 }
 
@@ -130,6 +135,13 @@ function seedPendingTask(unit: InMemoryWorkflowUnit, runId: string) {
     },
     USER,
   );
+  unit.seedGenerationOutput({
+    id: OUTPUT_ID,
+    workflowRunId: runId,
+    storageKey: `projects/${PROJECT_ID}/generations/r0/0.png`,
+    width: 1448,
+    height: 1086,
+  });
   return taskId;
 }
 
@@ -289,6 +301,15 @@ test("get projection enforces ownership and exposes pending task", async () => {
   const data = (owner.body as { data: Record<string, unknown> }).data;
   assert.equal(data["pendingHumanTaskId"], taskId);
   assert.equal(data["status"], "INTERRUPTED");
+
+  const tasks = await service.listHumanTasks({
+    workflowRunId: runId,
+    userId: USER,
+  });
+  const task = (tasks.body as {
+    data: Array<{ candidates: Array<Record<string, unknown>> }>;
+  }).data[0];
+  assert.equal(task?.candidates[0]?.["previewUrl"], "https://storage.example.test/candidate");
 
   await assert.rejects(
     service.getWorkflowRun({ workflowRunId: runId, userId: OTHER_USER }),

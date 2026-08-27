@@ -57,6 +57,7 @@ export function useWorkflow(options: UseWorkflowOptions) {
     queryKey: ["human-tasks", options.workflowRunId],
     queryFn: () => client.listHumanTasks(options.workflowRunId),
     enabled: pendingHumanTaskId != null,
+    refetchInterval: 240_000,
   });
 
   const invalidate = (): void => {
@@ -96,6 +97,7 @@ export function useWorkflow(options: UseWorkflowOptions) {
     stages: WORKFLOW_STAGES,
     allowedActions: pendingTask?.allowedActions ?? [],
     candidateOutputIds: pendingTask?.candidateOutputIds ?? [],
+    candidates: pendingTask?.candidates ?? [],
     isMutating: decideMutation.isPending || cancelMutation.isPending,
     decide: decideMutation.mutate,
     cancel: cancelMutation.mutate,

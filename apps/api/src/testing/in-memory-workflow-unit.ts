@@ -1,6 +1,7 @@
 import { ApplicationProblemError } from "../http/problem-details.js";
 import {
   IdempotencyConflictError,
+  type GenerationOutputRow,
   type HumanTaskRow,
   type OutboxEventInput,
   type StoredIdempotentResponse,
@@ -13,6 +14,10 @@ export interface InMemoryState {
   readonly projects: Map<string, string>;
   readonly runs: Map<string, WorkflowRunRow>;
   readonly tasks: Map<string, { task: HumanTaskRow; runUserId: string }>;
+  readonly generationOutputs: Map<
+    string,
+    GenerationOutputRow & { workflowRunId: string }
+  >;
   readonly outbox: OutboxEventInput[];
   readonly idempotency: Map<string, StoredIdempotentResponse>;
 }
@@ -34,6 +39,10 @@ export class InMemoryWorkflowUnit implements WorkflowUnitPort {
   readonly projects = new Map<string, string>();
   readonly runs = new Map<string, WorkflowRunRow>();
   readonly tasks = new Map<string, { task: HumanTaskRow; runUserId: string }>();
+  readonly generationOutputs = new Map<
+    string,
+    GenerationOutputRow & { workflowRunId: string }
+  >();
   readonly outbox: OutboxEventInput[] = [];
   readonly idempotency = new Map<string, StoredIdempotentResponse>();
 
@@ -47,6 +56,12 @@ export class InMemoryWorkflowUnit implements WorkflowUnitPort {
 
   seedTask(task: HumanTaskRow, runUserId: string): void {
     this.tasks.set(task.id, { task, runUserId });
+  }
+
+  seedGenerationOutput(
+    output: GenerationOutputRow & { workflowRunId: string },
+  ): void {
+    this.generationOutputs.set(output.id, output);
   }
 
   completedTaskResults: Array<{ taskId: string; result: unknown }> = [];
@@ -112,6 +127,12 @@ export class InMemoryWorkflowUnit implements WorkflowUnitPort {
           .filter((entry) => entry.task.workflowRunId === runId)
           .map((entry) => entry.task)
           .sort((left, right) => left.createdAt.localeCompare(right.createdAt));
+      },
+      async listGenerationOutputsForRun(runId, outputIds) {
+        return outputIds.flatMap((outputId) => {
+          const output = state.generationOutputs.get(outputId);
+          return output?.workflowRunId === runId ? [output] : [];
+        });
       },
       async findTaskById(taskId) {
         const entry = state.tasks.get(taskId);

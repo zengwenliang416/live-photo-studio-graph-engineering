@@ -7,7 +7,11 @@ import type {
 import { workflowProjectionSchema } from "@live-photo-studio/graph-contracts";
 import { ApplicationProblemError } from "../../http/problem-details.js";
 import { hashRequest } from "./canonical-json.js";
-import type { HumanTaskRow, WorkflowTx, WorkflowUnitPort } from "../ports.js";
+import type {
+  WorkflowCandidatePreviewSignerPort,
+  WorkflowTx,
+  WorkflowUnitPort,
+} from "../ports.js";
 import { IdempotencyConflictError } from "../ports.js";
 
 export interface StartWorkflowRunBody {
@@ -66,7 +70,11 @@ function validationFailed(detail: string): ApplicationProblemError {
  * one transaction and the orchestrator consumes them.
  */
 export class WorkflowService {
-  constructor(private readonly unit: WorkflowUnitPort) {}
+  constructor(
+    private readonly unit: WorkflowUnitPort,
+    private readonly candidatePreviewSigner: WorkflowCandidatePreviewSignerPort | null =
+      null,
+  ) {}
 
   async startWorkflowRun(params: {
     projectId: string;
@@ -178,7 +186,7 @@ export class WorkflowService {
     workflowRunId: string;
     userId: string;
   }): Promise<UseCaseResult> {
-    const tasks: readonly HumanTaskRow[] = await this.unit.transact(
+    const { tasks, outputs } = await this.unit.transact(
       async (tx) => {
         const run = await tx.findRunById(params.workflowRunId);
         if (!run) {
@@ -190,8 +198,46 @@ export class WorkflowService {
         if (run.userId !== params.userId) {
           throw forbidden("The caller does not own this workflow run.");
         }
-        return tx.listHumanTasksForRun(params.workflowRunId);
+        const tasks = await tx.listHumanTasksForRun(params.workflowRunId);
+        const candidateOutputIds = [
+          ...new Set(tasks.flatMap((task) => task.candidateOutputIds)),
+        ];
+        const outputs = await tx.listGenerationOutputsForRun(
+          params.workflowRunId,
+          candidateOutputIds,
+        );
+        return { tasks, outputs };
       },
+    );
+    const signedCandidates = await Promise.all(
+      outputs.map(async (output) => {
+        if (this.candidatePreviewSigner === null) {
+          return {
+            ...output,
+            previewUrl: null,
+            previewExpiresAt: null,
+          };
+        }
+        try {
+          const signed = await this.candidatePreviewSigner.sign(
+            output.storageKey,
+          );
+          return {
+            ...output,
+            previewUrl: signed.url,
+            previewExpiresAt: signed.expiresAt,
+          };
+        } catch {
+          return {
+            ...output,
+            previewUrl: null,
+            previewExpiresAt: null,
+          };
+        }
+      }),
+    );
+    const candidatesById = new Map(
+      signedCandidates.map((candidate) => [candidate.id, candidate]),
     );
     return {
       status: 200,
@@ -203,6 +249,20 @@ export class WorkflowService {
           status: task.status,
           allowedActions: task.allowedActions,
           candidateOutputIds: task.candidateOutputIds,
+          candidates: task.candidateOutputIds.flatMap((outputId) => {
+            const candidate = candidatesById.get(outputId);
+            return candidate
+              ? [
+                  {
+                    outputId: candidate.id,
+                    previewUrl: candidate.previewUrl,
+                    previewExpiresAt: candidate.previewExpiresAt,
+                    width: candidate.width,
+                    height: candidate.height,
+                  },
+                ]
+              : [];
+          }),
           createdAt: task.createdAt,
         })),
       },

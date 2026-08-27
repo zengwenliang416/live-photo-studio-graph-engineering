@@ -568,6 +568,23 @@ export function buildOpenApiDocument(baseUrl: string): Record<string, unknown> {
               type: "array",
               items: { type: "string", format: "uuid" },
             },
+            candidates: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  outputId: { type: "string", format: "uuid" },
+                  previewUrl: { type: "string", format: "uri", nullable: true },
+                  previewExpiresAt: {
+                    type: "string",
+                    format: "date-time",
+                    nullable: true,
+                  },
+                  width: { type: "integer", minimum: 1 },
+                  height: { type: "integer", minimum: 1 },
+                },
+              },
+            },
             createdAt: { type: "string", format: "date-time" },
           },
         },

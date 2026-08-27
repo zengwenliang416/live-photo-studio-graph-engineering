@@ -1,10 +1,12 @@
 import { z } from "zod";
 import {
   authSessionResponseSchema,
+  humanTasksResponseSchema,
   logoutResponseSchema,
   stylePresetPromptResponseSchema,
   stylePresetsResponseSchema,
   type AuthSessionResponse,
+  type HumanTaskView,
   type LoginRequest,
   type RegisterRequest,
   type StylePresetMetadata,
@@ -23,18 +25,6 @@ const workflowRunResponseSchema = z.object({
     currentPhase: z.string().nullable(),
     pendingHumanTaskId: workflowRunIdSchema.nullable(),
   }),
-});
-const humanTasksResponseSchema = z.object({
-  data: z.array(
-    z.object({
-      humanTaskId: workflowRunIdSchema,
-      taskType: z.string(),
-      nodeName: z.string(),
-      allowedActions: z.array(z.string()),
-      candidateOutputIds: z.array(workflowRunIdSchema),
-      status: z.string(),
-    }),
-  ),
 });
 const decisionResponseSchema = z.object({
   data: z.object({ humanTaskId: workflowRunIdSchema }),
@@ -507,14 +497,7 @@ export class WorkflowApiClient {
   }
 
   listHumanTasks(workflowRunId: string): Promise<{
-    data: ReadonlyArray<{
-      humanTaskId: string;
-      taskType: string;
-      nodeName: string;
-      allowedActions: readonly string[];
-      candidateOutputIds: readonly string[];
-      status: string;
-    }>;
+    data: ReadonlyArray<HumanTaskView>;
   }> {
     return this.request(
       "GET",

@@ -2,6 +2,10 @@ import { Inject, Module, type OnModuleDestroy } from "@nestjs/common";
 import { Queue } from "bullmq";
 import { Redis } from "ioredis";
 import type { Pool } from "pg";
+import {
+  createObjectStorageFromEnvironment,
+  loadObjectStorageEnvironment,
+} from "@live-photo-studio/storage";
 import type { ApiConfig } from "../config.js";
 import { PgWorkflowUnit } from "./infrastructure/pg-workflow-unit.js";
 import {
@@ -18,6 +22,8 @@ import {
 } from "./application/workflow-operations-service.js";
 import { PgWorkflowOperations } from "./infrastructure/pg-workflow-operations.js";
 import { WorkflowOperationsController } from "./workflow-operations.controller.js";
+import { ObjectStorageCandidatePreviewSigner } from "./infrastructure/object-storage-candidate-preview-signer.js";
+import type { WorkflowCandidatePreviewSignerPort } from "./ports.js";
 
 @Module({
   imports: [ApiDatabaseModule],
@@ -33,9 +39,25 @@ import { WorkflowOperationsController } from "./workflow-operations.controller.j
       useFactory: (pool: Pool) => new PgWorkflowUnit(pool),
     },
     {
+      provide: WORKFLOW_TOKENS.candidatePreviewSigner,
+      useFactory: (): WorkflowCandidatePreviewSignerPort => {
+        const environment = loadObjectStorageEnvironment();
+        return new ObjectStorageCandidatePreviewSigner(
+          createObjectStorageFromEnvironment(environment),
+          environment.OBJECT_STORAGE_SIGNED_URL_TTL_SECONDS,
+        );
+      },
+    },
+    {
       provide: WorkflowService,
-      inject: [WORKFLOW_TOKENS.workflowUnit],
-        useFactory: (unit: PgWorkflowUnit) => new WorkflowService(unit),
+      inject: [
+        WORKFLOW_TOKENS.workflowUnit,
+        WORKFLOW_TOKENS.candidatePreviewSigner,
+      ],
+      useFactory: (
+        unit: PgWorkflowUnit,
+        previewSigner: WorkflowCandidatePreviewSignerPort,
+      ) => new WorkflowService(unit, previewSigner),
     },
     {
       provide: WORKFLOW_TOKENS.operationsPort,
