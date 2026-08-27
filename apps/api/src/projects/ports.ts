@@ -31,6 +31,14 @@ export interface ProjectAssetRow {
     | null;
 }
 
+export interface ProjectLivePhotoPairRow {
+  readonly id: string;
+  readonly photoAssetId: string;
+  readonly videoAssetId: string;
+  readonly status: "PAIRED";
+  readonly createdAt: string;
+}
+
 export interface ProjectPreviewSignerPort {
   sign(objectKey: string): Promise<{
     readonly url: string;
@@ -61,6 +69,9 @@ export interface ProjectTx {
     cursor: ProjectCursor | null;
   }): Promise<readonly ProjectRow[]>;
   listAssetsByProject(projectId: string): Promise<readonly ProjectAssetRow[]>;
+  listLivePhotoPairsByProject(
+    projectId: string,
+  ): Promise<readonly ProjectLivePhotoPairRow[]>;
   findIdempotentResponse(
     scope: string,
     idempotencyKey: string,

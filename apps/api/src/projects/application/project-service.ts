@@ -137,21 +137,24 @@ export class ProjectService {
     projectId: string;
     userId: string;
   }): Promise<UseCaseResult> {
-    const { project, assets } = await this.store.transact(async (tx) => {
-      const project = await tx.findProjectById(params.projectId);
-      // Existence is not leaked: a foreign project answers 404 just like a
-      // missing one.
-      if (!project || project.userId !== params.userId) {
-        throw new ApplicationProblemError(
-          404,
-          "PROJECT_NOT_FOUND",
-          "Resource not found.",
-          `Project ${params.projectId} was not found.`,
-        );
-      }
-      const assets = await tx.listAssetsByProject(project.id);
-      return { project, assets };
-    });
+    const { project, assets, livePhotoPairs } = await this.store.transact(
+      async (tx) => {
+        const project = await tx.findProjectById(params.projectId);
+        // Existence is not leaked: a foreign project answers 404 just like a
+        // missing one.
+        if (!project || project.userId !== params.userId) {
+          throw new ApplicationProblemError(
+            404,
+            "PROJECT_NOT_FOUND",
+            "Resource not found.",
+            `Project ${params.projectId} was not found.`,
+          );
+        }
+        const assets = await tx.listAssetsByProject(project.id);
+        const livePhotoPairs = await tx.listLivePhotoPairsByProject(project.id);
+        return { project, assets, livePhotoPairs };
+      },
+    );
     const assetViews = await Promise.all(
       assets.map(async (asset) => {
         let previewUrl: string | null = null;
@@ -161,8 +164,14 @@ export class ProjectService {
           | "READY"
           | "FAILED"
           | "UNAVAILABLE" =
-          asset.status === "READY" ? "PROCESSING" : "UNAVAILABLE";
-        if (asset.status !== "READY") {
+          asset.status === "READY" &&
+          asset.contentType !== "video/quicktime"
+            ? "PROCESSING"
+            : "UNAVAILABLE";
+        if (
+          asset.status !== "READY" ||
+          asset.contentType === "video/quicktime"
+        ) {
           previewStatus = "UNAVAILABLE";
         } else if (asset.previewStatus === "FAILED") {
           previewStatus = "FAILED";
@@ -206,6 +215,13 @@ export class ProjectService {
           createdAt: project.createdAt,
           coverAssetId: project.coverAssetId,
           assets: assetViews,
+          livePhotoPairs: livePhotoPairs.map((pair) => ({
+            livePhotoPairId: pair.id,
+            photoAssetId: pair.photoAssetId,
+            videoAssetId: pair.videoAssetId,
+            status: pair.status,
+            createdAt: pair.createdAt,
+          })),
         },
       },
     };

@@ -4,6 +4,7 @@ import {
   IdempotencyConflictError,
   type ProjectAssetRow,
   type ProjectCursor,
+  type ProjectLivePhotoPairRow,
   type ProjectRow,
   type ProjectStorePort,
   type ProjectTx,
@@ -148,6 +149,31 @@ class PgProjectTx implements ProjectTx {
       [projectId],
     );
     return result.rows.map(mapAssetRow);
+  }
+
+  async listLivePhotoPairsByProject(
+    projectId: string,
+  ): Promise<readonly ProjectLivePhotoPairRow[]> {
+    const result = await this.client.query<{
+      id: string;
+      photo_asset_id: string;
+      video_asset_id: string;
+      status: "PAIRED";
+      created_at: Date;
+    }>(
+      `SELECT id, photo_asset_id, video_asset_id, status, created_at
+         FROM live_photo_pairs
+        WHERE project_id = $1
+        ORDER BY created_at ASC, id ASC`,
+      [projectId],
+    );
+    return result.rows.map((row) => ({
+      id: row.id,
+      photoAssetId: row.photo_asset_id,
+      videoAssetId: row.video_asset_id,
+      status: row.status,
+      createdAt: row.created_at.toISOString(),
+    }));
   }
 
   async findIdempotentResponse(

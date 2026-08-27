@@ -1,6 +1,7 @@
 import {
   IdempotencyConflictError,
   type ProjectAssetRow,
+  type ProjectLivePhotoPairRow,
   type ProjectRow,
   type ProjectStorePort,
   type ProjectTx,
@@ -22,6 +23,7 @@ function idempotencyRecordKey(
 export class InMemoryProjectStore implements ProjectStorePort {
   readonly projects = new Map<string, ProjectRow>();
   readonly assets = new Map<string, ProjectAssetRow[]>();
+  readonly livePhotoPairs = new Map<string, ProjectLivePhotoPairRow[]>();
   readonly idempotency = new Map<string, StoredIdempotentResponse>();
 
   seedProject(row: ProjectRow): void {
@@ -32,6 +34,12 @@ export class InMemoryProjectStore implements ProjectStorePort {
     const list = this.assets.get(projectId) ?? [];
     list.push(row);
     this.assets.set(projectId, list);
+  }
+
+  seedLivePhotoPair(projectId: string, row: ProjectLivePhotoPairRow): void {
+    const list = this.livePhotoPairs.get(projectId) ?? [];
+    list.push(row);
+    this.livePhotoPairs.set(projectId, list);
   }
 
   async transact<T>(work: (tx: ProjectTx) => Promise<T>): Promise<T> {
@@ -74,6 +82,13 @@ export class InMemoryProjectStore implements ProjectStorePort {
       async listAssetsByProject(projectId) {
         return [...(state.assets.get(projectId) ?? [])].sort((left, right) =>
           left.createdAt.localeCompare(right.createdAt),
+        );
+      },
+      async listLivePhotoPairsByProject(projectId) {
+        return [...(state.livePhotoPairs.get(projectId) ?? [])].sort(
+          (left, right) =>
+            left.createdAt.localeCompare(right.createdAt) ||
+            left.id.localeCompare(right.id),
         );
       },
       async findIdempotentResponse(scope, key, userId) {

@@ -4,6 +4,7 @@ import {
   type AssetRow,
   type AssetStorePort,
   type AssetTx,
+  type LivePhotoPairRow,
   type StoredIdempotentResponse,
 } from "../ports.js";
 
@@ -30,6 +31,7 @@ export class InMemoryAssetStore implements AssetStorePort {
     assetId: string;
     projectId: string;
   }> = [];
+  readonly livePhotoPairs = new Map<string, LivePhotoPairRow>();
   readonly idempotency = new Map<string, StoredIdempotentResponse>();
 
   seedProject(projectId: string, userId: string): void {
@@ -75,12 +77,12 @@ export class InMemoryAssetStore implements AssetStorePort {
       async findAssetById(assetId) {
         return state.assets.get(assetId) ?? null;
       },
-      async markAssetReady(assetId, bytes, sha256): Promise<boolean> {
+      async markAssetReady(assetId, bytes, sha256, role): Promise<boolean> {
         const row = state.assets.get(assetId);
         if (!row || row.status !== "UPLOADING") return false;
         state.assets.set(assetId, { ...row, status: "READY", bytes, sha256 });
         const roles = state.roles.get(assetId) ?? new Set<string>();
-        roles.add("CONTENT");
+        roles.add(role);
         state.roles.set(assetId, roles);
         return true;
       },
@@ -97,6 +99,27 @@ export class InMemoryAssetStore implements AssetStorePort {
         const roles = state.roles.get(assetId) ?? new Set<string>();
         roles.add("COVER");
         state.roles.set(assetId, roles);
+      },
+      async insertLivePhotoPair(input): Promise<LivePhotoPairRow> {
+        const conflict = [...state.livePhotoPairs.values()].some(
+          (pair) =>
+            pair.photoAssetId === input.photoAssetId ||
+            pair.videoAssetId === input.videoAssetId,
+        );
+        if (conflict) {
+          throw new ApplicationProblemError(
+            409,
+            "LIVE_PHOTO_ASSET_ALREADY_PAIRED",
+            "One of the assets already belongs to a Live Photo pair.",
+          );
+        }
+        const row: LivePhotoPairRow = {
+          ...input,
+          status: "PAIRED",
+          createdAt: new Date().toISOString(),
+        };
+        state.livePhotoPairs.set(row.id, row);
+        return row;
       },
       async findIdempotentResponse(scope, key, userId) {
         return (

@@ -13,11 +13,13 @@ import { ApplicationProblemError } from "../http/problem-details.js";
 import {
   AssetUploadService,
   type ConfirmUploadBody,
+  type CreateLivePhotoPairBody,
   type SetProjectCoverBody,
   type UploadIntentBody,
 } from "./application/asset-upload-service.js";
 import {
   confirmUploadRequestSchema,
+  createLivePhotoPairRequestSchema,
   setProjectCoverRequestSchema,
   uploadIntentRequestSchema,
 } from "./request-schemas.js";
@@ -93,6 +95,25 @@ export class AssetsController {
       userId: request.userId,
       idempotencyKey: requireIdempotencyKey(idempotencyKey),
       body: setProjectCoverRequestSchema.parse(body ?? {}) as SetProjectCoverBody,
+    });
+    return result.body;
+  }
+
+  @Post("projects/:projectId/live-photo-pairs")
+  @HttpCode(201)
+  async createLivePhotoPair(
+    @Req() request: AuthenticatedRequest,
+    @Param("projectId") projectId: string,
+    @Headers("idempotency-key") idempotencyKey: string | undefined,
+    @Body() body: unknown,
+  ): Promise<unknown> {
+    const result = await this.assets.createLivePhotoPair({
+      projectId: uuidParamSchema.parse(projectId),
+      userId: request.userId,
+      idempotencyKey: requireIdempotencyKey(idempotencyKey),
+      body: createLivePhotoPairRequestSchema.parse(
+        body ?? {},
+      ) as CreateLivePhotoPairBody,
     });
     return result.body;
   }

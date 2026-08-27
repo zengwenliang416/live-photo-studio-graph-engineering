@@ -27,6 +27,11 @@ export interface SetProjectCoverBody {
   readonly assetId: string;
 }
 
+export interface CreateLivePhotoPairBody {
+  readonly photoAssetId: string;
+  readonly videoAssetId: string;
+}
+
 export interface UseCaseResult {
   readonly status: number;
   readonly body: unknown;
@@ -97,6 +102,12 @@ export function matchesDeclaredContentType(
         prefix.length >= 12 &&
         asciiAt(prefix, 4, 4) === "ftyp" &&
         HEIF_BRANDS.has(asciiAt(prefix, 8, 4))
+      );
+    case "video/quicktime":
+      return (
+        prefix.length >= 12 &&
+        asciiAt(prefix, 4, 4) === "ftyp" &&
+        asciiAt(prefix, 8, 4) === "qt  "
       );
     default:
       return false;
@@ -301,10 +312,12 @@ export class AssetUploadService {
         userId: params.userId,
         requestHash,
         work: async (tx) => {
+          const isVideo = asset.contentType === "video/quicktime";
           const marked = await tx.markAssetReady(
             asset.id,
             stat.bytes,
             params.body.sha256,
+            isVideo ? "LIVE_PHOTO_VIDEO" : "CONTENT",
           );
           if (!marked) {
             throw conflict(
@@ -312,11 +325,13 @@ export class AssetUploadService {
               "The asset upload was already confirmed.",
             );
           }
-          await tx.insertAssetPreviewRequest({
-            eventId: randomUUID(),
-            assetId: asset.id,
-            projectId: asset.projectId,
-          });
+          if (!isVideo) {
+            await tx.insertAssetPreviewRequest({
+              eventId: randomUUID(),
+              assetId: asset.id,
+              projectId: asset.projectId,
+            });
+          }
           return {
             status: 200,
             body: { data: { assetId: asset.id, status: "READY" } },
@@ -360,10 +375,92 @@ export class AssetUploadService {
             "Only READY assets can be set as the project cover.",
           );
         }
+        if (asset.contentType === "video/quicktime") {
+          throw unprocessable(
+            "ASSET_COVER_TYPE_INVALID",
+            "A Live Photo video component cannot be used as the project cover.",
+          );
+        }
         await tx.setProjectCover(params.projectId, asset.id);
         return {
           status: 200,
           body: { data: { projectId: params.projectId, coverAssetId: asset.id } },
+        };
+      },
+    });
+  }
+
+  async createLivePhotoPair(params: {
+    projectId: string;
+    userId: string;
+    idempotencyKey: string;
+    body: CreateLivePhotoPairBody;
+  }): Promise<UseCaseResult> {
+    return this.executeIdempotently({
+      scope: `POST:/v1/projects/${params.projectId}/live-photo-pairs`,
+      idempotencyKey: params.idempotencyKey,
+      userId: params.userId,
+      requestHash: hashRequest(params.body),
+      work: async (tx) => {
+        await tx.assertProjectOwner(params.projectId, params.userId);
+        const photo = await tx.findAssetById(params.body.photoAssetId);
+        const video = await tx.findAssetById(params.body.videoAssetId);
+        if (
+          !photo ||
+          photo.projectId !== params.projectId ||
+          photo.userId !== params.userId
+        ) {
+          throw notFound(
+            "ASSET_NOT_FOUND",
+            `Asset ${params.body.photoAssetId} was not found.`,
+          );
+        }
+        if (
+          !video ||
+          video.projectId !== params.projectId ||
+          video.userId !== params.userId
+        ) {
+          throw notFound(
+            "ASSET_NOT_FOUND",
+            `Asset ${params.body.videoAssetId} was not found.`,
+          );
+        }
+        if (photo.status !== "READY" || video.status !== "READY") {
+          throw unprocessable(
+            "LIVE_PHOTO_ASSET_NOT_READY",
+            "Both Live Photo components must be READY before pairing.",
+          );
+        }
+        if (!["image/heic", "image/heif"].includes(photo.contentType)) {
+          throw unprocessable(
+            "LIVE_PHOTO_PHOTO_TYPE_INVALID",
+            "The photo component must be HEIC or HEIF.",
+          );
+        }
+        if (video.contentType !== "video/quicktime") {
+          throw unprocessable(
+            "LIVE_PHOTO_VIDEO_TYPE_INVALID",
+            "The video component must be a QuickTime MOV.",
+          );
+        }
+        const pair = await tx.insertLivePhotoPair({
+          id: randomUUID(),
+          projectId: params.projectId,
+          photoAssetId: photo.id,
+          videoAssetId: video.id,
+        });
+        return {
+          status: 201,
+          body: {
+            data: {
+              livePhotoPairId: pair.id,
+              projectId: pair.projectId,
+              photoAssetId: pair.photoAssetId,
+              videoAssetId: pair.videoAssetId,
+              status: pair.status,
+              createdAt: pair.createdAt,
+            },
+          },
         };
       },
     });

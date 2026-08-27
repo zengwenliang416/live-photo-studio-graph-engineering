@@ -195,7 +195,7 @@ test("get returns the project with assets in ascending creation order", async ()
   assert.ok(project);
   store.seedAsset(project.id, {
     id: "10000000-0000-4000-8000-000000000002",
-    contentType: "image/jpeg",
+    contentType: "video/quicktime",
     bytes: 2048,
     status: "READY",
     createdAt: new Date(Date.UTC(2026, 0, 2)).toISOString(),
@@ -203,6 +203,13 @@ test("get returns the project with assets in ascending creation order", async ()
       `projects/${project.id}/variants/10000000-0000-4000-8000-000000000002/` +
       "display-preview.v1.jpg",
     previewStatus: "SUCCEEDED",
+  });
+  store.seedLivePhotoPair(project.id, {
+    id: "20000000-0000-4000-8000-000000000001",
+    photoAssetId: "10000000-0000-4000-8000-000000000001",
+    videoAssetId: "10000000-0000-4000-8000-000000000002",
+    status: "PAIRED",
+    createdAt: new Date(Date.UTC(2026, 0, 3)).toISOString(),
   });
   store.seedAsset(project.id, {
     id: "10000000-0000-4000-8000-000000000001",
@@ -228,6 +235,12 @@ test("get returns the project with assets in ascending creation order", async ()
           status: string;
           previewStatus: string;
         }>;
+        livePhotoPairs: Array<{
+          livePhotoPairId: string;
+          photoAssetId: string;
+          videoAssetId: string;
+          status: string;
+        }>;
       };
     }
   ).data;
@@ -240,6 +253,16 @@ test("get returns the project with assets in ascending creation order", async ()
   );
   assert.equal(data.assets[0]?.bytes, null);
   assert.equal(data.assets[0]?.previewStatus, "UNAVAILABLE");
+  assert.equal(data.assets[1]?.previewStatus, "UNAVAILABLE");
+  assert.deepEqual(data.livePhotoPairs, [
+    {
+      livePhotoPairId: "20000000-0000-4000-8000-000000000001",
+      photoAssetId: "10000000-0000-4000-8000-000000000001",
+      videoAssetId: "10000000-0000-4000-8000-000000000002",
+      status: "PAIRED",
+      createdAt: new Date(Date.UTC(2026, 0, 3)).toISOString(),
+    },
+  ]);
 });
 
 test("get signs only completed display previews", async () => {

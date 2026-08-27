@@ -6,6 +6,7 @@ export const UPLOAD_CONTENT_TYPES = [
   "image/webp",
   "image/heic",
   "image/heif",
+  "video/quicktime",
 ] as const;
 
 export const uploadIntentRequestSchema = z
@@ -27,5 +28,12 @@ export const confirmUploadRequestSchema = z
 export const setProjectCoverRequestSchema = z
   .object({
     assetId: z.string().uuid(),
+  })
+  .strict();
+
+export const createLivePhotoPairRequestSchema = z
+  .object({
+    photoAssetId: z.string().uuid(),
+    videoAssetId: z.string().uuid(),
   })
   .strict();

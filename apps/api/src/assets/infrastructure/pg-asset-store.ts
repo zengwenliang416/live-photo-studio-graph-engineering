@@ -7,6 +7,8 @@ import {
   type AssetStatus,
   type AssetStorePort,
   type AssetTx,
+  type ConfirmedAssetRole,
+  type LivePhotoPairRow,
   type StoredIdempotentResponse,
 } from "../ports.js";
 
@@ -118,6 +120,7 @@ class PgAssetTx implements AssetTx {
     assetId: string,
     bytes: number,
     sha256: string,
+    role: ConfirmedAssetRole,
   ): Promise<boolean> {
     const update = await this.client.query(
       `UPDATE project_assets
@@ -129,9 +132,9 @@ class PgAssetTx implements AssetTx {
     if (update.rowCount !== 1) return false;
     await this.client.query(
       `INSERT INTO asset_roles (project_id, asset_id, role)
-       SELECT project_id, id, 'CONTENT' FROM project_assets WHERE id = $1
+       SELECT project_id, id, $2 FROM project_assets WHERE id = $1
        ON CONFLICT DO NOTHING`,
-      [assetId],
+      [assetId, role],
     );
     return true;
   }
@@ -178,6 +181,47 @@ class PgAssetTx implements AssetTx {
        ON CONFLICT DO NOTHING`,
       [projectId, assetId],
     );
+  }
+
+  async insertLivePhotoPair(input: {
+    id: string;
+    projectId: string;
+    photoAssetId: string;
+    videoAssetId: string;
+  }): Promise<LivePhotoPairRow> {
+    try {
+      const result = await this.client.query<Record<string, unknown>>(
+        `INSERT INTO live_photo_pairs (
+           id, project_id, photo_asset_id, video_asset_id
+         ) VALUES ($1, $2, $3, $4)
+         RETURNING id, project_id, photo_asset_id, video_asset_id, status, created_at`,
+        [
+          input.id,
+          input.projectId,
+          input.photoAssetId,
+          input.videoAssetId,
+        ],
+      );
+      const row = result.rows[0];
+      if (!row) throw new Error("live_photo_pairs insert returned no row.");
+      return {
+        id: row["id"] as string,
+        projectId: row["project_id"] as string,
+        photoAssetId: row["photo_asset_id"] as string,
+        videoAssetId: row["video_asset_id"] as string,
+        status: row["status"] as "PAIRED",
+        createdAt: (row["created_at"] as Date).toISOString(),
+      };
+    } catch (error) {
+      if (isUniqueViolation(error)) {
+        throw new ApplicationProblemError(
+          409,
+          "LIVE_PHOTO_ASSET_ALREADY_PAIRED",
+          "One of the assets already belongs to a Live Photo pair.",
+        );
+      }
+      throw error;
+    }
   }
 
   async findIdempotentResponse(

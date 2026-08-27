@@ -39,6 +39,14 @@ function heicBytes(total: number): Uint8Array {
   return bytes;
 }
 
+function quickTimeBytes(total: number): Uint8Array {
+  const bytes = new Uint8Array(total);
+  bytes.set([0x00, 0x00, 0x00, 0x14], 0);
+  bytes.set(Buffer.from("ftyp", "ascii"), 4);
+  bytes.set(Buffer.from("qt  ", "ascii"), 8);
+  return bytes;
+}
+
 function sha256Hex(bytes: Uint8Array): string {
   return createHash("sha256").update(bytes).digest("hex");
 }
@@ -157,7 +165,7 @@ test("upload intent replay returns the same asset and re-mints the URL", async (
 });
 
 async function seedUploadedAsset(
-  contentType: "image/jpeg" | "image/heic" = "image/jpeg",
+  contentType: "image/jpeg" | "image/heic" | "video/quicktime" = "image/jpeg",
   bytes: Uint8Array = jpegBytes(128),
 ) {
   const context = setup();
@@ -215,6 +223,23 @@ test("confirm recognizes HEIC ftyp brands", async () => {
   });
   assert.equal(result.status, 200);
   assert.equal(store.assets.get(assetId)?.status, "READY");
+});
+
+test("confirm accepts QuickTime MOV as LIVE_PHOTO_VIDEO without a preview job", async () => {
+  const bytes = quickTimeBytes(64);
+  const { store, service, assetId } = await seedUploadedAsset(
+    "video/quicktime",
+    bytes,
+  );
+  const result = await service.confirmUpload({
+    assetId,
+    userId: USER,
+    idempotencyKey: KEY,
+    body: { bytes: bytes.byteLength, sha256: sha256Hex(bytes) },
+  });
+  assert.equal(result.status, 200);
+  assert.deepEqual(store.rolesOf(assetId), ["LIVE_PHOTO_VIDEO"]);
+  assert.deepEqual(store.previewRequests, []);
 });
 
 test("confirm reports missing objects and size mismatches", async () => {
@@ -394,4 +419,163 @@ test("cover requires an owned project and a READY asset", async () => {
     body: { assetId },
   });
   assert.deepEqual(replay.body, result.body);
+});
+
+test("creates an idempotent Live Photo pair from READY HEIC and MOV assets", async () => {
+  const { store, storage, service } = setup();
+  const uploadAndConfirm = async (
+    contentType: "image/heic" | "video/quicktime",
+    bytes: Uint8Array,
+    suffix: string,
+  ): Promise<string> => {
+    const intent = await service.createUploadIntent({
+      projectId: PROJECT_ID,
+      userId: USER,
+      idempotencyKey: `${KEY}-intent-${suffix}`,
+      body: { contentType, bytes: bytes.byteLength },
+    });
+    const assetId = assetIdOf(intent);
+    const asset = store.assets.get(assetId);
+    assert.ok(asset);
+    await storage.putObject({
+      objectKey: asset.objectKey,
+      body: bytes,
+      contentType,
+    });
+    await service.confirmUpload({
+      assetId,
+      userId: USER,
+      idempotencyKey: `${KEY}-confirm-${suffix}`,
+      body: { bytes: bytes.byteLength, sha256: sha256Hex(bytes) },
+    });
+    return assetId;
+  };
+  const photoAssetId = await uploadAndConfirm(
+    "image/heic",
+    heicBytes(64),
+    "photo",
+  );
+  const videoAssetId = await uploadAndConfirm(
+    "video/quicktime",
+    quickTimeBytes(64),
+    "video",
+  );
+  await expectProblem(
+    service.setProjectCover({
+      projectId: PROJECT_ID,
+      userId: USER,
+      idempotencyKey: `${KEY}-video-cover`,
+      body: { assetId: videoAssetId },
+    }),
+    422,
+    "ASSET_COVER_TYPE_INVALID",
+  );
+
+  const first = await service.createLivePhotoPair({
+    projectId: PROJECT_ID,
+    userId: USER,
+    idempotencyKey: `${KEY}-pair`,
+    body: { photoAssetId, videoAssetId },
+  });
+  const replay = await service.createLivePhotoPair({
+    projectId: PROJECT_ID,
+    userId: USER,
+    idempotencyKey: `${KEY}-pair`,
+    body: { photoAssetId, videoAssetId },
+  });
+
+  assert.equal(first.status, 201);
+  assert.deepEqual(replay.body, first.body);
+  assert.equal(store.livePhotoPairs.size, 1);
+  assert.deepEqual(store.rolesOf(photoAssetId), ["CONTENT"]);
+  assert.deepEqual(store.rolesOf(videoAssetId), ["LIVE_PHOTO_VIDEO"]);
+  await expectProblem(
+    service.createLivePhotoPair({
+      projectId: PROJECT_ID,
+      userId: USER,
+      idempotencyKey: `${KEY}-pair-again`,
+      body: { photoAssetId, videoAssetId },
+    }),
+    409,
+    "LIVE_PHOTO_ASSET_ALREADY_PAIRED",
+  );
+});
+
+test("Live Photo pairing enforces ownership, readiness and component types", async () => {
+  const { store, service } = setup();
+  const heicIntent = await service.createUploadIntent({
+    projectId: PROJECT_ID,
+    userId: USER,
+    idempotencyKey: `${KEY}-heic`,
+    body: { contentType: "image/heic", bytes: 64 },
+  });
+  const jpegIntent = await service.createUploadIntent({
+    projectId: PROJECT_ID,
+    userId: USER,
+    idempotencyKey: `${KEY}-jpeg`,
+    body: { contentType: "image/jpeg", bytes: 64 },
+  });
+  const heicAssetId = assetIdOf(heicIntent);
+  const jpegAssetId = assetIdOf(jpegIntent);
+
+  await expectProblem(
+    service.createLivePhotoPair({
+      projectId: PROJECT_ID,
+      userId: USER,
+      idempotencyKey: `${KEY}-not-ready`,
+      body: { photoAssetId: heicAssetId, videoAssetId: jpegAssetId },
+    }),
+    422,
+    "LIVE_PHOTO_ASSET_NOT_READY",
+  );
+
+  const now = new Date().toISOString();
+  const readyHeic = store.assets.get(heicAssetId);
+  const readyJpeg = store.assets.get(jpegAssetId);
+  assert.ok(readyHeic);
+  assert.ok(readyJpeg);
+  store.assets.set(heicAssetId, {
+    ...readyHeic,
+    status: "READY",
+    bytes: 64,
+    sha256: "a".repeat(64),
+    createdAt: now,
+  });
+  store.assets.set(jpegAssetId, {
+    ...readyJpeg,
+    status: "READY",
+    bytes: 64,
+    sha256: "b".repeat(64),
+    createdAt: now,
+  });
+  await expectProblem(
+    service.createLivePhotoPair({
+      projectId: PROJECT_ID,
+      userId: USER,
+      idempotencyKey: `${KEY}-wrong-video`,
+      body: { photoAssetId: heicAssetId, videoAssetId: jpegAssetId },
+    }),
+    422,
+    "LIVE_PHOTO_VIDEO_TYPE_INVALID",
+  );
+  await expectProblem(
+    service.createLivePhotoPair({
+      projectId: PROJECT_ID,
+      userId: USER,
+      idempotencyKey: `${KEY}-wrong-photo`,
+      body: { photoAssetId: jpegAssetId, videoAssetId: heicAssetId },
+    }),
+    422,
+    "LIVE_PHOTO_PHOTO_TYPE_INVALID",
+  );
+  await expectProblem(
+    service.createLivePhotoPair({
+      projectId: PROJECT_ID,
+      userId: OTHER_USER,
+      idempotencyKey: `${KEY}-foreign`,
+      body: { photoAssetId: heicAssetId, videoAssetId: jpegAssetId },
+    }),
+    404,
+    "PROJECT_NOT_FOUND",
+  );
 });

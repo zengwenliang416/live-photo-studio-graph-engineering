@@ -137,6 +137,14 @@ test("upload intent validates the body and signs an upload URL", async () => {
   assert.ok(typeof ok.body.data.uploadUrl === "string");
   assert.equal(ok.body.data.uploadHeaders["content-type"], "image/jpeg");
   assert.ok(typeof ok.body.data.expiresAt === "string");
+
+  const mov = await request(app.getHttpServer())
+    .post(`/v1/projects/${PROJECT_ID}/upload-intents`)
+    .set("x-user-id", USER)
+    .set("Idempotency-Key", "contract-key-intent-mov")
+    .send({ contentType: "video/quicktime", bytes: 128 });
+  assert.equal(mov.status, 201);
+  assert.equal(mov.body.data.uploadHeaders["content-type"], "video/quicktime");
   await app.close();
 });
 
@@ -168,5 +176,18 @@ test("confirm and cover require idempotency keys and valid bodies", async () => 
     .set("Idempotency-Key", "contract-key-cover-0001")
     .send({ assetId: "not-a-uuid" });
   expectProblem(coverBadAsset, 422, "VALIDATION_FAILED");
+
+  const pairMissingKey = await request(app.getHttpServer())
+    .post(`/v1/projects/${PROJECT_ID}/live-photo-pairs`)
+    .set("x-user-id", USER)
+    .send({ photoAssetId: ASSET_ID, videoAssetId: ASSET_ID });
+  expectProblem(pairMissingKey, 400, "IDEMPOTENCY_KEY_REQUIRED");
+
+  const pairBadAsset = await request(app.getHttpServer())
+    .post(`/v1/projects/${PROJECT_ID}/live-photo-pairs`)
+    .set("x-user-id", USER)
+    .set("Idempotency-Key", "contract-key-pair-0001")
+    .send({ photoAssetId: ASSET_ID, videoAssetId: "not-a-uuid" });
+  expectProblem(pairBadAsset, 422, "VALIDATION_FAILED");
   await app.close();
 });

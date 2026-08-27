@@ -1,4 +1,14 @@
 export type AssetStatus = "UPLOADING" | "READY" | "REJECTED";
+export type ConfirmedAssetRole = "CONTENT" | "LIVE_PHOTO_VIDEO";
+
+export interface LivePhotoPairRow {
+  readonly id: string;
+  readonly projectId: string;
+  readonly photoAssetId: string;
+  readonly videoAssetId: string;
+  readonly status: "PAIRED";
+  readonly createdAt: string;
+}
 
 export interface AssetRow {
   readonly id: string;
@@ -32,14 +42,12 @@ export interface AssetTx {
     declaredBytes: number;
   }): Promise<void>;
   findAssetById(assetId: string): Promise<AssetRow | null>;
-  /**
-   * Transitions UPLOADING → READY and registers the CONTENT role in the same
-   * transaction. Returns false when the asset already left UPLOADING.
-   */
+  /** Transitions UPLOADING → READY and registers its role atomically. */
   markAssetReady(
     assetId: string,
     bytes: number,
     sha256: string,
+    role: ConfirmedAssetRole,
   ): Promise<boolean>;
   insertAssetPreviewRequest(input: {
     eventId: string;
@@ -50,6 +58,12 @@ export interface AssetTx {
   markAssetRejected(assetId: string): Promise<void>;
   /** Sets projects.cover_asset_id and registers the COVER role atomically. */
   setProjectCover(projectId: string, assetId: string): Promise<void>;
+  insertLivePhotoPair(input: {
+    id: string;
+    projectId: string;
+    photoAssetId: string;
+    videoAssetId: string;
+  }): Promise<LivePhotoPairRow>;
   findIdempotentResponse(
     scope: string,
     idempotencyKey: string,
