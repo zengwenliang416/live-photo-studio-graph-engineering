@@ -478,6 +478,7 @@ function UploadPanel(): React.JSX.Element {
                 selectedKey={styleKey}
                 onSelect={setStyleKey}
                 heading="选择系列风格"
+                mode="compact"
               />
             </section>
 

@@ -36,6 +36,7 @@ test("upload page offers a non-blocking style picker", () => {
   assert.match(pageSource, /heading="选择系列风格"/u);
   assert.match(pageSource, /selectedKey=\{styleKey\}/u);
   assert.match(pageSource, /onSelect=\{setStyleKey\}/u);
+  assert.match(pageSource, /mode="compact"/u);
 });
 
 test("upload page wires the intent, signed PUT and confirm pipeline", () => {

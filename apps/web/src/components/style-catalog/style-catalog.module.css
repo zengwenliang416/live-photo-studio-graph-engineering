@@ -127,6 +127,7 @@
   gap: 12px;
   padding-right: 4px;
   overflow-y: auto;
+  contain: layout paint;
 }
 
 .card {
@@ -138,6 +139,8 @@
   background:
     linear-gradient(155deg, rgb(29 29 32 / 96%), rgb(17 17 19 / 98%));
   box-shadow: 0 18px 46px rgb(0 0 0 / 14%);
+  content-visibility: auto;
+  contain-intrinsic-size: 330px;
   transition:
     transform 160ms ease,
     border-color 160ms ease;
@@ -157,7 +160,8 @@
 
 .preview {
   position: relative;
-  min-height: 142px;
+  height: 142px;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -175,6 +179,9 @@
 }
 
 .preview img {
+  position: absolute;
+  inset: 0;
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -323,10 +330,37 @@
   background: rgb(230 175 46 / 7%);
 }
 
+.catalogFooter {
+  display: flex;
+  min-height: 52px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--muted-dim);
+  background: var(--surface);
+  font-size: 9px;
+}
+
+.catalogFooter button {
+  min-height: 36px;
+  padding: 7px 13px;
+  border: 1px solid rgb(230 175 46 / 38%);
+  border-radius: 9px;
+  color: #f2d58e;
+  background: rgb(230 175 46 / 7%);
+  font-size: 9px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
 .search input:focus-visible,
 .categoryRail button:focus-visible,
 .selectButton:focus-visible,
 .promptButton:focus-visible,
+.catalogFooter button:focus-visible,
 .closeButton:focus-visible,
 .promptToolbar button:focus-visible,
 .promptToolbar select:focus-visible {
@@ -496,6 +530,56 @@
   overflow-wrap: anywhere;
 }
 
+.catalog[data-mode="compact"] {
+  container: compact-style-catalog / inline-size;
+  gap: 14px;
+}
+
+.catalog[data-mode="compact"] .catalogHeader {
+  grid-template-columns: 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.catalog[data-mode="compact"] .heading {
+  font-size: clamp(26px, 2.2vw, 34px);
+}
+
+.catalog[data-mode="compact"] .summary {
+  max-width: 54ch;
+}
+
+.catalog[data-mode="compact"] .grid {
+  max-height: none;
+  grid-template-columns: 1fr;
+  overflow: visible;
+}
+
+.catalog[data-mode="compact"] .card {
+  min-height: 156px;
+  grid-template-columns: 128px minmax(0, 1fr);
+  grid-template-rows: 1fr;
+}
+
+.catalog[data-mode="compact"] .preview {
+  width: 128px;
+  height: 100%;
+  min-height: 156px;
+}
+
+.catalog[data-mode="compact"] .cardBody {
+  gap: 9px;
+  padding: 12px;
+}
+
+.catalog[data-mode="compact"] .cardBody h3 {
+  font-size: 16px;
+}
+
+.catalog[data-mode="compact"] .cardBody p {
+  -webkit-line-clamp: 2;
+}
+
 @media (max-width: 780px) {
   .catalogHeader {
     grid-template-columns: 1fr;
@@ -510,13 +594,32 @@
   }
 }
 
+@container compact-style-catalog (min-width: 620px) {
+  .catalog[data-mode="compact"] .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .catalog[data-mode="compact"] .card {
+    min-height: 0;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .catalog[data-mode="compact"] .preview {
+    width: auto;
+    height: 136px;
+    min-height: 0;
+  }
+}
+
 @media (max-width: 520px) {
   .grid {
     grid-template-columns: 1fr;
   }
 
   .resultBar,
-  .promptToolbar {
+  .promptToolbar,
+  .catalogFooter {
     align-items: stretch;
     flex-direction: column;
   }
@@ -531,6 +634,7 @@
   .categoryRail button,
   .selectButton,
   .promptButton,
+  .catalogFooter button,
   .promptToolbar button,
   .promptToolbar select,
   .closeButton {

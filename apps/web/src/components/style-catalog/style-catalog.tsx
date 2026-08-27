@@ -24,7 +24,11 @@ interface StyleCatalogProps {
   readonly selectedKey?: string | null;
   readonly onSelect?: (key: string) => void;
   readonly heading?: string;
+  readonly mode?: "full" | "compact";
 }
+
+const FULL_BATCH_SIZE = 24;
+const COMPACT_BATCH_SIZE = 8;
 
 function promptErrorMessage(error: unknown): string {
   if (error instanceof ApiProblemError) {
@@ -42,10 +46,14 @@ export function StyleCatalog({
   selectedKey,
   onSelect,
   heading = "完整风格目录",
+  mode = "full",
 }: StyleCatalogProps): React.JSX.Element {
   const [category, setCategory] = useState(ALL_STYLE_CATEGORIES);
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query);
+  const batchSize =
+    mode === "compact" ? COMPACT_BATCH_SIZE : FULL_BATCH_SIZE;
+  const [visibleCount, setVisibleCount] = useState(batchSize);
   const [promptKey, setPromptKey] = useState<string | null>(null);
   const [referenceImageCount, setReferenceImageCount] = useState(1);
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">(
@@ -59,6 +67,8 @@ export function StyleCatalog({
     () => filterStylePresets(presets, category, deferredQuery),
     [category, deferredQuery, presets],
   );
+  const visiblePresets = filtered.slice(0, visibleCount);
+  const remainingCount = Math.max(0, filtered.length - visiblePresets.length);
   const activePreset =
     promptKey === null
       ? null
@@ -72,6 +82,10 @@ export function StyleCatalog({
       setCategory(ALL_STYLE_CATEGORIES);
     }
   }, [categories, category]);
+
+  useEffect(() => {
+    setVisibleCount(batchSize);
+  }, [batchSize, category, deferredQuery]);
 
   useEffect(() => {
     if (promptKey === null) return;
@@ -111,7 +125,11 @@ export function StyleCatalog({
   };
 
   return (
-    <section className={styles.catalog} aria-labelledby="style-catalog-title">
+    <section
+      className={styles.catalog}
+      data-mode={mode}
+      aria-labelledby="style-catalog-title"
+    >
       <div className={styles.catalogHeader}>
         <div>
           <span className={styles.kicker}>STYLE LIBRARY / 视觉策略库</span>
@@ -168,7 +186,8 @@ export function StyleCatalog({
         <>
           <div className={styles.resultBar}>
             <span>
-              当前显示 <strong>{filtered.length}</strong> / {presets.length}
+              当前显示 <strong>{visiblePresets.length}</strong> /{" "}
+              {filtered.length} 个匹配结果
             </span>
             {selectedKey !== undefined && selectedKey !== null && (
               <span>
@@ -189,7 +208,7 @@ export function StyleCatalog({
               role={onSelect === undefined ? "list" : "radiogroup"}
               aria-label="生成风格"
             >
-              {filtered.map((preset) => {
+              {visiblePresets.map((preset) => {
                 const isSelected = selectedKey === preset.key;
                 return (
                   <article
@@ -209,6 +228,8 @@ export function StyleCatalog({
                             src={preset.source.previewUrl}
                             alt=""
                             loading="lazy"
+                            decoding="async"
+                            fetchPriority="low"
                             referrerPolicy="no-referrer"
                           />
                         )}
@@ -263,6 +284,19 @@ export function StyleCatalog({
                   </article>
                 );
               })}
+            </div>
+          )}
+          {remainingCount > 0 && (
+            <div className={styles.catalogFooter}>
+              <span>还有 {remainingCount} 种风格未显示</span>
+              <button
+                type="button"
+                onClick={() =>
+                  setVisibleCount((count) => count + batchSize)
+                }
+              >
+                再显示 {Math.min(batchSize, remainingCount)} 种
+              </button>
             </div>
           )}
         </>
