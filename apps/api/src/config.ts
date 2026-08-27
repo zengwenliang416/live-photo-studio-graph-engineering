@@ -8,6 +8,7 @@ export const apiConfigSchema = z.object({
   GRAPH_SIGNAL_QUEUE: z.string().min(1).default("graph-signals"),
   GENERATION_JOB_QUEUE: z.string().min(1).default("generation-jobs"),
   RENDER_JOB_QUEUE: z.string().min(1).default("render-jobs"),
+  ASSET_PREVIEW_JOB_QUEUE: z.string().min(1).default("asset-preview-jobs"),
   OUTBOX_DISPATCH_INTERVAL_MS: z.coerce.number().int().positive().default(500),
   OUTBOX_DISPATCH_BATCH_SIZE: z.coerce.number().int().positive().max(200).default(20),
   OUTBOX_VISIBILITY_TIMEOUT_MS: z.coerce.number().int().positive().default(60_000),

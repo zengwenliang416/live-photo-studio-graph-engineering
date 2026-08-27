@@ -32,6 +32,7 @@ async function createApp() {
     signals: fakeQueue,
     generationJobs: fakeQueue,
     renderJobs: fakeQueue,
+    assetPreviewJobs: fakeQueue,
   } as unknown as OutboxQueuePair;
 
   const moduleRef = await Test.createTestingModule({
@@ -48,6 +49,7 @@ async function createApp() {
       GRAPH_SIGNAL_QUEUE: "graph-signals-test",
       GENERATION_JOB_QUEUE: "generation-jobs-test",
       RENDER_JOB_QUEUE: "render-jobs-test",
+      ASSET_PREVIEW_JOB_QUEUE: "asset-preview-jobs-test",
       OUTBOX_DISPATCH_INTERVAL_MS: 60_000,
       OUTBOX_DISPATCH_BATCH_SIZE: 10,
       OUTBOX_VISIBILITY_TIMEOUT_MS: 60_000,

@@ -1,6 +1,7 @@
 import type { Queue } from "bullmq";
 import type { Pool } from "pg";
 import {
+  assetPreviewRequestedPayloadSchema,
   generationRequestedPayloadSchema,
   renderRequestedPayloadSchema,
   safeLogEvent,
@@ -14,6 +15,7 @@ export interface OutboxQueuePair {
   readonly signals: Queue;
   readonly generationJobs: Queue;
   readonly renderJobs: Queue;
+  readonly assetPreviewJobs: Queue;
 }
 
 interface OutboxRow {
@@ -267,6 +269,9 @@ export function routeEvent(
   if (eventType === "workflow.render.requested.v1") {
     return queues.renderJobs;
   }
+  if (eventType === "asset.preview.requested.v1") {
+    return queues.assetPreviewJobs;
+  }
   return null;
 }
 
@@ -287,6 +292,8 @@ export function parseRoutedPayload(eventType: string, payload: unknown): unknown
           ? generationRequestedPayloadSchema.safeParse(payload)
           : eventType === "workflow.render.requested.v1"
             ? renderRequestedPayloadSchema.safeParse(payload)
+            : eventType === "asset.preview.requested.v1"
+              ? assetPreviewRequestedPayloadSchema.safeParse(payload)
             : { success: true as const, data: payload };
   if (!parsed.success) throw new OutboxPayloadError();
   return parsed.data;

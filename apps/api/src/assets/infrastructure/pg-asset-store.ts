@@ -136,6 +136,28 @@ class PgAssetTx implements AssetTx {
     return true;
   }
 
+  async insertAssetPreviewRequest(input: {
+    eventId: string;
+    assetId: string;
+    projectId: string;
+  }): Promise<void> {
+    await this.client.query(
+      `INSERT INTO outbox_events (
+         id, aggregate_type, aggregate_id, event_type, payload
+       ) VALUES ($1, 'asset', $2, 'asset.preview.requested.v1', $3::jsonb)`,
+      [
+        input.eventId,
+        input.assetId,
+        JSON.stringify({
+          jobId: input.assetId,
+          projectId: input.projectId,
+          assetId: input.assetId,
+          recipeVersion: "display-preview.v1",
+        }),
+      ],
+    );
+  }
+
   async markAssetRejected(assetId: string): Promise<void> {
     await this.client.query(
       `UPDATE project_assets

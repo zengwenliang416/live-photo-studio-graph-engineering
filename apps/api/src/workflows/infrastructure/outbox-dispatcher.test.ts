@@ -13,6 +13,7 @@ function fakePair(): {
     signals: Queue;
     generationJobs: Queue;
     renderJobs: Queue;
+    assetPreviewJobs: Queue;
   };
   names: Map<Queue, string>;
 } {
@@ -28,6 +29,7 @@ function fakePair(): {
       signals: make("graph-signals"),
       generationJobs: make("generation-jobs"),
       renderJobs: make("render-jobs"),
+      assetPreviewJobs: make("asset-preview-jobs"),
     },
     names,
   };
@@ -48,6 +50,7 @@ test("outbox routing maps domain events to their transport queues", () => {
   assert.equal(route("RENDER_JOB_FAILED"), "graph-signals");
   assert.equal(route("workflow.generation.requested.v1"), "generation-jobs");
   assert.equal(route("workflow.render.requested.v1"), "render-jobs");
+  assert.equal(route("asset.preview.requested.v1"), "asset-preview-jobs");
   assert.equal(route("workflow.completed.v1"), null);
   assert.equal(route("workflow.failed.v1"), null);
   assert.equal(route("totally.unknown.event"), null);

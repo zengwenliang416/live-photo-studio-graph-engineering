@@ -22,6 +22,20 @@ export interface ProjectAssetRow {
   readonly bytes: number | null;
   readonly status: "UPLOADING" | "READY" | "REJECTED" | string;
   readonly createdAt: string;
+  readonly previewObjectKey: string | null;
+  readonly previewStatus:
+    | "QUEUED"
+    | "RUNNING"
+    | "SUCCEEDED"
+    | "FAILED"
+    | null;
+}
+
+export interface ProjectPreviewSignerPort {
+  sign(objectKey: string): Promise<{
+    readonly url: string;
+    readonly expiresAt: string;
+  }>;
 }
 
 export interface StoredIdempotentResponse {

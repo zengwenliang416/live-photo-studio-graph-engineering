@@ -312,6 +312,11 @@ export class AssetUploadService {
               "The asset upload was already confirmed.",
             );
           }
+          await tx.insertAssetPreviewRequest({
+            eventId: randomUUID(),
+            assetId: asset.id,
+            projectId: asset.projectId,
+          });
           return {
             status: 200,
             body: { data: { assetId: asset.id, status: "READY" } },

@@ -18,6 +18,8 @@ export interface UploadItem {
   status: FileUploadStatus;
   assetId?: string;
   errorMessage?: string;
+  previewUrl?: string | null;
+  previewStatus?: "PROCESSING" | "READY" | "FAILED" | "UNAVAILABLE";
 }
 
 export const MAX_UPLOAD_BYTES = 20 * 1024 * 1024;
@@ -83,7 +85,12 @@ export function validateUploadFile(
 export function advanceUploadItem(
   item: UploadItem,
   status: FileUploadStatus,
-  patch: { assetId?: string; errorMessage?: string } = {},
+  patch: {
+    assetId?: string;
+    errorMessage?: string;
+    previewUrl?: string | null;
+    previewStatus?: "PROCESSING" | "READY" | "FAILED" | "UNAVAILABLE";
+  } = {},
 ): UploadItem {
   const next: UploadItem = {
     key: item.key,
@@ -93,6 +100,14 @@ export function advanceUploadItem(
   };
   const assetId = patch.assetId ?? item.assetId;
   if (assetId !== undefined) next.assetId = assetId;
+  const previewUrl =
+    "previewUrl" in patch ? patch.previewUrl : item.previewUrl;
+  if (previewUrl !== undefined) next.previewUrl = previewUrl;
+  const previewStatus =
+    "previewStatus" in patch ? patch.previewStatus : item.previewStatus;
+  if (previewStatus !== undefined) {
+    next.previewStatus = previewStatus;
+  }
   const errorMessage =
     patch.errorMessage ??
     (status === "failed" ? item.errorMessage : undefined);

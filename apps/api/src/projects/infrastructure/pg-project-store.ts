@@ -32,12 +32,20 @@ function mapProjectRow(row: Record<string, unknown>): ProjectRow {
 
 function mapAssetRow(row: Record<string, unknown>): ProjectAssetRow {
   const bytes = row["bytes"];
+  const previewObjectKey = row["preview_object_key"];
+  const previewStatus = row["preview_status"];
   return {
     id: row["id"] as string,
     contentType: row["content_type"] as string,
     bytes: typeof bytes === "number" ? bytes : null,
     status: row["status"] as ProjectAssetRow["status"],
     createdAt: (row["created_at"] as Date).toISOString(),
+    previewObjectKey:
+      typeof previewObjectKey === "string" ? previewObjectKey : null,
+    previewStatus:
+      typeof previewStatus === "string"
+        ? (previewStatus as NonNullable<ProjectAssetRow["previewStatus"]>)
+        : null,
   };
 }
 
@@ -123,10 +131,20 @@ class PgProjectTx implements ProjectTx {
     projectId: string,
   ): Promise<readonly ProjectAssetRow[]> {
     const result = await this.client.query<Record<string, unknown>>(
-      `SELECT id, content_type, bytes, status, created_at
-         FROM project_assets
-        WHERE project_id = $1
-        ORDER BY created_at ASC, id ASC`,
+      `SELECT asset.id,
+              asset.content_type,
+              asset.bytes,
+              asset.status,
+              asset.created_at,
+              variant.object_key AS preview_object_key,
+              variant.status AS preview_status
+         FROM project_assets AS asset
+         LEFT JOIN asset_variants AS variant
+           ON variant.asset_id = asset.id
+          AND variant.variant_type = 'DISPLAY_PREVIEW'
+          AND variant.recipe_version = 'display-preview.v1'
+        WHERE asset.project_id = $1
+        ORDER BY asset.created_at ASC, asset.id ASC`,
       [projectId],
     );
     return result.rows.map(mapAssetRow);

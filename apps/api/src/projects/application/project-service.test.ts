@@ -199,6 +199,10 @@ test("get returns the project with assets in ascending creation order", async ()
     bytes: 2048,
     status: "READY",
     createdAt: new Date(Date.UTC(2026, 0, 2)).toISOString(),
+    previewObjectKey:
+      `projects/${project.id}/variants/10000000-0000-4000-8000-000000000002/` +
+      "display-preview.v1.jpg",
+    previewStatus: "SUCCEEDED",
   });
   store.seedAsset(project.id, {
     id: "10000000-0000-4000-8000-000000000001",
@@ -206,6 +210,8 @@ test("get returns the project with assets in ascending creation order", async ()
     bytes: null,
     status: "UPLOADING",
     createdAt: new Date(Date.UTC(2026, 0, 1)).toISOString(),
+    previewObjectKey: null,
+    previewStatus: null,
   });
 
   const result = await service.getProject({
@@ -215,7 +221,14 @@ test("get returns the project with assets in ascending creation order", async ()
   assert.equal(result.status, 200);
   const data = (
     result.body as {
-      data: { assets: Array<{ assetId: string; bytes: number | null; status: string }> };
+      data: {
+        assets: Array<{
+          assetId: string;
+          bytes: number | null;
+          status: string;
+          previewStatus: string;
+        }>;
+      };
     }
   ).data;
   assert.deepEqual(
@@ -226,6 +239,54 @@ test("get returns the project with assets in ascending creation order", async ()
     ],
   );
   assert.equal(data.assets[0]?.bytes, null);
+  assert.equal(data.assets[0]?.previewStatus, "UNAVAILABLE");
+});
+
+test("get signs only completed display previews", async () => {
+  const store = new InMemoryProjectStore();
+  const [project] = seedProjects(store, USER, 1);
+  assert.ok(project);
+  const objectKey =
+    `projects/${project.id}/variants/10000000-0000-4000-8000-000000000003/` +
+    "display-preview.v1.jpg";
+  store.seedAsset(project.id, {
+    id: "10000000-0000-4000-8000-000000000003",
+    contentType: "image/heic",
+    bytes: 4096,
+    status: "READY",
+    createdAt: new Date(Date.UTC(2026, 0, 3)).toISOString(),
+    previewObjectKey: objectKey,
+    previewStatus: "SUCCEEDED",
+  });
+  const service = new ProjectService(store, {
+    async sign(requestedKey) {
+      assert.equal(requestedKey, objectKey);
+      return {
+        url: "https://storage.example.test/signed-preview",
+        expiresAt: "2026-01-03T00:05:00.000Z",
+      };
+    },
+  });
+
+  const result = await service.getProject({
+    projectId: project.id,
+    userId: USER,
+  });
+  const data = (
+    result.body as {
+      data: {
+        assets: Array<{
+          previewUrl: string | null;
+          previewStatus: string;
+        }>;
+      };
+    }
+  ).data;
+  assert.equal(
+    data.assets[0]?.previewUrl,
+    "https://storage.example.test/signed-preview",
+  );
+  assert.equal(data.assets[0]?.previewStatus, "READY");
 });
 
 test("get never leaks existence: foreign and missing projects both 404", async () => {

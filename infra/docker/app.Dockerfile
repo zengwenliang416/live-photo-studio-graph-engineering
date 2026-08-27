@@ -23,6 +23,9 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 WORKDIR /app
 
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends libvips-tools \
+  && rm -rf /var/lib/apt/lists/*
 RUN npm install --global pnpm@10.20.0
 COPY --from=build --chown=node:node /app /app
 

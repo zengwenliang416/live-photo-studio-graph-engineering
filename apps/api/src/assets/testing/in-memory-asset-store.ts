@@ -25,6 +25,11 @@ export class InMemoryAssetStore implements AssetStorePort {
   readonly assets = new Map<string, AssetRow>();
   readonly roles = new Map<string, Set<string>>();
   readonly covers = new Map<string, string>();
+  readonly previewRequests: Array<{
+    eventId: string;
+    assetId: string;
+    projectId: string;
+  }> = [];
   readonly idempotency = new Map<string, StoredIdempotentResponse>();
 
   seedProject(projectId: string, userId: string): void {
@@ -78,6 +83,9 @@ export class InMemoryAssetStore implements AssetStorePort {
         roles.add("CONTENT");
         state.roles.set(assetId, roles);
         return true;
+      },
+      async insertAssetPreviewRequest(input): Promise<void> {
+        state.previewRequests.push(input);
       },
       async markAssetRejected(assetId): Promise<void> {
         const row = state.assets.get(assetId);

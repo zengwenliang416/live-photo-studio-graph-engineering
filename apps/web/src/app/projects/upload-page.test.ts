@@ -39,6 +39,15 @@ test("upload page offers a non-blocking style picker", () => {
   assert.match(pageSource, /mode="compact"/u);
 });
 
+test("upload page renders signed asset previews and polls while processing", () => {
+  assert.match(pageSource, /asset\.previewStatus === "PROCESSING"/u);
+  assert.match(pageSource, /src=\{item\.previewUrl\}/u);
+  assert.match(pageSource, /正在生成预览/u);
+  assert.match(pageSource, /queryClient\.invalidateQueries/u);
+  assert.match(styleSource, /\.assetPreview img/u);
+  assert.match(styleSource, /object-fit: cover/u);
+});
+
 test("upload page wires the intent, signed PUT and confirm pipeline", () => {
   assert.match(pageSource, /createUploadIntent/u);
   assert.match(pageSource, /uploadToSignedUrl/u);
@@ -118,6 +127,8 @@ test("advanceUploadItem keeps the asset id and scopes errors to failed", () => {
     fileName: "a.jpg",
     bytes: 10,
     status: "queued",
+    previewUrl: "https://storage.example.test/preview-a",
+    previewStatus: "READY",
   };
   const intending = advanceUploadItem(base, "intending");
   assert.equal(intending.status, "intending");
@@ -143,6 +154,15 @@ test("advanceUploadItem keeps the asset id and scopes errors to failed", () => {
   const retried = advanceUploadItem(failed, "intending");
   assert.equal(retried.errorMessage, undefined);
   assert.equal(retried.assetId, "asset-1");
+  assert.equal(retried.previewUrl, "https://storage.example.test/preview-a");
+  assert.equal(retried.previewStatus, "READY");
+
+  const refreshed = advanceUploadItem(retried, "ready", {
+    previewUrl: null,
+    previewStatus: "PROCESSING",
+  });
+  assert.equal(refreshed.previewUrl, null);
+  assert.equal(refreshed.previewStatus, "PROCESSING");
 });
 
 test("summarizeUploads and firstReadyAssetId derive the page summary", () => {

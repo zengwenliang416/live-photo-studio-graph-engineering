@@ -73,6 +73,7 @@ import { WorkflowOperationsController } from "./workflow-operations.controller.j
           signals: build(config.GRAPH_SIGNAL_QUEUE),
           generationJobs: build(config.GENERATION_JOB_QUEUE),
           renderJobs: build(config.RENDER_JOB_QUEUE),
+          assetPreviewJobs: build(config.ASSET_PREVIEW_JOB_QUEUE),
         };
       },
     },
@@ -112,6 +113,7 @@ export class WorkflowsModule implements OnModuleDestroy {
       this.queues.signals.close(),
       this.queues.generationJobs.close(),
       this.queues.renderJobs.close(),
+      this.queues.assetPreviewJobs.close(),
     ]);
   }
 }

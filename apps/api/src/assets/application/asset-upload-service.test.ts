@@ -192,6 +192,13 @@ test("confirm verifies the object and marks the asset READY with CONTENT role", 
   assert.equal(asset?.status, "READY");
   assert.equal(asset?.bytes, bytes.byteLength);
   assert.deepEqual(store.rolesOf(assetId), ["CONTENT"]);
+  assert.deepEqual(
+    store.previewRequests.map((request) => ({
+      assetId: request.assetId,
+      projectId: request.projectId,
+    })),
+    [{ assetId, projectId: PROJECT_ID }],
+  );
 });
 
 test("confirm recognizes HEIC ftyp brands", async () => {

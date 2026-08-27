@@ -7,6 +7,7 @@ import {
   encodeProjectCursor,
   type ProjectCursor,
   type ProjectStorePort,
+  type ProjectPreviewSignerPort,
   type ProjectTx,
 } from "../ports.js";
 
@@ -61,7 +62,10 @@ function decodeProjectCursor(raw: string): ProjectCursor {
  * the authenticated user and never leak cross-user existence.
  */
 export class ProjectService {
-  constructor(private readonly store: ProjectStorePort) {}
+  constructor(
+    private readonly store: ProjectStorePort,
+    private readonly previewSigner: ProjectPreviewSignerPort | null = null,
+  ) {}
 
   async createProject(params: {
     userId: string;
@@ -148,6 +152,51 @@ export class ProjectService {
       const assets = await tx.listAssetsByProject(project.id);
       return { project, assets };
     });
+    const assetViews = await Promise.all(
+      assets.map(async (asset) => {
+        let previewUrl: string | null = null;
+        let previewExpiresAt: string | null = null;
+        let previewStatus:
+          | "PROCESSING"
+          | "READY"
+          | "FAILED"
+          | "UNAVAILABLE" =
+          asset.status === "READY" ? "PROCESSING" : "UNAVAILABLE";
+        if (asset.status !== "READY") {
+          previewStatus = "UNAVAILABLE";
+        } else if (asset.previewStatus === "FAILED") {
+          previewStatus = "FAILED";
+        } else if (
+          asset.previewStatus === "SUCCEEDED" &&
+          asset.previewObjectKey !== null
+        ) {
+          if (this.previewSigner === null) {
+            previewStatus = "UNAVAILABLE";
+          } else {
+            try {
+              const signed = await this.previewSigner.sign(
+                asset.previewObjectKey,
+              );
+              previewUrl = signed.url;
+              previewExpiresAt = signed.expiresAt;
+              previewStatus = "READY";
+            } catch {
+              previewStatus = "UNAVAILABLE";
+            }
+          }
+        }
+        return {
+          assetId: asset.id,
+          contentType: asset.contentType,
+          bytes: asset.bytes,
+          status: asset.status,
+          createdAt: asset.createdAt,
+          previewUrl,
+          previewExpiresAt,
+          previewStatus,
+        };
+      }),
+    );
     return {
       status: 200,
       body: {
@@ -156,13 +205,7 @@ export class ProjectService {
           title: project.title,
           createdAt: project.createdAt,
           coverAssetId: project.coverAssetId,
-          assets: assets.map((asset) => ({
-            assetId: asset.id,
-            contentType: asset.contentType,
-            bytes: asset.bytes,
-            status: asset.status,
-            createdAt: asset.createdAt,
-          })),
+          assets: assetViews,
         },
       },
     };

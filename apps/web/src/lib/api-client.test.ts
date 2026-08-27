@@ -325,6 +325,9 @@ test("getProject parses the asset list with nullable fields", async () => {
           bytes: null,
           status: "READY",
           createdAt: CREATED_AT,
+          previewUrl: "https://storage.example.test/signed-preview",
+          previewExpiresAt: CREATED_AT,
+          previewStatus: "READY",
         },
       ],
     },
@@ -334,6 +337,10 @@ test("getProject parses the asset list with nullable fields", async () => {
   assert.equal(result.data.coverAssetId, ASSET_ID);
   assert.equal(result.data.assets[0]?.status, "READY");
   assert.equal(result.data.assets[0]?.bytes, null);
+  assert.equal(
+    result.data.assets[0]?.previewUrl,
+    "https://storage.example.test/signed-preview",
+  );
 });
 
 test("upload intent keys are scoped per project, file name and size", async () => {

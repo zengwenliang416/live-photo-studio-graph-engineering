@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { generationRequestedPayloadSchema } from "./job-payloads.js";
+import {
+  assetPreviewRequestedPayloadSchema,
+  generationRequestedPayloadSchema,
+} from "./job-payloads.js";
 
 const UUID = "00000000-0000-4000-8000-000000000001";
 
@@ -44,6 +47,24 @@ test("generation payloads reject empty or overlong style keys", () => {
     generationRequestedPayloadSchema.safeParse({
       ...validPayload(),
       styleKey: "x".repeat(65),
+    }).success,
+    false,
+  );
+});
+
+test("asset preview payloads keep only ids and the fixed recipe version", () => {
+  const parsed = assetPreviewRequestedPayloadSchema.parse({
+    jobId: UUID,
+    projectId: UUID,
+    assetId: UUID,
+    recipeVersion: "display-preview.v1",
+  });
+  assert.equal(parsed.assetId, UUID);
+  assert.equal(parsed.recipeVersion, "display-preview.v1");
+  assert.equal(
+    assetPreviewRequestedPayloadSchema.safeParse({
+      ...parsed,
+      recipeVersion: "display-preview.v2",
     }).success,
     false,
   );

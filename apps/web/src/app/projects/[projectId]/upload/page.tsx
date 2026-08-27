@@ -7,6 +7,7 @@ import {
   QueryClient,
   QueryClientProvider,
   useQuery,
+  useQueryClient,
 } from "@tanstack/react-query";
 import {
   ApiProblemError,
@@ -49,6 +50,7 @@ function UploadPanel(): React.JSX.Element {
   const projectId = params.projectId ?? "";
   const router = useRouter();
   const client = useMemo(() => new WorkflowApiClient(), []);
+  const queryClient = useQueryClient();
 
   // File blobs stay in a ref, never in React state or web storage.
   const filesRef = useRef(new Map<string, File>());
@@ -69,6 +71,12 @@ function UploadPanel(): React.JSX.Element {
     queryKey: ["project", projectId],
     queryFn: () => client.getProject(projectId),
     enabled: projectId.length > 0,
+    refetchInterval: (query) =>
+      query.state.data?.data.assets.some(
+        (asset) => asset.previewStatus === "PROCESSING",
+      )
+        ? 1500
+        : false,
   });
 
   const stylePresetsQuery = useQuery({
@@ -92,8 +100,21 @@ function UploadPanel(): React.JSX.Element {
       setConfirmedCoverAssetId((prev) => prev ?? detail.coverAssetId);
     }
     setItems((prev) => {
+      const assetsById = new Map(
+        detail.assets.map((asset) => [asset.assetId, asset]),
+      );
+      const updated = prev.map((item) => {
+        if (item.assetId === undefined) return item;
+        const asset = assetsById.get(item.assetId);
+        if (!asset) return item;
+        return {
+          ...item,
+          previewUrl: asset.previewUrl,
+          previewStatus: asset.previewStatus,
+        };
+      });
       const known = new Set(
-        prev
+        updated
           .map((item) => item.assetId)
           .filter((id): id is string => id !== undefined),
       );
@@ -106,9 +127,11 @@ function UploadPanel(): React.JSX.Element {
           bytes: asset.bytes ?? 0,
           status: "ready",
           assetId: asset.assetId,
+          previewUrl: asset.previewUrl,
+          previewStatus: asset.previewStatus,
         });
       }
-      return restored.length > 0 ? [...prev, ...restored] : prev;
+      return restored.length > 0 ? [...updated, ...restored] : updated;
     });
   }, [projectQuery.data]);
 
@@ -153,11 +176,14 @@ function UploadPanel(): React.JSX.Element {
         const sha256 = await sha256Hex(await file.arrayBuffer());
         await client.confirmAsset(assetId, { bytes: file.size, sha256 });
         patchItem(key, "ready", { assetId });
+        await queryClient.invalidateQueries({
+          queryKey: ["project", projectId],
+        });
       } catch (error: unknown) {
         patchItem(key, "failed", { errorMessage: uploadErrorMessage(error) });
       }
     },
-    [client, patchItem, projectId],
+    [client, patchItem, projectId, queryClient],
   );
 
   const pump = useCallback((): void => {
@@ -407,9 +433,38 @@ function UploadPanel(): React.JSX.Element {
                         <div
                           className={styles.assetPreview}
                           data-variant={index % 5}
-                          aria-hidden="true"
                         >
-                          <span>{String(index + 1).padStart(2, "0")}</span>
+                          {item.previewUrl ? (
+                            <img
+                              src={item.previewUrl}
+                              alt={`${item.fileName} 的素材预览`}
+                              loading="lazy"
+                              decoding="async"
+                              referrerPolicy="no-referrer"
+                            />
+                          ) : (
+                            <div
+                              className={styles.previewPlaceholder}
+                              aria-label={
+                                item.previewStatus === "FAILED"
+                                  ? "素材预览生成失败"
+                                  : item.previewStatus === "UNAVAILABLE"
+                                    ? "素材预览暂时不可用"
+                                    : "正在生成素材预览"
+                              }
+                            >
+                              <span>
+                                {String(index + 1).padStart(2, "0")}
+                              </span>
+                              <small>
+                                {item.previewStatus === "FAILED"
+                                  ? "预览生成失败"
+                                  : item.previewStatus === "UNAVAILABLE"
+                                    ? "预览暂不可用"
+                                    : "正在生成预览"}
+                              </small>
+                            </div>
+                          )}
                         </div>
                         <div className={styles.itemMain}>
                           <span className={styles.itemName}>{item.fileName}</span>

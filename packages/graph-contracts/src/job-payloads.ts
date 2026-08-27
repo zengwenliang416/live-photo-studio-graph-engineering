@@ -25,3 +25,14 @@ export const renderRequestedPayloadSchema = z.object({
 export type RenderRequestedPayload = z.infer<
   typeof renderRequestedPayloadSchema
 >;
+
+export const assetPreviewRequestedPayloadSchema = z.object({
+  jobId: z.string().uuid(),
+  projectId: z.string().uuid(),
+  assetId: z.string().uuid(),
+  recipeVersion: z.literal("display-preview.v1"),
+});
+
+export type AssetPreviewRequestedPayload = z.infer<
+  typeof assetPreviewRequestedPayloadSchema
+>;

@@ -78,6 +78,14 @@ const projectAssetSchema = z.object({
   bytes: z.number().int().nonnegative().nullable(),
   status: z.enum(["UPLOADING", "READY", "REJECTED"]),
   createdAt: z.string().min(1),
+  previewUrl: z.string().url().nullable(),
+  previewExpiresAt: z.string().datetime().nullable(),
+  previewStatus: z.enum([
+    "PROCESSING",
+    "READY",
+    "FAILED",
+    "UNAVAILABLE",
+  ]),
 });
 const projectDetailResponseSchema = z.object({
   data: projectSummarySchema.extend({
@@ -147,6 +155,13 @@ export interface ProjectAsset {
   readonly bytes: number | null;
   readonly status: ProjectAssetStatus;
   readonly createdAt: string;
+  readonly previewUrl: string | null;
+  readonly previewExpiresAt: string | null;
+  readonly previewStatus:
+    | "PROCESSING"
+    | "READY"
+    | "FAILED"
+    | "UNAVAILABLE";
 }
 
 export class ApiProblemError extends Error {
