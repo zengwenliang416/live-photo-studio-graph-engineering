@@ -9,7 +9,9 @@ import {
 } from "@live-photo-studio/database";
 import { workflowSignalSchema } from "@live-photo-studio/graph-contracts";
 import { WorkflowOperationsService } from "../application/workflow-operations-service.js";
+import { WorkflowService } from "../application/workflow-service.js";
 import { PgWorkflowOperations } from "./pg-workflow-operations.js";
+import { PgWorkflowUnit } from "./pg-workflow-unit.js";
 
 const RUN_PG_TESTS = process.env.RUN_PG_TESTS === "1";
 const ADMIN_URL =
@@ -485,6 +487,81 @@ if (!RUN_PG_TESTS) {
     assert.equal(RUN_PG_TESTS, false);
   });
 } else {
+  test("workflow start persists a run, outbox command and idempotent response", async () => {
+    const databasePool = await database();
+    const projectId = randomUUID();
+    const userId = randomUUID();
+    const idempotencyKey = `pg-start-${randomUUID()}`;
+
+    await databasePool.query(
+      `INSERT INTO projects (id, user_id, title)
+       VALUES ($1::uuid, $2::text, 'workflow start integration')`,
+      [projectId, userId],
+    );
+
+    const service = new WorkflowService(new PgWorkflowUnit(databasePool));
+    const result = await service.startWorkflowRun({
+      projectId,
+      userId,
+      idempotencyKey,
+      body: {
+        graphKey: "live-photo-project",
+        graphVersion: "v1",
+        input: { styleKey: "tokyo-rainy-night-neon" },
+      },
+    });
+
+    assert.equal(result.status, 202);
+    const response = result.body as {
+      data: { workflowRunId: string; status: string };
+    };
+    assert.equal(response.data.status, "QUEUED");
+
+    const run = await databasePool.query<{
+      id: string;
+      thread_id: string;
+      status: string;
+    }>(
+      `SELECT id, thread_id, status
+         FROM workflow_runs
+        WHERE id = $1::uuid`,
+      [response.data.workflowRunId],
+    );
+    assert.equal(run.rows[0]?.id, response.data.workflowRunId);
+    assert.equal(run.rows[0]?.thread_id, response.data.workflowRunId);
+    assert.equal(run.rows[0]?.status, "QUEUED");
+
+    const outbox = await databasePool.query<{
+      event_type: string;
+      workflow_run_id: string;
+      style_key: string;
+    }>(
+      `SELECT event_type,
+              payload->>'workflowRunId' AS workflow_run_id,
+              payload->'input'->>'styleKey' AS style_key
+         FROM outbox_events
+        WHERE aggregate_id = $1::text`,
+      [response.data.workflowRunId],
+    );
+    assert.equal(outbox.rows[0]?.event_type, "START_WORKFLOW");
+    assert.equal(outbox.rows[0]?.workflow_run_id, response.data.workflowRunId);
+    assert.equal(outbox.rows[0]?.style_key, "tokyo-rainy-night-neon");
+
+    const idempotency = await databasePool.query<{ response_status: number }>(
+      `SELECT response_status
+         FROM idempotency_keys
+        WHERE scope = $1::text
+          AND idempotency_key = $2::text
+          AND user_id = $3::text`,
+      [
+        `POST:/v1/projects/${projectId}/workflow-runs`,
+        idempotencyKey,
+        userId,
+      ],
+    );
+    assert.equal(idempotency.rows[0]?.response_status, 202);
+  });
+
   test("getTriage returns bounded workflow and operations aggregates", async () => {
     const databasePool = await database();
     const fixture = await seedTriageFixture(databasePool);

@@ -96,7 +96,10 @@ class PgWorkflowTx implements WorkflowTx {
     await this.client.query(
       `INSERT INTO workflow_runs (
          id, project_id, user_id, trace_id, graph_key, graph_version, thread_id, status
-       ) VALUES ($1, $2, $3, $4, $5, $6, $1, 'QUEUED')
+       ) VALUES (
+         $1::uuid, $2::uuid, $3::text, $4::text, $5::text, $6::text,
+         $1::text, 'QUEUED'
+       )
        ON CONFLICT (id) DO NOTHING`,
       [
         input.id,
