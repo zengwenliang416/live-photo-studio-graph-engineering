@@ -36,3 +36,23 @@ export const assetPreviewRequestedPayloadSchema = z.object({
 export type AssetPreviewRequestedPayload = z.infer<
   typeof assetPreviewRequestedPayloadSchema
 >;
+
+export const assetModelInputRequestedPayloadSchema = z.object({
+  jobId: z.string().uuid(),
+  projectId: z.string().uuid(),
+  assetId: z.string().uuid(),
+  recipeVersion: z.literal("model-input.v1"),
+});
+
+export type AssetModelInputRequestedPayload = z.infer<
+  typeof assetModelInputRequestedPayloadSchema
+>;
+
+export const assetImageVariantRequestedPayloadSchema = z.union([
+  assetPreviewRequestedPayloadSchema,
+  assetModelInputRequestedPayloadSchema,
+]);
+
+export type AssetImageVariantRequestedPayload = z.infer<
+  typeof assetImageVariantRequestedPayloadSchema
+>;

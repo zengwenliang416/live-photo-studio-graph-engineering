@@ -54,6 +54,11 @@ export interface AssetTx {
     assetId: string;
     projectId: string;
   }): Promise<void>;
+  insertAssetModelInputRequest(input: {
+    eventId: string;
+    assetId: string;
+    projectId: string;
+  }): Promise<void>;
   /** Transitions UPLOADING → REJECTED; a no-op once the asset settled. */
   markAssetRejected(assetId: string): Promise<void>;
   /** Sets projects.cover_asset_id and registers the COVER role atomically. */

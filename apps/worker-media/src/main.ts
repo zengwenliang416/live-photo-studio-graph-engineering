@@ -4,15 +4,15 @@ import { Redis } from "ioredis";
 import type { Pool } from "pg";
 import { createAppPool } from "@live-photo-studio/database";
 import {
-  assetPreviewRequestedPayloadSchema,
+  assetImageVariantRequestedPayloadSchema,
   safeLogEvent,
 } from "@live-photo-studio/graph-contracts";
 import { createObjectStorageFromEnvironment } from "@live-photo-studio/storage";
 import {
-  AssetPreviewService,
-  PermanentAssetPreviewError,
-  PgAssetPreviewStore,
-} from "./asset-preview-service.js";
+  AssetImageVariantService,
+  PermanentAssetImageVariantError,
+  PgAssetImageVariantStore,
+} from "./asset-image-variant-service.js";
 import { RenderService } from "./export-service.js";
 import {
   renderRequestedPayloadSchema,
@@ -32,8 +32,8 @@ async function main(): Promise<void> {
     config.EXPORT_DURATION_MS,
     storage,
   );
-  const previewService = new AssetPreviewService(
-    new PgAssetPreviewStore(pool),
+  const imageVariantService = new AssetImageVariantService(
+    new PgAssetImageVariantStore(pool),
     storage,
   );
 
@@ -68,11 +68,11 @@ async function main(): Promise<void> {
   const previewWorker = new Worker(
     config.ASSET_PREVIEW_JOB_QUEUE,
     async (job) => {
-      const payload = assetPreviewRequestedPayloadSchema.parse(job.data);
+      const payload = assetImageVariantRequestedPayloadSchema.parse(job.data);
       try {
-        await previewService.process(payload);
+        await imageVariantService.process(payload);
       } catch (error) {
-        if (error instanceof PermanentAssetPreviewError) {
+        if (error instanceof PermanentAssetImageVariantError) {
           throw new UnrecoverableError(error.message);
         }
         throw error;
@@ -85,14 +85,15 @@ async function main(): Promise<void> {
   );
 
   previewWorker.on("failed", (job, error) => {
-    const parsed = assetPreviewRequestedPayloadSchema.safeParse(job?.data);
+    const parsed = assetImageVariantRequestedPayloadSchema.safeParse(job?.data);
     if (!parsed.success) return;
     console.error(
       JSON.stringify(
-        safeLogEvent("worker_media.asset_preview_failed", {
+        safeLogEvent("worker_media.asset_image_variant_failed", {
           jobId: job?.id,
           projectId: parsed.data.projectId,
           assetId: parsed.data.assetId,
+          recipeVersion: parsed.data.recipeVersion,
           message: error instanceof Error ? error.name : "UnknownError",
         }),
       ),
@@ -113,9 +114,9 @@ async function main(): Promise<void> {
 
   console.info(JSON.stringify(safeLogEvent("worker_media.started", {
     renderQueue: config.RENDER_JOB_QUEUE,
-    assetPreviewQueue: config.ASSET_PREVIEW_JOB_QUEUE,
+    assetImageVariantQueue: config.ASSET_PREVIEW_JOB_QUEUE,
     concurrency: config.MEDIA_WORKER_CONCURRENCY,
-    assetPreviewConcurrency: config.ASSET_PREVIEW_WORKER_CONCURRENCY,
+    assetImageVariantConcurrency: config.ASSET_PREVIEW_WORKER_CONCURRENCY,
   })));
 }
 

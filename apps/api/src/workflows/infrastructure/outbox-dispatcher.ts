@@ -1,6 +1,7 @@
 import type { Queue } from "bullmq";
 import type { Pool } from "pg";
 import {
+  assetModelInputRequestedPayloadSchema,
   assetPreviewRequestedPayloadSchema,
   generationRequestedPayloadSchema,
   renderRequestedPayloadSchema,
@@ -54,6 +55,7 @@ const ROUTED_EVENT_TYPES = [
   "workflow.generation.requested.v1",
   "workflow.render.requested.v1",
   "asset.preview.requested.v1",
+  "asset.model-input.requested.v1",
 ] as const;
 
 /**
@@ -286,7 +288,10 @@ export function routeEvent(
   if (eventType === "workflow.render.requested.v1") {
     return queues.renderJobs;
   }
-  if (eventType === "asset.preview.requested.v1") {
+  if (
+    eventType === "asset.preview.requested.v1" ||
+    eventType === "asset.model-input.requested.v1"
+  ) {
     return queues.assetPreviewJobs;
   }
   return null;
@@ -311,7 +316,9 @@ export function parseRoutedPayload(eventType: string, payload: unknown): unknown
             ? renderRequestedPayloadSchema.safeParse(payload)
             : eventType === "asset.preview.requested.v1"
               ? assetPreviewRequestedPayloadSchema.safeParse(payload)
-            : { success: true as const, data: payload };
+              : eventType === "asset.model-input.requested.v1"
+                ? assetModelInputRequestedPayloadSchema.safeParse(payload)
+                : { success: true as const, data: payload };
   if (!parsed.success) throw new OutboxPayloadError();
   return parsed.data;
 }

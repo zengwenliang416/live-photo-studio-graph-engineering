@@ -14,6 +14,7 @@ import type { GenerationRequestedPayload } from "./provider.js";
 
 const DEFAULT_STYLE_KEY = "cinematic-portrait";
 const MAX_REFERENCE_IMAGES = 6;
+const MODEL_INPUT_RECIPE_VERSION = "model-input.v1";
 
 type BatchRecord = {
   status: string;
@@ -341,15 +342,24 @@ export class GenerationService {
       content_type: string;
       created_at: string;
     }>(
-      `SELECT id::text AS asset_id, object_key, content_type, created_at
-         FROM project_assets
-        WHERE project_id = $1::uuid
-          AND id = ANY($2::uuid[])`,
-      [payload.projectId, requestedAssetIds],
+      `SELECT asset.id::text AS asset_id,
+              variant.object_key,
+              variant.content_type,
+              asset.created_at
+         FROM project_assets AS asset
+         JOIN asset_variants AS variant
+           ON variant.asset_id = asset.id
+          AND variant.project_id = asset.project_id
+          AND variant.variant_type = 'MODEL_INPUT'
+          AND variant.recipe_version = $3
+          AND variant.status = 'SUCCEEDED'
+        WHERE asset.project_id = $1::uuid
+          AND asset.id = ANY($2::uuid[])`,
+      [payload.projectId, requestedAssetIds, MODEL_INPUT_RECIPE_VERSION],
     );
     const rows = new Map(result.rows.map((row) => [row.asset_id, row]));
     if (requestedAssetIds.some((assetId) => !rows.has(assetId))) {
-      throw new ProviderFailureError("ASSET_OBJECT_MISSING", false);
+      throw new ProviderFailureError("ASSET_MODEL_INPUT_NOT_READY", false);
     }
     const orderedAssetIds = [
       payload.coverAssetId,

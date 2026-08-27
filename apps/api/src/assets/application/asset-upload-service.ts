@@ -331,6 +331,11 @@ export class AssetUploadService {
               assetId: asset.id,
               projectId: asset.projectId,
             });
+            await tx.insertAssetModelInputRequest({
+              eventId: randomUUID(),
+              assetId: asset.id,
+              projectId: asset.projectId,
+            });
           }
           return {
             status: 200,

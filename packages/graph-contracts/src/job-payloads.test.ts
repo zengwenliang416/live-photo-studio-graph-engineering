@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  assetImageVariantRequestedPayloadSchema,
+  assetModelInputRequestedPayloadSchema,
   assetPreviewRequestedPayloadSchema,
   generationRequestedPayloadSchema,
 } from "./job-payloads.js";
@@ -67,5 +69,26 @@ test("asset preview payloads keep only ids and the fixed recipe version", () => 
       recipeVersion: "display-preview.v2",
     }).success,
     false,
+  );
+});
+
+test("asset model input payloads use a distinct fixed recipe version", () => {
+  const parsed = assetModelInputRequestedPayloadSchema.parse({
+    jobId: UUID,
+    projectId: UUID,
+    assetId: UUID,
+    recipeVersion: "model-input.v1",
+  });
+  assert.equal(parsed.recipeVersion, "model-input.v1");
+  assert.equal(
+    assetModelInputRequestedPayloadSchema.safeParse({
+      ...parsed,
+      recipeVersion: "display-preview.v1",
+    }).success,
+    false,
+  );
+  assert.equal(
+    assetImageVariantRequestedPayloadSchema.safeParse(parsed).success,
+    true,
   );
 });

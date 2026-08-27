@@ -53,6 +53,7 @@ test("outbox routing maps domain events to their transport queues", () => {
   assert.equal(route("workflow.generation.requested.v1"), "generation-jobs");
   assert.equal(route("workflow.render.requested.v1"), "render-jobs");
   assert.equal(route("asset.preview.requested.v1"), "asset-preview-jobs");
+  assert.equal(route("asset.model-input.requested.v1"), "asset-preview-jobs");
   assert.equal(route("workflow.completed.v1"), null);
   assert.equal(route("workflow.failed.v1"), null);
   assert.equal(route("totally.unknown.event"), null);
@@ -120,4 +121,5 @@ test("dispatcher recovers events that an older deployment marked unknown", async
   const routedTypes = recovery.values?.[1];
   assert.ok(Array.isArray(routedTypes));
   assert.ok(routedTypes.includes("asset.preview.requested.v1"));
+  assert.ok(routedTypes.includes("asset.model-input.requested.v1"));
 });

@@ -144,18 +144,47 @@ class PgAssetTx implements AssetTx {
     assetId: string;
     projectId: string;
   }): Promise<void> {
+    await this.insertAssetImageVariantRequest({
+      ...input,
+      eventType: "asset.preview.requested.v1",
+      recipeVersion: "display-preview.v1",
+    });
+  }
+
+  async insertAssetModelInputRequest(input: {
+    eventId: string;
+    assetId: string;
+    projectId: string;
+  }): Promise<void> {
+    await this.insertAssetImageVariantRequest({
+      ...input,
+      eventType: "asset.model-input.requested.v1",
+      recipeVersion: "model-input.v1",
+    });
+  }
+
+  private async insertAssetImageVariantRequest(input: {
+    eventId: string;
+    assetId: string;
+    projectId: string;
+    eventType:
+      | "asset.preview.requested.v1"
+      | "asset.model-input.requested.v1";
+    recipeVersion: "display-preview.v1" | "model-input.v1";
+  }): Promise<void> {
     await this.client.query(
       `INSERT INTO outbox_events (
          id, aggregate_type, aggregate_id, event_type, payload
-       ) VALUES ($1, 'asset', $2, 'asset.preview.requested.v1', $3::jsonb)`,
+       ) VALUES ($1, 'asset', $2, $3, $4::jsonb)`,
       [
         input.eventId,
         input.assetId,
+        input.eventType,
         JSON.stringify({
-          jobId: input.assetId,
+          jobId: input.eventId,
           projectId: input.projectId,
           assetId: input.assetId,
-          recipeVersion: "display-preview.v1",
+          recipeVersion: input.recipeVersion,
         }),
       ],
     );

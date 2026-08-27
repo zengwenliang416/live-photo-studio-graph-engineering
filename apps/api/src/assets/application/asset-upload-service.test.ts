@@ -207,6 +207,13 @@ test("confirm verifies the object and marks the asset READY with CONTENT role", 
     })),
     [{ assetId, projectId: PROJECT_ID }],
   );
+  assert.deepEqual(
+    store.modelInputRequests.map((request) => ({
+      assetId: request.assetId,
+      projectId: request.projectId,
+    })),
+    [{ assetId, projectId: PROJECT_ID }],
+  );
 });
 
 test("confirm recognizes HEIC ftyp brands", async () => {
@@ -240,6 +247,7 @@ test("confirm accepts QuickTime MOV as LIVE_PHOTO_VIDEO without a preview job", 
   assert.equal(result.status, 200);
   assert.deepEqual(store.rolesOf(assetId), ["LIVE_PHOTO_VIDEO"]);
   assert.deepEqual(store.previewRequests, []);
+  assert.deepEqual(store.modelInputRequests, []);
 });
 
 test("confirm reports missing objects and size mismatches", async () => {

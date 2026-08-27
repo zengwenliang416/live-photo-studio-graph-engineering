@@ -3,8 +3,16 @@ import test, { after } from "node:test";
 import { randomUUID } from "node:crypto";
 import type { Pool } from "pg";
 import { createAppPool, runMigrations } from "@live-photo-studio/database";
-import { workflowSignalSchema } from "@live-photo-studio/graph-contracts";
+import {
+  assetImageVariantRequestedPayloadSchema,
+  workflowSignalSchema,
+} from "@live-photo-studio/graph-contracts";
 import { InMemoryObjectStorage } from "@live-photo-studio/storage";
+import {
+  AssetImageVariantService,
+  PgAssetImageVariantStore,
+  type AssetImageVariantRenderer,
+} from "./asset-image-variant-service.js";
 import { RenderService } from "./export-service.js";
 import {
   FakeExportRenderer,
@@ -159,11 +167,88 @@ class BlockingRenderer extends CountingRenderer {
   }
 }
 
+class StaticImageVariantRenderer implements AssetImageVariantRenderer {
+  readonly sizes: string[] = [];
+
+  async render(
+    _input: Uint8Array,
+    _contentType: string,
+    recipe: { readonly size: string },
+  ): Promise<Uint8Array> {
+    this.sizes.push(recipe.size);
+    return Uint8Array.from([0xff, 0xd8, 0xff, 1, 2, 3]);
+  }
+}
+
 if (!RUN_PG_TESTS) {
   test("worker-media integration suite requires RUN_PG_TESTS=1 plus local PostgreSQL", () => {
     assert.equal(RUN_PG_TESTS, false);
   });
 } else {
+  test("model-input variant uses a separate JPEG object and is replay-safe", async () => {
+    await harness();
+    const projectId = randomUUID();
+    const assetId = randomUUID();
+    const originalKey = `projects/${projectId}/originals/${assetId}`;
+    await pool!.query(
+      `INSERT INTO projects (id, user_id)
+       VALUES ($1::uuid, $2::text)`,
+      [projectId, USER_ID],
+    );
+    await pool!.query(
+      `INSERT INTO project_assets (
+         id, project_id, user_id, object_key, content_type,
+         declared_bytes, bytes, sha256, status, confirmed_at
+       ) VALUES (
+         $1::uuid, $2::uuid, $3::text, $4, 'image/heic',
+         3, 3, $5, 'READY', now()
+       )`,
+      [assetId, projectId, USER_ID, originalKey, "0".repeat(64)],
+    );
+    await shared!.storage.putObject({
+      objectKey: originalKey,
+      body: Uint8Array.from([1, 2, 3]),
+      contentType: "image/heic",
+    });
+    const renderer = new StaticImageVariantRenderer();
+    const service = new AssetImageVariantService(
+      new PgAssetImageVariantStore(pool!),
+      shared!.storage,
+      renderer,
+    );
+    const job = assetImageVariantRequestedPayloadSchema.parse({
+      jobId: randomUUID(),
+      projectId,
+      assetId,
+      recipeVersion: "model-input.v1",
+    });
+
+    assert.equal(await service.process(job), "SUCCEEDED");
+    assert.equal(await service.process(job), "ALREADY_DONE");
+    assert.deepEqual(renderer.sizes, ["2048x2048"]);
+
+    const variant = await pool!.query<{
+      variant_type: string;
+      recipe_version: string;
+      object_key: string;
+      content_type: string;
+      status: string;
+    }>(
+      `SELECT variant_type, recipe_version, object_key, content_type, status
+         FROM asset_variants
+        WHERE asset_id = $1::uuid`,
+      [assetId],
+    );
+    assert.deepEqual(variant.rows[0], {
+      variant_type: "MODEL_INPUT",
+      recipe_version: "model-input.v1",
+      object_key:
+        `projects/${projectId}/variants/${assetId}/model-input.v1.jpg`,
+      content_type: "image/jpeg",
+      status: "SUCCEEDED",
+    });
+  });
+
   test("render produces one export with stable hash and correlated signal", async () => {
     const service = await harness();
     const seeded = await seedOutput(pool!);

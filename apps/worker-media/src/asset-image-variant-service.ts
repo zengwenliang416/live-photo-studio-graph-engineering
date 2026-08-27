@@ -6,49 +6,88 @@ import { promisify } from "node:util";
 import { execFile } from "node:child_process";
 import convertHeic from "heic-convert";
 import type { Pool } from "pg";
-import type { AssetPreviewRequestedPayload } from "@live-photo-studio/graph-contracts";
+import type { AssetImageVariantRequestedPayload } from "@live-photo-studio/graph-contracts";
 import type { ObjectStoragePort } from "@live-photo-studio/storage";
 
 const execFileAsync = promisify(execFile);
-const MAX_PREVIEW_BYTES = 4 * 1024 * 1024;
 const STALE_CLAIM_SECONDS = 300;
 
-interface PreviewSource {
+type VariantType = "DISPLAY_PREVIEW" | "MODEL_INPUT";
+
+interface ImageVariantRecipe {
+  readonly variantType: VariantType;
+  readonly size: string;
+  readonly quality: number;
+  readonly maxBytes: number;
+}
+
+const RECIPES = {
+  "display-preview.v1": {
+    variantType: "DISPLAY_PREVIEW",
+    size: "1280x1280",
+    quality: 82,
+    maxBytes: 4 * 1024 * 1024,
+  },
+  "model-input.v1": {
+    variantType: "MODEL_INPUT",
+    size: "2048x2048",
+    quality: 90,
+    maxBytes: 10 * 1024 * 1024,
+  },
+} as const satisfies Record<
+  AssetImageVariantRequestedPayload["recipeVersion"],
+  ImageVariantRecipe
+>;
+
+interface VariantSource {
   readonly assetId: string;
   readonly projectId: string;
   readonly objectKey: string;
   readonly contentType: string;
 }
 
-type PreviewClaim =
-  | { readonly kind: "CLAIMED"; readonly source: PreviewSource }
+type VariantClaim =
+  | { readonly kind: "CLAIMED"; readonly source: VariantSource }
   | { readonly kind: "IN_PROGRESS" }
   | { readonly kind: "ALREADY_DONE" };
 
-export interface AssetPreviewStorePort {
-  claim(payload: AssetPreviewRequestedPayload): Promise<PreviewClaim>;
+export interface AssetImageVariantStorePort {
+  claim(payload: AssetImageVariantRequestedPayload): Promise<VariantClaim>;
   complete(
-    payload: AssetPreviewRequestedPayload,
+    payload: AssetImageVariantRequestedPayload,
     objectKey: string,
     bytes: number,
   ): Promise<void>;
-  fail(payload: AssetPreviewRequestedPayload, errorCode: string): Promise<void>;
+  fail(
+    payload: AssetImageVariantRequestedPayload,
+    errorCode: string,
+  ): Promise<void>;
 }
 
-export interface AssetPreviewRenderer {
-  render(input: Uint8Array, contentType: string): Promise<Uint8Array>;
+export interface AssetImageVariantRenderer {
+  render(
+    input: Uint8Array,
+    contentType: string,
+    recipe: ImageVariantRecipe,
+  ): Promise<Uint8Array>;
 }
 
-export class PermanentAssetPreviewError extends Error {
+export class PermanentAssetImageVariantError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = "PermanentAssetPreviewError";
+    this.name = "PermanentAssetImageVariantError";
   }
 }
 
-export class VipsAssetPreviewRenderer implements AssetPreviewRenderer {
-  async render(input: Uint8Array, contentType: string): Promise<Uint8Array> {
-    const directory = await mkdtemp(join(tmpdir(), "live-photo-preview-"));
+export class VipsAssetImageVariantRenderer
+  implements AssetImageVariantRenderer
+{
+  async render(
+    input: Uint8Array,
+    contentType: string,
+    recipe: ImageVariantRecipe,
+  ): Promise<Uint8Array> {
+    const directory = await mkdtemp(join(tmpdir(), "live-photo-variant-"));
     try {
       const extension =
         contentType === "image/png"
@@ -74,7 +113,9 @@ export class VipsAssetPreviewRenderer implements AssetPreviewRenderer {
           await writeFile(decodedPath, decoded);
           thumbnailSource = decodedPath;
         } catch {
-          throw new PermanentAssetPreviewError("ASSET_PREVIEW_HEIC_DECODE_FAILED");
+          throw new PermanentAssetImageVariantError(
+            "ASSET_VARIANT_HEIC_DECODE_FAILED",
+          );
         }
       }
 
@@ -84,25 +125,29 @@ export class VipsAssetPreviewRenderer implements AssetPreviewRenderer {
           [
             thumbnailSource,
             "--size",
-            "1280x1280",
+            recipe.size,
             "--output",
-            `${outputPath}[Q=82,strip,optimize_coding]`,
+            `${outputPath}[Q=${recipe.quality},strip,optimize_coding]`,
           ],
           { timeout: 30_000, maxBuffer: 256 * 1024 },
         );
       } catch {
-        throw new PermanentAssetPreviewError("ASSET_PREVIEW_RESIZE_FAILED");
+        throw new PermanentAssetImageVariantError(
+          "ASSET_VARIANT_RESIZE_FAILED",
+        );
       }
 
       const output = await readFile(outputPath);
       if (
         output.byteLength < 3 ||
-        output.byteLength > MAX_PREVIEW_BYTES ||
+        output.byteLength > recipe.maxBytes ||
         output[0] !== 0xff ||
         output[1] !== 0xd8 ||
         output[2] !== 0xff
       ) {
-        throw new PermanentAssetPreviewError("ASSET_PREVIEW_OUTPUT_INVALID");
+        throw new PermanentAssetImageVariantError(
+          "ASSET_VARIANT_OUTPUT_INVALID",
+        );
       }
       return output;
     } finally {
@@ -111,10 +156,13 @@ export class VipsAssetPreviewRenderer implements AssetPreviewRenderer {
   }
 }
 
-export class PgAssetPreviewStore implements AssetPreviewStorePort {
+export class PgAssetImageVariantStore implements AssetImageVariantStorePort {
   constructor(private readonly pool: Pool) {}
 
-  async claim(payload: AssetPreviewRequestedPayload): Promise<PreviewClaim> {
+  async claim(
+    payload: AssetImageVariantRequestedPayload,
+  ): Promise<VariantClaim> {
+    const recipe = RECIPES[payload.recipeVersion];
     const client = await this.pool.connect();
     try {
       await client.query("BEGIN");
@@ -133,7 +181,9 @@ export class PgAssetPreviewStore implements AssetPreviewStorePort {
       );
       const asset = assetResult.rows[0];
       if (!asset || asset.status !== "READY") {
-        throw new PermanentAssetPreviewError("ASSET_PREVIEW_SOURCE_NOT_READY");
+        throw new PermanentAssetImageVariantError(
+          "ASSET_VARIANT_SOURCE_NOT_READY",
+        );
       }
 
       const objectKey =
@@ -143,13 +193,14 @@ export class PgAssetPreviewStore implements AssetPreviewStorePort {
         `INSERT INTO asset_variants (
            id, asset_id, project_id, variant_type, recipe_version,
            object_key, content_type, status
-         ) VALUES ($1, $2, $3, 'DISPLAY_PREVIEW', $4, $5, 'image/jpeg', 'RUNNING')
+         ) VALUES ($1, $2, $3, $4, $5, $6, 'image/jpeg', 'RUNNING')
          ON CONFLICT (asset_id, variant_type, recipe_version) DO NOTHING
          RETURNING id`,
         [
           randomUUID(),
           payload.assetId,
           payload.projectId,
+          recipe.variantType,
           payload.recipeVersion,
           objectKey,
         ],
@@ -160,23 +211,24 @@ export class PgAssetPreviewStore implements AssetPreviewStorePort {
           stale: boolean;
         }>(
           `SELECT status,
-                  updated_at < now() - make_interval(secs => $4) AS stale
+                  updated_at < now() - make_interval(secs => $5) AS stale
              FROM asset_variants
             WHERE asset_id = $1
               AND project_id = $2
-              AND variant_type = 'DISPLAY_PREVIEW'
-              AND recipe_version = $3
+              AND variant_type = $3
+              AND recipe_version = $4
             FOR UPDATE`,
           [
             payload.assetId,
             payload.projectId,
+            recipe.variantType,
             payload.recipeVersion,
             STALE_CLAIM_SECONDS,
           ],
         );
         const variant = existing.rows[0];
         if (!variant) {
-          throw new Error("ASSET_PREVIEW_VARIANT_NOT_FOUND");
+          throw new Error("ASSET_IMAGE_VARIANT_NOT_FOUND");
         }
         if (variant.status === "SUCCEEDED") {
           await client.query("COMMIT");
@@ -190,9 +242,15 @@ export class PgAssetPreviewStore implements AssetPreviewStorePort {
           `UPDATE asset_variants
               SET status = 'RUNNING', error_code = NULL, updated_at = now()
             WHERE asset_id = $1
-              AND variant_type = 'DISPLAY_PREVIEW'
-              AND recipe_version = $2`,
-          [payload.assetId, payload.recipeVersion],
+              AND project_id = $2
+              AND variant_type = $3
+              AND recipe_version = $4`,
+          [
+            payload.assetId,
+            payload.projectId,
+            recipe.variantType,
+            payload.recipeVersion,
+          ],
         );
       }
       await client.query("COMMIT");
@@ -214,63 +272,74 @@ export class PgAssetPreviewStore implements AssetPreviewStorePort {
   }
 
   async complete(
-    payload: AssetPreviewRequestedPayload,
+    payload: AssetImageVariantRequestedPayload,
     objectKey: string,
     bytes: number,
   ): Promise<void> {
+    const recipe = RECIPES[payload.recipeVersion];
     const result = await this.pool.query(
       `UPDATE asset_variants
           SET status = 'SUCCEEDED',
-              object_key = $4,
+              object_key = $5,
               content_type = 'image/jpeg',
-              bytes = $5,
+              bytes = $6,
               error_code = NULL,
               updated_at = now()
         WHERE asset_id = $1
           AND project_id = $2
-          AND recipe_version = $3
-          AND variant_type = 'DISPLAY_PREVIEW'
+          AND variant_type = $3
+          AND recipe_version = $4
           AND status = 'RUNNING'`,
       [
         payload.assetId,
         payload.projectId,
+        recipe.variantType,
         payload.recipeVersion,
         objectKey,
         bytes,
       ],
     );
     if (result.rowCount !== 1) {
-      throw new Error("ASSET_PREVIEW_COMPLETE_SCOPE_MISMATCH");
+      throw new Error("ASSET_IMAGE_VARIANT_COMPLETE_SCOPE_MISMATCH");
     }
   }
 
   async fail(
-    payload: AssetPreviewRequestedPayload,
+    payload: AssetImageVariantRequestedPayload,
     errorCode: string,
   ): Promise<void> {
+    const recipe = RECIPES[payload.recipeVersion];
     await this.pool.query(
       `UPDATE asset_variants
-          SET status = 'FAILED', error_code = $4, updated_at = now()
+          SET status = 'FAILED', error_code = $5, updated_at = now()
         WHERE asset_id = $1
           AND project_id = $2
-          AND recipe_version = $3
-          AND variant_type = 'DISPLAY_PREVIEW'
+          AND variant_type = $3
+          AND recipe_version = $4
           AND status = 'RUNNING'`,
-      [payload.assetId, payload.projectId, payload.recipeVersion, errorCode],
+      [
+        payload.assetId,
+        payload.projectId,
+        recipe.variantType,
+        payload.recipeVersion,
+        errorCode,
+      ],
     );
   }
 }
 
-export class AssetPreviewService {
+export class AssetImageVariantService {
   constructor(
-    private readonly store: AssetPreviewStorePort,
+    private readonly store: AssetImageVariantStorePort,
     private readonly storage: ObjectStoragePort,
-    private readonly renderer: AssetPreviewRenderer = new VipsAssetPreviewRenderer(),
+    private readonly renderer: AssetImageVariantRenderer =
+      new VipsAssetImageVariantRenderer(),
   ) {}
 
-  async process(payload: AssetPreviewRequestedPayload): Promise<
+  async process(payload: AssetImageVariantRequestedPayload): Promise<
     "SUCCEEDED" | "ALREADY_DONE" | "IN_PROGRESS"
   > {
+    const recipe = RECIPES[payload.recipeVersion];
     const claim = await this.store.claim(payload);
     if (claim.kind === "ALREADY_DONE") return "ALREADY_DONE";
     if (claim.kind === "IN_PROGRESS") return "IN_PROGRESS";
@@ -283,6 +352,7 @@ export class AssetPreviewService {
       const preview = await this.renderer.render(
         input,
         claim.source.contentType,
+        recipe,
       );
       const stored = await this.storage.putObject({
         objectKey: outputKey,
@@ -295,9 +365,9 @@ export class AssetPreviewService {
       await this.store
         .fail(
           payload,
-          error instanceof PermanentAssetPreviewError
+          error instanceof PermanentAssetImageVariantError
             ? error.message
-            : "ASSET_PREVIEW_FAILED",
+            : "ASSET_IMAGE_VARIANT_FAILED",
         )
         .catch(() => undefined);
       throw error;

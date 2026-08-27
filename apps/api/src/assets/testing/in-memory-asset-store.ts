@@ -31,6 +31,11 @@ export class InMemoryAssetStore implements AssetStorePort {
     assetId: string;
     projectId: string;
   }> = [];
+  readonly modelInputRequests: Array<{
+    eventId: string;
+    assetId: string;
+    projectId: string;
+  }> = [];
   readonly livePhotoPairs = new Map<string, LivePhotoPairRow>();
   readonly idempotency = new Map<string, StoredIdempotentResponse>();
 
@@ -88,6 +93,9 @@ export class InMemoryAssetStore implements AssetStorePort {
       },
       async insertAssetPreviewRequest(input): Promise<void> {
         state.previewRequests.push(input);
+      },
+      async insertAssetModelInputRequest(input): Promise<void> {
+        state.modelInputRequests.push(input);
       },
       async markAssetRejected(assetId): Promise<void> {
         const row = state.assets.get(assetId);

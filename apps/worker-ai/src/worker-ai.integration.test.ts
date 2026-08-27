@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import type { Pool } from "pg";
 import { createAppPool, runMigrations } from "@live-photo-studio/database";
 import { workflowSignalSchema } from "@live-photo-studio/graph-contracts";
+import { InMemoryObjectStorage } from "@live-photo-studio/storage";
 import {
   generationRequestedPayloadSchema,
   MockImageGenerationProvider,
@@ -68,6 +69,25 @@ class BlockingProvider implements ImageGenerationProvider {
 
   release(): void {
     this.resolveReleased();
+  }
+}
+
+class CapturingPlanProvider implements ImageGenerationProvider {
+  readonly name = "capturing-plan";
+  readonly estimatedCostMicros = 0;
+  readonly usesPromptPlan = true;
+  readonly delegate = new MockImageGenerationProvider();
+  calls = 0;
+  referenceContentTypes: string[] = [];
+
+  async generate(
+    input: Parameters<ImageGenerationProvider["generate"]>[0],
+  ) {
+    this.calls += 1;
+    this.referenceContentTypes = input.referenceImages.map(
+      (image) => image.contentType,
+    );
+    return this.delegate.generate(input);
   }
 }
 
@@ -144,6 +164,58 @@ async function seedAssets(
   );
 }
 
+async function seedProjectAssetRows(
+  job: ReturnType<typeof payload>,
+): Promise<void> {
+  const assetIds = [...new Set([job.coverAssetId, ...job.sourceAssetIds])];
+  for (const assetId of assetIds) {
+    await pool!.query(
+      `INSERT INTO project_assets (
+         id, project_id, user_id, object_key, content_type,
+         declared_bytes, bytes, sha256, status, confirmed_at
+       ) VALUES (
+         $1::uuid, $2::uuid, $3::text, $4, 'image/heic',
+         32, 32, $5, 'READY', now()
+       )`,
+      [
+        assetId,
+        job.projectId,
+        USER_ID,
+        `projects/${job.projectId}/originals/${assetId}`,
+        "0".repeat(64),
+      ],
+    );
+  }
+}
+
+async function seedModelInputVariants(
+  job: ReturnType<typeof payload>,
+  storage: InMemoryObjectStorage,
+): Promise<void> {
+  await seedProjectAssetRows(job);
+  const assetIds = [...new Set([job.coverAssetId, ...job.sourceAssetIds])];
+  for (const assetId of assetIds) {
+    const objectKey =
+      `projects/${job.projectId}/variants/${assetId}/model-input.v1.jpg`;
+    const bytes = Uint8Array.from([0xff, 0xd8, 0xff, 1, 2, 3]);
+    await storage.putObject({
+      objectKey,
+      body: bytes,
+      contentType: "image/jpeg",
+    });
+    await pool!.query(
+      `INSERT INTO asset_variants (
+         id, asset_id, project_id, variant_type, recipe_version,
+         object_key, content_type, bytes, status
+       ) VALUES (
+         $1::uuid, $2::uuid, $3::uuid, 'MODEL_INPUT', 'model-input.v1',
+         $4, 'image/jpeg', $5, 'SUCCEEDED'
+       )`,
+      [randomUUID(), assetId, job.projectId, objectKey, bytes.byteLength],
+    );
+  }
+}
+
 async function seedWorkflowRun(
   projectId: string,
   workflowRunId: string,
@@ -217,6 +289,68 @@ if (!RUN_PG_TESTS) {
     const signal = workflowSignalSchema.parse(signals.rows[0]?.payload);
     assert.equal(signal.correlationId, job.jobId);
     assert.deepEqual(signal.payload["outputIds"], result.outputIds);
+  });
+
+  test("prompt providers read JPEG model-input variants instead of HEIC originals", async () => {
+    await harness();
+    const job = payload(PROJECT_ID);
+    const storage = new InMemoryObjectStorage();
+    const provider = new CapturingPlanProvider();
+    const service = new GenerationService(
+      pool!,
+      new MockImageGenerationProvider(),
+      4,
+      0,
+      {
+        storage,
+        resolveProvider: async () => provider,
+      },
+    );
+    await seedWorkflowRun(PROJECT_ID, job.workflowRunId);
+    await seedModelInputVariants(job, storage);
+    await seedAssets(job);
+
+    const result = await service.process(job);
+
+    assert.equal(result.status, "SUCCEEDED");
+    assert.equal(provider.calls, 1);
+    assert.deepEqual(provider.referenceContentTypes, [
+      "image/jpeg",
+      "image/jpeg",
+    ]);
+  });
+
+  test("prompt providers fail before dispatch when model inputs are not ready", async () => {
+    await harness();
+    const job = payload(PROJECT_ID);
+    const storage = new InMemoryObjectStorage();
+    const provider = new CapturingPlanProvider();
+    const service = new GenerationService(
+      pool!,
+      new MockImageGenerationProvider(),
+      4,
+      0,
+      {
+        storage,
+        resolveProvider: async () => provider,
+      },
+    );
+    await seedWorkflowRun(PROJECT_ID, job.workflowRunId);
+    await seedProjectAssetRows(job);
+    await seedAssets(job);
+
+    const result = await service.process(job);
+
+    assert.equal(result.status, "FAILED");
+    assert.equal(provider.calls, 0);
+    const batch = await pool!.query<{ error_code: string | null }>(
+      "SELECT error_code FROM generation_batches WHERE id = $1::uuid",
+      [job.jobId],
+    );
+    assert.equal(
+      batch.rows[0]?.error_code,
+      "ASSET_MODEL_INPUT_NOT_READY",
+    );
   });
 
   test("duplicate delivery is idempotent and emits nothing", async () => {
