@@ -29,8 +29,11 @@ async function main(): Promise<void> {
   const storage = createObjectStorageFromEnvironment();
   const service = new RenderService(
     pool,
-    new FfmpegExportRenderer(storage, config.FFMPEG_PATH),
-    config.EXPORT_DURATION_MS,
+    new FfmpegExportRenderer(
+      storage,
+      config.FFMPEG_PATH,
+      config.FFPROBE_PATH,
+    ),
     storage,
   );
   const imageVariantService = new AssetImageVariantService(

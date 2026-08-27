@@ -12,7 +12,7 @@
 - HEIC/JPEG/PNG/WebP 素材接入管道。
 - `mock` 与 OpenAI GPT Image Provider。
 - 低质量多候选生成、结果选择和风格策略。
-- FFmpeg 轻微推近动态导出。
+- 替换静态封面并原样透传配对的 Live Photo MOV。
 - SSE 项目事件通知。
 - Transactional Outbox + 幂等 Job ID。
 - PostgreSQL 事务级 `Idempotency-Key`：重复请求复用首次响应，请求体冲突返回 409。
@@ -72,7 +72,7 @@ OPENAI_IMAGE_MODEL=gpt-image-2-2026-04-21
 → 启动 Graph 工作流(POST /v1/projects/:id/workflow-runs,input.styleKey,同事务写 Outbox)
 → AI Worker 按用户配置解析 Provider,编译 Prompt(含 prompt_version/prompt_hash)生成候选
 → 用户在工作流页选择 anchor
-→ Media Worker 渲染 MOV 与导出包
+→ Media Worker 把候选图渲染为新封面，原样复用配对 MOV 并生成导出包
 → 网页下载 ZIP(短期签名 URL)
 ```
 

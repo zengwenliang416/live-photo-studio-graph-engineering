@@ -22,6 +22,8 @@ interface SelectedOutputRecord {
   readonly storageKey: string;
   readonly width: number;
   readonly height: number;
+  readonly motionAssetId: string;
+  readonly motionObjectKey: string;
 }
 
 interface RenderJobRecord {
@@ -40,7 +42,6 @@ export class RenderService {
   constructor(
     private readonly pool: Pool,
     private readonly renderer: ExportRenderer = new FakeExportRenderer(),
-    private readonly durationMs = 1500,
     private readonly storage: ObjectStoragePort = new InMemoryObjectStorage(),
   ) {}
 
@@ -79,7 +80,8 @@ export class RenderService {
         sourceObjectKey: selectedOutput.storageKey,
         sourceWidth: selectedOutput.width,
         sourceHeight: selectedOutput.height,
-        durationMs: this.durationMs,
+        motionAssetId: selectedOutput.motionAssetId,
+        motionObjectKey: selectedOutput.motionObjectKey,
       });
       const manifestBytes = new TextEncoder().encode(
         JSON.stringify(artifacts.manifest),
@@ -132,7 +134,7 @@ export class RenderService {
             objectKeys.manifest,
             JSON.stringify(manifest),
             sha256,
-            this.durationMs,
+            artifacts.durationMs,
             zip.length,
           ],
         );
@@ -305,10 +307,34 @@ export class RenderService {
     if (!row) {
       throw new Error("SELECTED_OUTPUT_NOT_FOUND");
     }
+    const motion = await this.pool.query<{
+      video_asset_id: string;
+      object_key: string;
+    }>(
+      `SELECT pair.video_asset_id, video.object_key
+         FROM projects project
+         JOIN live_photo_pairs pair
+           ON pair.project_id = project.id
+          AND pair.photo_asset_id = project.cover_asset_id
+          AND pair.status = 'PAIRED'
+         JOIN project_assets video
+           ON video.id = pair.video_asset_id
+          AND video.project_id = project.id
+          AND video.status = 'READY'
+          AND video.content_type = 'video/quicktime'
+        WHERE project.id = $1::uuid`,
+      [payload.projectId],
+    );
+    const motionRow = motion.rows[0];
+    if (!motionRow) {
+      throw new Error("LIVE_PHOTO_VIDEO_NOT_FOUND");
+    }
     return {
       storageKey: row.storage_key,
       width: row.width,
       height: row.height,
+      motionAssetId: motionRow.video_asset_id,
+      motionObjectKey: motionRow.object_key,
     };
   }
 

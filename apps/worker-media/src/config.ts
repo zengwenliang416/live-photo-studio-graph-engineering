@@ -11,13 +11,8 @@ export const workerMediaConfigSchema = z.object({
     .int()
     .positive()
     .default(1),
-  EXPORT_DURATION_MS: z.coerce
-    .number()
-    .int()
-    .min(100)
-    .max(3000)
-    .default(1500),
   FFMPEG_PATH: z.string().min(1).default("ffmpeg"),
+  FFPROBE_PATH: z.string().min(1).default("ffprobe"),
 });
 
 export type WorkerMediaConfig = z.infer<typeof workerMediaConfigSchema>;

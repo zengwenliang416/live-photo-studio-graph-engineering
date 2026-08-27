@@ -52,11 +52,44 @@ async function seedOutput(
   const workflowRunId = randomUUID();
   const batchId = randomUUID();
   const outputId = randomUUID();
+  const photoAssetId = randomUUID();
+  const videoAssetId = randomUUID();
+  const pairId = randomUUID();
   await client.query(
-    `INSERT INTO projects (id, user_id)
-     VALUES ($1::uuid, $2::text)
+    `INSERT INTO projects (id, user_id, cover_asset_id)
+     VALUES ($1::uuid, $2::text, NULL)
      ON CONFLICT (id) DO NOTHING`,
     [projectId, USER_ID],
+  );
+  await client.query(
+    `INSERT INTO project_assets (
+       id, project_id, user_id, object_key, content_type,
+       declared_bytes, bytes, sha256, status, confirmed_at
+     ) VALUES
+       ($1::uuid, $3::uuid, $4::text, $5, 'image/heic',
+        3, 3, $7, 'READY', now()),
+       ($2::uuid, $3::uuid, $4::text, $6, 'video/quicktime',
+        12, 12, $8, 'READY', now())`,
+    [
+      photoAssetId,
+      videoAssetId,
+      projectId,
+      USER_ID,
+      `projects/${projectId}/originals/${photoAssetId}`,
+      `projects/${projectId}/originals/${videoAssetId}`,
+      "1".repeat(64),
+      "2".repeat(64),
+    ],
+  );
+  await client.query(
+    "UPDATE projects SET cover_asset_id = $2::uuid WHERE id = $1::uuid",
+    [projectId, photoAssetId],
+  );
+  await client.query(
+    `INSERT INTO live_photo_pairs (
+       id, project_id, photo_asset_id, video_asset_id
+     ) VALUES ($1::uuid, $2::uuid, $3::uuid, $4::uuid)`,
+    [pairId, projectId, photoAssetId, videoAssetId],
   );
   await client.query(
     `INSERT INTO workflow_runs (
@@ -111,7 +144,7 @@ async function harness(): Promise<RenderService> {
   }
   pool = createAppPool(TEST_URL);
   const storage = new InMemoryObjectStorage();
-  shared = { service: new RenderService(pool, undefined, 1500, storage), storage };
+  shared = { service: new RenderService(pool, undefined, storage), storage };
   return shared.service;
 }
 
@@ -396,6 +429,23 @@ if (!RUN_PG_TESTS) {
     await assert.rejects(
       service.process(job),
       /SELECTED_OUTPUT_NOT_FOUND/u,
+    );
+    assert.equal(renderer.calls, 0);
+  });
+
+  test("rejects rendering when the project cover has no paired MOV", async () => {
+    await harness();
+    const seeded = await seedOutput(pool!);
+    await pool!.query(
+      "DELETE FROM live_photo_pairs WHERE project_id = $1::uuid",
+      [seeded.projectId],
+    );
+    const renderer = new CountingRenderer();
+    const service = new RenderService(pool!, renderer);
+
+    await assert.rejects(
+      service.process(payload(seeded)),
+      /LIVE_PHOTO_VIDEO_NOT_FOUND/u,
     );
     assert.equal(renderer.calls, 0);
   });

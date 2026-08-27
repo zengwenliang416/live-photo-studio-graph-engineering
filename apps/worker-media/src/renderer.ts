@@ -17,6 +17,7 @@ export {
 export interface RenderArtifacts {
   readonly cover: Uint8Array;
   readonly motion: Uint8Array;
+  readonly durationMs: number;
   readonly manifest: Record<string, unknown>;
 }
 
@@ -29,12 +30,13 @@ export interface ExportRenderer {
     sourceObjectKey: string;
     sourceWidth: number;
     sourceHeight: number;
-    durationMs: number;
+    motionObjectKey: string;
+    motionAssetId: string;
   }): Promise<RenderArtifacts>;
 }
 
 const MOTION_FRAMES = 24;
-const MOTION_FRAME_RATE = 30;
+const FAKE_MOTION_DURATION_MS = 1500;
 
 /**
  * Deterministic renderer for CI and local development: identical inputs
@@ -49,7 +51,8 @@ export class FakeExportRenderer implements ExportRenderer {
     sourceObjectKey: string;
     sourceWidth: number;
     sourceHeight: number;
-    durationMs: number;
+    motionObjectKey: string;
+    motionAssetId: string;
   }): Promise<RenderArtifacts> {
     const seed = `${input.projectId}:${input.selectedOutputId}`;
     const cover = new TextEncoder().encode(
@@ -65,11 +68,12 @@ export class FakeExportRenderer implements ExportRenderer {
     return {
       cover,
       motion,
+      durationMs: FAKE_MOTION_DURATION_MS,
       manifest: {
         schemaVersion: "1",
         recipeVersion: this.recipeVersion,
         seed,
-        durationMs: input.durationMs,
+        durationMs: FAKE_MOTION_DURATION_MS,
         coverSha256: sha256Hex(cover),
         motionSha256: sha256Hex(motion),
       },
@@ -78,11 +82,12 @@ export class FakeExportRenderer implements ExportRenderer {
 }
 
 export class FfmpegExportRenderer implements ExportRenderer {
-  readonly recipeVersion = "ken-burns.v2";
+  readonly recipeVersion = "cover-replacement.v3";
 
   constructor(
     private readonly storage: ObjectStoragePort,
     private readonly ffmpegPath = "ffmpeg",
+    private readonly ffprobePath = "ffprobe",
   ) {}
 
   async render(input: {
@@ -91,7 +96,8 @@ export class FfmpegExportRenderer implements ExportRenderer {
     sourceObjectKey: string;
     sourceWidth: number;
     sourceHeight: number;
-    durationMs: number;
+    motionObjectKey: string;
+    motionAssetId: string;
   }): Promise<RenderArtifacts> {
     const directory = await mkdtemp(join(tmpdir(), "live-photo-render-"));
     const sourcePath = join(directory, "source-image");
@@ -101,8 +107,15 @@ export class FfmpegExportRenderer implements ExportRenderer {
     const height = evenDimension(input.sourceHeight);
 
     try {
-      const source = await this.storage.getObject(input.sourceObjectKey);
-      await writeFile(sourcePath, source);
+      const [source, motion] = await Promise.all([
+        this.storage.getObject(input.sourceObjectKey),
+        this.storage.getObject(input.motionObjectKey),
+      ]);
+      assertQuickTimeMovie(motion);
+      await Promise.all([
+        writeFile(sourcePath, source),
+        writeFile(motionPath, motion),
+      ]);
       await runFfmpeg(this.ffmpegPath, [
         "-hide_banner",
         "-loglevel",
@@ -118,55 +131,28 @@ export class FfmpegExportRenderer implements ExportRenderer {
         "2",
         coverPath,
       ]);
-      await runFfmpeg(this.ffmpegPath, [
-        "-hide_banner",
-        "-loglevel",
-        "error",
-        "-y",
-        "-loop",
-        "1",
-        "-framerate",
-        String(MOTION_FRAME_RATE),
-        "-i",
-        coverPath,
-        "-vf",
-        buildMotionFilter(width, height),
-        "-t",
-        (input.durationMs / 1000).toFixed(3),
-        "-an",
-        "-c:v",
-        "libx264",
-        "-preset",
-        "medium",
-        "-crf",
-        "18",
-        "-pix_fmt",
-        "yuv420p",
-        "-tag:v",
-        "avc1",
-        "-movflags",
-        "+faststart",
-        motionPath,
-      ]);
-
-      const [cover, motion] = await Promise.all([
+      const [cover, motionMetadata] = await Promise.all([
         readFile(coverPath),
-        readFile(motionPath),
+        probeQuickTimeMovie(this.ffprobePath, motionPath),
       ]);
       assertJpeg(cover);
-      assertQuickTimeMovie(motion);
       return {
         cover,
         motion,
+        durationMs: motionMetadata.durationMs,
         manifest: {
           schemaVersion: "1",
           recipeVersion: this.recipeVersion,
           sourceOutputId: input.selectedOutputId,
-          durationMs: input.durationMs,
-          width,
-          height,
-          frameRate: MOTION_FRAME_RATE,
-          videoCodec: "h264",
+          motionSourceAssetId: input.motionAssetId,
+          motionPassthrough: true,
+          durationMs: motionMetadata.durationMs,
+          coverWidth: width,
+          coverHeight: height,
+          motionWidth: motionMetadata.width,
+          motionHeight: motionMetadata.height,
+          frameRate: motionMetadata.frameRate,
+          videoCodec: motionMetadata.videoCodec,
           coverSha256: sha256Hex(cover),
           motionSha256: sha256Hex(motion),
         },
@@ -184,17 +170,6 @@ function evenDimension(value: number): number {
     throw new Error("RENDER_DIMENSION_INVALID");
   }
   return value - (value % 2);
-}
-
-export function buildMotionFilter(width: number, height: number): string {
-  return [
-    "zoompan=",
-    "z='min(max(zoom,pzoom)+0.0007,1.035)':",
-    "x='iw/2-(iw/zoom/2)':",
-    "y='ih/2-(ih/zoom/2)':",
-    `d=1:s=${width}x${height}:fps=${MOTION_FRAME_RATE}`,
-    ",format=yuv420p",
-  ].join("");
 }
 
 async function runFfmpeg(
@@ -219,6 +194,116 @@ async function runFfmpeg(
         return;
       }
       reject(new Error("FFMPEG_RENDER_FAILED"));
+    });
+  });
+}
+
+interface MotionMetadata {
+  readonly durationMs: number;
+  readonly width: number;
+  readonly height: number;
+  readonly frameRate: number;
+  readonly videoCodec: string;
+}
+
+async function probeQuickTimeMovie(
+  ffprobePath: string,
+  motionPath: string,
+): Promise<MotionMetadata> {
+  const stdout = await runFfprobe(ffprobePath, [
+    "-v",
+    "error",
+    "-select_streams",
+    "v:0",
+    "-show_entries",
+    "format=duration:stream=codec_name,width,height,avg_frame_rate",
+    "-of",
+    "json",
+    motionPath,
+  ]);
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(stdout);
+  } catch {
+    throw new Error("FFPROBE_RESPONSE_INVALID");
+  }
+  if (parsed === null || typeof parsed !== "object") {
+    throw new Error("FFPROBE_RESPONSE_INVALID");
+  }
+  const record = parsed as Record<string, unknown>;
+  const streams = record["streams"];
+  const format = record["format"];
+  const stream =
+    Array.isArray(streams) && streams[0] && typeof streams[0] === "object"
+      ? (streams[0] as Record<string, unknown>)
+      : null;
+  const formatRecord =
+    format !== null && typeof format === "object"
+      ? (format as Record<string, unknown>)
+      : null;
+  const durationSeconds = Number(formatRecord?.["duration"]);
+  const width = Number(stream?.["width"]);
+  const height = Number(stream?.["height"]);
+  const videoCodec = stream?.["codec_name"];
+  const frameRate = parseFrameRate(stream?.["avg_frame_rate"]);
+  const durationMs = Math.round(durationSeconds * 1000);
+  if (
+    !Number.isInteger(durationMs) ||
+    durationMs < 1 ||
+    durationMs > 60_000 ||
+    !Number.isInteger(width) ||
+    width < 1 ||
+    !Number.isInteger(height) ||
+    height < 1 ||
+    typeof videoCodec !== "string" ||
+    videoCodec.length === 0 ||
+    frameRate <= 0
+  ) {
+    throw new Error("FFPROBE_RESPONSE_INVALID");
+  }
+  return { durationMs, width, height, frameRate, videoCodec };
+}
+
+function parseFrameRate(value: unknown): number {
+  if (typeof value !== "string") return 0;
+  const [numeratorText, denominatorText] = value.split("/");
+  const numerator = Number(numeratorText);
+  const denominator = Number(denominatorText);
+  if (
+    !Number.isFinite(numerator) ||
+    !Number.isFinite(denominator) ||
+    denominator === 0
+  ) {
+    return 0;
+  }
+  return numerator / denominator;
+}
+
+async function runFfprobe(
+  ffprobePath: string,
+  args: readonly string[],
+): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    const child = spawn(ffprobePath, [...args], {
+      stdio: ["ignore", "pipe", "ignore"],
+    });
+    const chunks: Buffer[] = [];
+    let stdoutBytes = 0;
+    child.stdout.on("data", (chunk: Buffer) => {
+      stdoutBytes += chunk.byteLength;
+      if (stdoutBytes > 64 * 1024) {
+        child.kill("SIGKILL");
+        return;
+      }
+      chunks.push(chunk);
+    });
+    child.once("error", () => reject(new Error("FFPROBE_UNAVAILABLE")));
+    child.once("close", (code) => {
+      if (code === 0 && stdoutBytes <= 64 * 1024) {
+        resolve(Buffer.concat(chunks).toString("utf8"));
+        return;
+      }
+      reject(new Error("FFPROBE_FAILED"));
     });
   });
 }
