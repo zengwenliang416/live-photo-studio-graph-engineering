@@ -1,0 +1,556 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		2572BAB81E926D4D9A359D37 /* LivePhotoImporterApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1F60B889567A2D6F0ED9695 /* LivePhotoImporterApp.swift */; };
+		27F4AB32FE3AB108C8D5F667 /* PrototypeAppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7169CAD7DD03304984BA02EB /* PrototypeAppView.swift */; };
+		573E39786EF7AA8D889B63D0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 211DC6BFED3D6915D51DA805 /* Assets.xcassets */; };
+		5C80F79CBEF71FA962782AC3 /* PrototypeLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27B872E14C904B69797A7F5C /* PrototypeLibraryView.swift */; };
+		631A45FCED8810CB7331F99C /* PhotoLibraryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CACE3EE80F7730C09C15C18A /* PhotoLibraryService.swift */; };
+		6512B072F8A0B6D1D71DCEF3 /* LivePhotoPackage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1FD2CFAD460DA8EA388D605 /* LivePhotoPackage.swift */; };
+		891B9F5927138DEBD271AB12 /* StudioHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F544291932898977A53C4FD7 /* StudioHomeView.swift */; };
+		A52D25BB5C7DB362D1A946C6 /* LivePhotoPackageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0992CB484BAF1788378279CD /* LivePhotoPackageService.swift */; };
+		A71F41CDEDCFFF7A9818E1E0 /* PrototypeComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CBF400A611AA4C760FD00A8 /* PrototypeComponents.swift */; };
+		B22506B90484FCD8DFE67702 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 364B03BEF4440A7604A08453 /* ZIPFoundation */; };
+		B4B02207E59593018FEB15A0 /* PrototypeModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76180F7D65E79E3941B3394E /* PrototypeModels.swift */; };
+		D2D6ECBE15D875F573E74042 /* RepairStudioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A60B887FECA467B46ADE55E6 /* RepairStudioView.swift */; };
+		E04D6B7D062118AC6D8FA5F4 /* ImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18F4AFE100F0E49FD5FEAC80 /* ImportView.swift */; };
+		ED9B2DE88E03D6E24D7D1C58 /* PrototypeProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E349A777F1B41B0FE73A57E0 /* PrototypeProfileView.swift */; };
+		EF8463B07A231D97CD9DDA9E /* ImportModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D61F149BBE707967F01A6E4 /* ImportModel.swift */; };
+		EFD2C5B79C3A0878E1AC743D /* LivePhotoPackageServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69850F084B25B9275CCA8BBF /* LivePhotoPackageServiceTests.swift */; };
+		F24BF4B566DB74385A2BA02E /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = C613E4721A4A0ECDDDE8D24B /* ZIPFoundation */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D36924395931B2C15C65FC12 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9092C870340FF7766D3A640C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3B7CC22B62B9776F7A3431AE;
+			remoteInfo = LivePhotoImporter;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0992CB484BAF1788378279CD /* LivePhotoPackageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivePhotoPackageService.swift; sourceTree = "<group>"; };
+		18F4AFE100F0E49FD5FEAC80 /* ImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportView.swift; sourceTree = "<group>"; };
+		211DC6BFED3D6915D51DA805 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		27B872E14C904B69797A7F5C /* PrototypeLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeLibraryView.swift; sourceTree = "<group>"; };
+		38E61D77B0A31801965702A5 /* LivePhotoImporterTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = LivePhotoImporterTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		3CC02D26C01C3964BF3718EA /* LivePhotoImporter.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = LivePhotoImporter.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3D61F149BBE707967F01A6E4 /* ImportModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportModel.swift; sourceTree = "<group>"; };
+		69850F084B25B9275CCA8BBF /* LivePhotoPackageServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivePhotoPackageServiceTests.swift; sourceTree = "<group>"; };
+		7169CAD7DD03304984BA02EB /* PrototypeAppView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeAppView.swift; sourceTree = "<group>"; };
+		76180F7D65E79E3941B3394E /* PrototypeModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeModels.swift; sourceTree = "<group>"; };
+		9CBF400A611AA4C760FD00A8 /* PrototypeComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeComponents.swift; sourceTree = "<group>"; };
+		A60B887FECA467B46ADE55E6 /* RepairStudioView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepairStudioView.swift; sourceTree = "<group>"; };
+		CACE3EE80F7730C09C15C18A /* PhotoLibraryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryService.swift; sourceTree = "<group>"; };
+		D1F60B889567A2D6F0ED9695 /* LivePhotoImporterApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivePhotoImporterApp.swift; sourceTree = "<group>"; };
+		D1FD2CFAD460DA8EA388D605 /* LivePhotoPackage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivePhotoPackage.swift; sourceTree = "<group>"; };
+		E349A777F1B41B0FE73A57E0 /* PrototypeProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeProfileView.swift; sourceTree = "<group>"; };
+		F544291932898977A53C4FD7 /* StudioHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudioHomeView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		6E9B9C55733A002F3FFB8028 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F24BF4B566DB74385A2BA02E /* ZIPFoundation in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A05E2B0BE4E7A7CDF782E4F3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B22506B90484FCD8DFE67702 /* ZIPFoundation in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		140EC5FAB61746B95C48838B /* Prototype */ = {
+			isa = PBXGroup;
+			children = (
+				7169CAD7DD03304984BA02EB /* PrototypeAppView.swift */,
+				9CBF400A611AA4C760FD00A8 /* PrototypeComponents.swift */,
+				27B872E14C904B69797A7F5C /* PrototypeLibraryView.swift */,
+				76180F7D65E79E3941B3394E /* PrototypeModels.swift */,
+				E349A777F1B41B0FE73A57E0 /* PrototypeProfileView.swift */,
+				A60B887FECA467B46ADE55E6 /* RepairStudioView.swift */,
+				F544291932898977A53C4FD7 /* StudioHomeView.swift */,
+			);
+			path = Prototype;
+			sourceTree = "<group>";
+		};
+		3B8A15FB8530662799CF8A18 = {
+			isa = PBXGroup;
+			children = (
+				C225D47204C34897997C8992 /* Resources */,
+				CB9E559FB1BECAC919D4EFF0 /* Sources */,
+				480A07C25194CC9DC083D840 /* Tests */,
+				ECB90AB4D3A0659ACB946155 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		480A07C25194CC9DC083D840 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				69850F084B25B9275CCA8BBF /* LivePhotoPackageServiceTests.swift */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		C225D47204C34897997C8992 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				211DC6BFED3D6915D51DA805 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		CB9E559FB1BECAC919D4EFF0 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				DC3EE6F6102F0E3C747D5B33 /* App */,
+				D0B21E807C559EFAEF8A6CBA /* Import */,
+				140EC5FAB61746B95C48838B /* Prototype */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		D0B21E807C559EFAEF8A6CBA /* Import */ = {
+			isa = PBXGroup;
+			children = (
+				3D61F149BBE707967F01A6E4 /* ImportModel.swift */,
+				18F4AFE100F0E49FD5FEAC80 /* ImportView.swift */,
+				D1FD2CFAD460DA8EA388D605 /* LivePhotoPackage.swift */,
+				0992CB484BAF1788378279CD /* LivePhotoPackageService.swift */,
+				CACE3EE80F7730C09C15C18A /* PhotoLibraryService.swift */,
+			);
+			path = Import;
+			sourceTree = "<group>";
+		};
+		DC3EE6F6102F0E3C747D5B33 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				D1F60B889567A2D6F0ED9695 /* LivePhotoImporterApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		ECB90AB4D3A0659ACB946155 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3CC02D26C01C3964BF3718EA /* LivePhotoImporter.app */,
+				38E61D77B0A31801965702A5 /* LivePhotoImporterTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		3B7CC22B62B9776F7A3431AE /* LivePhotoImporter */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EED93B23BBDA5E09774E0E8E /* Build configuration list for PBXNativeTarget "LivePhotoImporter" */;
+			buildPhases = (
+				6E2BD80F4D4B2CBE08DD9F40 /* Sources */,
+				3AF879ACEB27CDA92DA09D73 /* Resources */,
+				A05E2B0BE4E7A7CDF782E4F3 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LivePhotoImporter;
+			packageProductDependencies = (
+				364B03BEF4440A7604A08453 /* ZIPFoundation */,
+			);
+			productName = LivePhotoImporter;
+			productReference = 3CC02D26C01C3964BF3718EA /* LivePhotoImporter.app */;
+			productType = "com.apple.product-type.application";
+		};
+		8613C85033AFC8BC6E9EBE0B /* LivePhotoImporterTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 778EA2E79EF47FDB973808C3 /* Build configuration list for PBXNativeTarget "LivePhotoImporterTests" */;
+			buildPhases = (
+				62DBC0CAB9C9DD829E16F8EB /* Sources */,
+				6E9B9C55733A002F3FFB8028 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				0FC10E267D11385E8C91EEDC /* PBXTargetDependency */,
+			);
+			name = LivePhotoImporterTests;
+			packageProductDependencies = (
+				C613E4721A4A0ECDDDE8D24B /* ZIPFoundation */,
+			);
+			productName = LivePhotoImporterTests;
+			productReference = 38E61D77B0A31801965702A5 /* LivePhotoImporterTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		9092C870340FF7766D3A640C /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = DDD0D9147D138DA62B6B0667 /* Build configuration list for PBXProject "LivePhotoImporter" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 3B8A15FB8530662799CF8A18;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				7FA1C468438C9A812A42B747 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = ECB90AB4D3A0659ACB946155 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				3B7CC22B62B9776F7A3431AE /* LivePhotoImporter */,
+				8613C85033AFC8BC6E9EBE0B /* LivePhotoImporterTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		3AF879ACEB27CDA92DA09D73 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				573E39786EF7AA8D889B63D0 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		62DBC0CAB9C9DD829E16F8EB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EFD2C5B79C3A0878E1AC743D /* LivePhotoPackageServiceTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6E2BD80F4D4B2CBE08DD9F40 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EF8463B07A231D97CD9DDA9E /* ImportModel.swift in Sources */,
+				E04D6B7D062118AC6D8FA5F4 /* ImportView.swift in Sources */,
+				2572BAB81E926D4D9A359D37 /* LivePhotoImporterApp.swift in Sources */,
+				6512B072F8A0B6D1D71DCEF3 /* LivePhotoPackage.swift in Sources */,
+				A52D25BB5C7DB362D1A946C6 /* LivePhotoPackageService.swift in Sources */,
+				631A45FCED8810CB7331F99C /* PhotoLibraryService.swift in Sources */,
+				27F4AB32FE3AB108C8D5F667 /* PrototypeAppView.swift in Sources */,
+				A71F41CDEDCFFF7A9818E1E0 /* PrototypeComponents.swift in Sources */,
+				5C80F79CBEF71FA962782AC3 /* PrototypeLibraryView.swift in Sources */,
+				B4B02207E59593018FEB15A0 /* PrototypeModels.swift in Sources */,
+				ED9B2DE88E03D6E24D7D1C58 /* PrototypeProfileView.swift in Sources */,
+				D2D6ECBE15D875F573E74042 /* RepairStudioView.swift in Sources */,
+				891B9F5927138DEBD271AB12 /* StudioHomeView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		0FC10E267D11385E8C91EEDC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3B7CC22B62B9776F7A3431AE /* LivePhotoImporter */;
+			targetProxy = D36924395931B2C15C65FC12 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		2F2432CA88A5987DBD305013 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = "Generated/LivePhotoImporter-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Motion Cover";
+				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = NO;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "将替换后的封面和原始动态视频保存为一张 Live Photo。";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIRequiresFullScreen = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.motioncover.livephoto.importer;
+				PRODUCT_MODULE_NAME = LivePhotoImporter;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		7ECC2E702465532F19471688 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		8367DA4F558B33E164F82A9C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				INFOPLIST_FILE = "Generated/LivePhotoImporterTests-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.motioncover.livephoto.importer.tests;
+				PRODUCT_MODULE_NAME = LivePhotoImporterTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LivePhotoImporter.app/LivePhotoImporter";
+			};
+			name = Debug;
+		};
+		96C943200A60AE37DBAC7F51 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				INFOPLIST_FILE = "Generated/LivePhotoImporterTests-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.motioncover.livephoto.importer.tests;
+				PRODUCT_MODULE_NAME = LivePhotoImporterTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LivePhotoImporter.app/LivePhotoImporter";
+			};
+			name = Release;
+		};
+		BDEBD9DDBFFB5C9F6C397F5E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		C359DD88D9969986421F81E8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = "Generated/LivePhotoImporter-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Motion Cover";
+				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = NO;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "将替换后的封面和原始动态视频保存为一张 Live Photo。";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIRequiresFullScreen = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.motioncover.livephoto.importer;
+				PRODUCT_MODULE_NAME = LivePhotoImporter;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		778EA2E79EF47FDB973808C3 /* Build configuration list for PBXNativeTarget "LivePhotoImporterTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8367DA4F558B33E164F82A9C /* Debug */,
+				96C943200A60AE37DBAC7F51 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		DDD0D9147D138DA62B6B0667 /* Build configuration list for PBXProject "LivePhotoImporter" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7ECC2E702465532F19471688 /* Debug */,
+				BDEBD9DDBFFB5C9F6C397F5E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		EED93B23BBDA5E09774E0E8E /* Build configuration list for PBXNativeTarget "LivePhotoImporter" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2F2432CA88A5987DBD305013 /* Debug */,
+				C359DD88D9969986421F81E8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		7FA1C468438C9A812A42B747 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/weichsel/ZIPFoundation.git";
+			requirement = {
+				kind = exactVersion;
+				version = 0.9.20;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		364B03BEF4440A7604A08453 /* ZIPFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7FA1C468438C9A812A42B747 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
+			productName = ZIPFoundation;
+		};
+		C613E4721A4A0ECDDDE8D24B /* ZIPFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7FA1C468438C9A812A42B747 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
+			productName = ZIPFoundation;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 9092C870340FF7766D3A640C /* Project object */;
+}

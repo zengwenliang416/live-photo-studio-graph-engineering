@@ -5,6 +5,8 @@ node_modules/
 # Build outputs
 dist/
 build/
+.build/
+.derived-data/
 .next/
 out/
 next-env.d.ts

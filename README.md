@@ -20,7 +20,7 @@
 
 ## 当前边界
 
-本仓库的网页导出物是 `cover.jpg + motion.mov + manifest.json` 的 ZIP 包。它为后续 iOS Importer 写入 Live Photo 配对元数据做好了协议准备，但**网页本身不会声称已经把 ZIP 直接保存为系统照片库中的 Live Photo**。真正的一键保存需要 iOS PhotoKit 导入层。
+本仓库的网页导出物是 `cover.jpg + motion.mov + manifest.json` 的 ZIP 包。网页本身不会声称已经把 ZIP 直接保存为系统照片库中的 Live Photo。`apps/ios-importer` 提供 iOS PhotoKit 导入层：校验资源包、只给替换后的 JPEG 写入配对标识，并将 JPEG 与未改写的 MOV 作为一张 Live Photo 保存到照片图库。
 
 ## 快速启动
 
@@ -97,6 +97,7 @@ apps/web             Next.js Web
 apps/api             NestJS API
 apps/worker-ai       图片生成 Worker
 apps/worker-media    素材处理与动态渲染 Worker
+apps/ios-importer    SwiftUI + PhotoKit 的 Live Photo 导入器
 packages/contracts   Zod API 契约
 packages/database    PostgreSQL、事务和迁移
 packages/logger      结构化日志
@@ -116,7 +117,7 @@ docs                 架构与 ADR
 - 使用固定版本容器镜像，避免 `latest`。
 - 为 RustFS S3-compatible API、Redis、PostgreSQL 配置 TLS、备份与密钥管理。
 - 添加病毒扫描、内容安全、配额和积分账本。
-- 增加 iOS Importer，写入 Live Photo 配对元数据并调用 PhotoKit。
+- 在实体 iPhone 上完成 iOS Importer 的签名安装与 PhotoKit 验收。
 - 为 OpenAI Provider 增加组织验证、限流、成本预算和评估集。
 - 为 Media Worker 补齐 ImageMagick、libheif 的固定镜像能力，并持续验证 HEIC 解码。
 
