@@ -5,6 +5,7 @@ import {
   advanceUploadItem,
   firstReadyAssetId,
   MAX_UPLOAD_BYTES,
+  prepareUploadItems,
   resolveContentType,
   sha256Hex,
   summarizeUploads,
@@ -52,6 +53,7 @@ test("upload page wires the intent, signed PUT and confirm pipeline", () => {
   assert.match(pageSource, /createUploadIntent/u);
   assert.match(pageSource, /uploadToSignedUrl/u);
   assert.match(pageSource, /confirmAsset/u);
+  assert.match(pageSource, /createLivePhotoPair/u);
   assert.match(pageSource, /sha256Hex/u);
   assert.match(pageSource, /setProjectCover/u);
   assert.doesNotMatch(pageSource, /\bfetch\(/u);
@@ -79,7 +81,7 @@ test("upload page file input accepts the supported formats", () => {
   );
   assert.match(
     pageSource,
-    /image\/jpeg,image\/png,image\/webp,\.heic,\.heif/u,
+    /image\/jpeg,image\/png,image\/webp,\.heic,\.heif,video\/quicktime,\.mov/u,
   );
   assert.match(pageSource, /multiple/u);
   assert.match(pageSource, /htmlFor="asset-files"/u);
@@ -109,7 +111,7 @@ test("validateUploadFile enforces the size limit", () => {
 test("validateUploadFile rejects unsupported types", () => {
   assert.equal(
     validateUploadFile("a.gif", 10, "image/gif"),
-    "仅支持 JPEG、PNG、WebP 或 HEIC 图片。",
+    "仅支持 JPEG、PNG、WebP、HEIC 或 Live Photo 的 MOV 组件。",
   );
 });
 
@@ -117,6 +119,7 @@ test("resolveContentType falls back to the extension for HEIC", () => {
   assert.equal(resolveContentType("photo.HEIC", ""), "image/heic");
   assert.equal(resolveContentType("photo.heif", ""), "image/heif");
   assert.equal(resolveContentType("photo.png", ""), "image/png");
+  assert.equal(resolveContentType("photo.MOV", ""), "video/quicktime");
   assert.equal(resolveContentType("photo.jpg", "image/jpeg"), "image/jpeg");
   assert.equal(resolveContentType("photo", ""), null);
 });
@@ -180,6 +183,93 @@ test("summarizeUploads and firstReadyAssetId derive the page summary", () => {
   });
   assert.equal(firstReadyAssetId(items), "ra");
   assert.equal(firstReadyAssetId([]), null);
+});
+
+test("prepareUploadItems pairs same-name HEIC and MOV within one batch", () => {
+  const items = prepareUploadItems(
+    [
+      {
+        key: "photo",
+        fileName: "IMG_3181.HEIC",
+        bytes: 626 * 1024,
+        mimeType: "",
+      },
+      {
+        key: "video",
+        fileName: "IMG_3181.MOV",
+        bytes: 2_600_000,
+        mimeType: "video/quicktime",
+      },
+    ],
+    "batch-1",
+  );
+  assert.equal(items[0]?.status, "queued");
+  assert.equal(items[1]?.status, "queued");
+  assert.equal(items[0]?.pairGroupKey, items[1]?.pairGroupKey);
+  assert.equal(items[0]?.pairStatus, "waiting");
+  assert.equal(items[1]?.mediaKind, "LIVE_PHOTO_VIDEO");
+  assert.deepEqual(summarizeUploads(items), {
+    total: 1,
+    ready: 0,
+    failed: 0,
+    active: 1,
+  });
+});
+
+test("prepareUploadItems rejects a standalone MOV but keeps standalone HEIC", () => {
+  const items = prepareUploadItems(
+    [
+      {
+        key: "photo",
+        fileName: "STILL.HEIC",
+        bytes: 100,
+        mimeType: "",
+      },
+      {
+        key: "video",
+        fileName: "OTHER.MOV",
+        bytes: 100,
+        mimeType: "",
+      },
+    ],
+    "batch-2",
+  );
+  assert.equal(items[0]?.status, "queued");
+  assert.equal(items[0]?.pairGroupKey, undefined);
+  assert.equal(items[1]?.status, "failed");
+  assert.match(items[1]?.errorMessage ?? "", /同名 HEIC/u);
+});
+
+test("paired Live Photo counts as one ready material and exposes its photo cover", () => {
+  const items: UploadItem[] = [
+    {
+      key: "photo",
+      fileName: "IMG_3181.HEIC",
+      bytes: 100,
+      status: "ready",
+      assetId: "photo-asset",
+      mediaKind: "PHOTO",
+      pairGroupKey: "pair-1",
+      pairStatus: "paired",
+    },
+    {
+      key: "video",
+      fileName: "IMG_3181.MOV",
+      bytes: 200,
+      status: "ready",
+      assetId: "video-asset",
+      mediaKind: "LIVE_PHOTO_VIDEO",
+      pairGroupKey: "pair-1",
+      pairStatus: "paired",
+    },
+  ];
+  assert.deepEqual(summarizeUploads(items), {
+    total: 1,
+    ready: 1,
+    failed: 0,
+    active: 0,
+  });
+  assert.equal(firstReadyAssetId(items), "photo-asset");
 });
 
 test("sha256Hex hashes to lowercase hex", async () => {

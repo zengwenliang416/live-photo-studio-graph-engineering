@@ -87,9 +87,17 @@ const projectAssetSchema = z.object({
     "UNAVAILABLE",
   ]),
 });
+const livePhotoPairSchema = z.object({
+  livePhotoPairId: z.string().uuid(),
+  photoAssetId: z.string().uuid(),
+  videoAssetId: z.string().uuid(),
+  status: z.literal("PAIRED"),
+  createdAt: z.string().min(1),
+});
 const projectDetailResponseSchema = z.object({
   data: projectSummarySchema.extend({
     assets: z.array(projectAssetSchema),
+    livePhotoPairs: z.array(livePhotoPairSchema),
   }),
 });
 const uploadIntentResponseSchema = z.object({
@@ -110,6 +118,11 @@ const setCoverResponseSchema = z.object({
   data: z.object({
     projectId: z.string().uuid(),
     coverAssetId: z.string().uuid(),
+  }),
+});
+const createLivePhotoPairResponseSchema = z.object({
+  data: livePhotoPairSchema.extend({
+    projectId: z.string().uuid(),
   }),
 });
 const imageProviderSettingsResponseSchema = z.object({
@@ -162,6 +175,14 @@ export interface ProjectAsset {
     | "READY"
     | "FAILED"
     | "UNAVAILABLE";
+}
+
+export interface LivePhotoPair {
+  readonly livePhotoPairId: string;
+  readonly photoAssetId: string;
+  readonly videoAssetId: string;
+  readonly status: "PAIRED";
+  readonly createdAt: string;
 }
 
 export class ApiProblemError extends Error {
@@ -569,7 +590,10 @@ export class WorkflowApiClient {
   }
 
   getProject(projectId: string): Promise<{
-    data: ProjectSummary & { assets: ProjectAsset[] };
+    data: ProjectSummary & {
+      assets: ProjectAsset[];
+      livePhotoPairs: LivePhotoPair[];
+    };
   }> {
     return this.request(
       "GET",
@@ -621,6 +645,22 @@ export class WorkflowApiClient {
       setCoverResponseSchema,
       { assetId },
       `cover:${projectId}`,
+    );
+  }
+
+  createLivePhotoPair(
+    projectId: string,
+    photoAssetId: string,
+    videoAssetId: string,
+  ): Promise<{
+    data: LivePhotoPair & { projectId: string };
+  }> {
+    return this.request(
+      "POST",
+      `/v1/projects/${projectId}/live-photo-pairs`,
+      createLivePhotoPairResponseSchema,
+      { photoAssetId, videoAssetId },
+      `live-photo-pair:${projectId}:${photoAssetId}:${videoAssetId}`,
     );
   }
 

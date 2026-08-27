@@ -11,6 +11,13 @@ export type FileUploadStatus =
   | "ready"
   | "failed";
 
+export type UploadMediaKind = "PHOTO" | "LIVE_PHOTO_VIDEO";
+export type LivePhotoPairStatus =
+  | "waiting"
+  | "pairing"
+  | "paired"
+  | "failed";
+
 export interface UploadItem {
   key: string;
   fileName: string;
@@ -20,6 +27,10 @@ export interface UploadItem {
   errorMessage?: string;
   previewUrl?: string | null;
   previewStatus?: "PROCESSING" | "READY" | "FAILED" | "UNAVAILABLE";
+  mediaKind?: UploadMediaKind;
+  pairGroupKey?: string;
+  pairStatus?: LivePhotoPairStatus;
+  pairErrorMessage?: string;
 }
 
 export const MAX_UPLOAD_BYTES = 20 * 1024 * 1024;
@@ -40,6 +51,7 @@ const ALLOWED_CONTENT_TYPES: ReadonlySet<string> = new Set([
   "image/webp",
   "image/heic",
   "image/heif",
+  "video/quicktime",
 ]);
 
 // HEIC files often arrive with an empty MIME type, so the extension is the
@@ -51,6 +63,7 @@ const EXTENSION_CONTENT_TYPES: Readonly<Record<string, string>> = {
   ".webp": "image/webp",
   ".heic": "image/heic",
   ".heif": "image/heif",
+  ".mov": "video/quicktime",
 };
 
 export function resolveContentType(
@@ -73,9 +86,81 @@ export function validateUploadFile(
   if (bytes <= 0) return "文件内容为空。";
   if (bytes > MAX_UPLOAD_BYTES) return "文件超过 20MiB 上限。";
   if (resolveContentType(fileName, mimeType) === null) {
-    return "仅支持 JPEG、PNG、WebP 或 HEIC 图片。";
+    return "仅支持 JPEG、PNG、WebP、HEIC 或 Live Photo 的 MOV 组件。";
   }
   return null;
+}
+
+function extensionOf(fileName: string): string {
+  const dot = fileName.lastIndexOf(".");
+  return dot === -1 ? "" : fileName.slice(dot).toLowerCase();
+}
+
+function stemOf(fileName: string): string {
+  const dot = fileName.lastIndexOf(".");
+  return (dot === -1 ? fileName : fileName.slice(0, dot)).trim().toLowerCase();
+}
+
+export function prepareUploadItems(
+  files: readonly {
+    key: string;
+    fileName: string;
+    bytes: number;
+    mimeType: string;
+  }[],
+  batchKey: string,
+): UploadItem[] {
+  const items = files.map((file): UploadItem => {
+    const contentType = resolveContentType(file.fileName, file.mimeType);
+    const problem = validateUploadFile(
+      file.fileName,
+      file.bytes,
+      file.mimeType,
+    );
+    return {
+      key: file.key,
+      fileName: file.fileName,
+      bytes: file.bytes,
+      status: problem === null ? "queued" : "failed",
+      mediaKind:
+        contentType === "video/quicktime" ? "LIVE_PHOTO_VIDEO" : "PHOTO",
+      ...(problem === null ? {} : { errorMessage: problem }),
+    };
+  });
+  const photosByStem = new Map<string, UploadItem[]>();
+  const videosByStem = new Map<string, UploadItem[]>();
+  for (const item of items) {
+    if (item.status === "failed") continue;
+    const stem = stemOf(item.fileName);
+    if (item.mediaKind === "LIVE_PHOTO_VIDEO") {
+      const list = videosByStem.get(stem) ?? [];
+      list.push(item);
+      videosByStem.set(stem, list);
+    } else if ([".heic", ".heif"].includes(extensionOf(item.fileName))) {
+      const list = photosByStem.get(stem) ?? [];
+      list.push(item);
+      photosByStem.set(stem, list);
+    }
+  }
+  for (const [stem, videos] of videosByStem) {
+    const photos = photosByStem.get(stem) ?? [];
+    for (let index = 0; index < videos.length; index += 1) {
+      const video = videos[index];
+      const photo = photos[index];
+      if (!video) continue;
+      if (!photo) {
+        video.status = "failed";
+        video.errorMessage = "MOV 需与同批选择的同名 HEIC/HEIF 一起上传。";
+        continue;
+      }
+      const pairGroupKey = `${batchKey}:${stem}:${index}`;
+      video.pairGroupKey = pairGroupKey;
+      video.pairStatus = "waiting";
+      photo.pairGroupKey = pairGroupKey;
+      photo.pairStatus = "waiting";
+    }
+  }
+  return items;
 }
 
 /**
@@ -90,14 +175,11 @@ export function advanceUploadItem(
     errorMessage?: string;
     previewUrl?: string | null;
     previewStatus?: "PROCESSING" | "READY" | "FAILED" | "UNAVAILABLE";
+    pairStatus?: LivePhotoPairStatus;
+    pairErrorMessage?: string;
   } = {},
 ): UploadItem {
-  const next: UploadItem = {
-    key: item.key,
-    fileName: item.fileName,
-    bytes: item.bytes,
-    status,
-  };
+  const next: UploadItem = { ...item, status };
   const assetId = patch.assetId ?? item.assetId;
   if (assetId !== undefined) next.assetId = assetId;
   const previewUrl =
@@ -108,10 +190,20 @@ export function advanceUploadItem(
   if (previewStatus !== undefined) {
     next.previewStatus = previewStatus;
   }
+  if (patch.pairStatus !== undefined) next.pairStatus = patch.pairStatus;
+  if (patch.pairErrorMessage !== undefined) {
+    next.pairErrorMessage = patch.pairErrorMessage;
+  } else if (
+    patch.pairStatus !== undefined &&
+    patch.pairStatus !== "failed"
+  ) {
+    delete next.pairErrorMessage;
+  }
   const errorMessage =
     patch.errorMessage ??
     (status === "failed" ? item.errorMessage : undefined);
   if (errorMessage !== undefined) next.errorMessage = errorMessage;
+  else delete next.errorMessage;
   return next;
 }
 
@@ -125,22 +217,42 @@ export interface UploadSummary {
 export function summarizeUploads(
   items: readonly UploadItem[],
 ): UploadSummary {
+  let total = 0;
   let ready = 0;
   let failed = 0;
   let active = 0;
   for (const item of items) {
+    if (
+      item.mediaKind === "LIVE_PHOTO_VIDEO" &&
+      item.pairGroupKey !== undefined
+    ) {
+      continue;
+    }
+    total += 1;
+    if (item.pairGroupKey !== undefined) {
+      if (item.status === "failed" || item.pairStatus === "failed") failed += 1;
+      else if (item.status === "ready" && item.pairStatus === "paired") {
+        ready += 1;
+      } else active += 1;
+      continue;
+    }
     if (item.status === "ready") ready += 1;
     else if (item.status === "failed") failed += 1;
     else active += 1;
   }
-  return { total: items.length, ready, failed, active };
+  return { total, ready, failed, active };
 }
 
 export function firstReadyAssetId(
   items: readonly UploadItem[],
 ): string | null {
   for (const item of items) {
-    if (item.status === "ready" && item.assetId !== undefined) {
+    if (
+      item.mediaKind !== "LIVE_PHOTO_VIDEO" &&
+      item.status === "ready" &&
+      item.assetId !== undefined &&
+      (item.pairGroupKey === undefined || item.pairStatus === "paired")
+    ) {
       return item.assetId;
     }
   }

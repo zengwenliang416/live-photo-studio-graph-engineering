@@ -20,17 +20,26 @@ import {
   advanceUploadItem,
   firstReadyAssetId,
   MAX_UPLOAD_CONCURRENCY,
+  prepareUploadItems,
   resolveContentType,
   sha256Hex,
   summarizeUploads,
   UPLOAD_STATUS_LABELS,
-  validateUploadFile,
   type FileUploadStatus,
+  type LivePhotoPairStatus,
   type UploadItem,
 } from "../../../../lib/upload-flow.js";
 import styles from "./upload.module.css";
 
-const ACCEPT_ATTRIBUTE = "image/jpeg,image/png,image/webp,.heic,.heif";
+const ACCEPT_ATTRIBUTE =
+  "image/jpeg,image/png,image/webp,.heic,.heif,video/quicktime,.mov";
+
+interface LivePhotoPairProgress {
+  photoAssetId?: string;
+  videoAssetId?: string;
+  inFlight?: boolean;
+  livePhotoPairId?: string;
+}
 
 function formatBytes(bytes: number): string {
   if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MiB`;
@@ -54,8 +63,18 @@ function UploadPanel(): React.JSX.Element {
 
   // File blobs stay in a ref, never in React state or web storage.
   const filesRef = useRef(new Map<string, File>());
+  const itemMetadataRef = useRef(
+    new Map<
+      string,
+      {
+        mediaKind: "PHOTO" | "LIVE_PHOTO_VIDEO";
+        pairGroupKey?: string;
+      }
+    >(),
+  );
   const queueRef = useRef<string[]>([]);
   const inFlightRef = useRef(0);
+  const pairGroupsRef = useRef(new Map<string, LivePhotoPairProgress>());
   const [items, setItems] = useState<UploadItem[]>([]);
   const [coverAssetId, setCoverAssetId] = useState<string | null>(null);
   const [confirmedCoverAssetId, setConfirmedCoverAssetId] = useState<
@@ -103,14 +122,26 @@ function UploadPanel(): React.JSX.Element {
       const assetsById = new Map(
         detail.assets.map((asset) => [asset.assetId, asset]),
       );
+      const pairsByPhotoId = new Map(
+        detail.livePhotoPairs.map((pair) => [pair.photoAssetId, pair]),
+      );
+      const videoAssetIds = new Set(
+        detail.livePhotoPairs.map((pair) => pair.videoAssetId),
+      );
       const updated = prev.map((item) => {
         if (item.assetId === undefined) return item;
         const asset = assetsById.get(item.assetId);
         if (!asset) return item;
+        const pair = pairsByPhotoId.get(item.assetId);
         return {
           ...item,
           previewUrl: asset.previewUrl,
           previewStatus: asset.previewStatus,
+          ...(pair === undefined
+            ? {}
+            : {
+                pairStatus: "paired" as const,
+              }),
         };
       });
       const known = new Set(
@@ -121,14 +152,26 @@ function UploadPanel(): React.JSX.Element {
       const restored: UploadItem[] = [];
       for (const asset of detail.assets) {
         if (asset.status !== "READY" || known.has(asset.assetId)) continue;
+        if (videoAssetIds.has(asset.assetId)) continue;
+        const pair = pairsByPhotoId.get(asset.assetId);
+        const isVideo = asset.contentType === "video/quicktime";
         restored.push({
           key: `remote:${asset.assetId}`,
-          fileName: `已上传素材 ${asset.assetId.slice(0, 8)}`,
+          fileName:
+            pair === undefined
+              ? `已上传素材 ${asset.assetId.slice(0, 8)}`
+              : `Live Photo ${asset.assetId.slice(0, 8)}`,
           bytes: asset.bytes ?? 0,
           status: "ready",
           assetId: asset.assetId,
           previewUrl: asset.previewUrl,
           previewStatus: asset.previewStatus,
+          mediaKind: isVideo ? "LIVE_PHOTO_VIDEO" : "PHOTO",
+          ...(pair === undefined
+            ? {}
+            : {
+                pairStatus: "paired" as const,
+              }),
         });
       }
       return restored.length > 0 ? [...updated, ...restored] : updated;
@@ -139,7 +182,12 @@ function UploadPanel(): React.JSX.Element {
     (
       key: string,
       status: FileUploadStatus,
-      patch: { assetId?: string; errorMessage?: string } = {},
+      patch: {
+        assetId?: string;
+        errorMessage?: string;
+        pairStatus?: LivePhotoPairStatus;
+        pairErrorMessage?: string;
+      } = {},
     ): void => {
       setItems((prev) =>
         prev.map((item) =>
@@ -148,6 +196,67 @@ function UploadPanel(): React.JSX.Element {
       );
     },
     [],
+  );
+
+  const patchPair = useCallback(
+    (
+      pairGroupKey: string,
+      patch: {
+        pairStatus: LivePhotoPairStatus;
+        pairErrorMessage?: string;
+      },
+    ): void => {
+      setItems((prev) =>
+        prev.map((item) =>
+          item.pairGroupKey === pairGroupKey
+            ? advanceUploadItem(item, item.status, patch)
+            : item,
+        ),
+      );
+    },
+    [],
+  );
+
+  const createPairIfReady = useCallback(
+    async (pairGroupKey: string): Promise<void> => {
+      const group = pairGroupsRef.current.get(pairGroupKey);
+      if (
+        !group ||
+        group.inFlight ||
+        group.livePhotoPairId !== undefined ||
+        group.photoAssetId === undefined ||
+        group.videoAssetId === undefined
+      ) {
+        return;
+      }
+      group.inFlight = true;
+      patchPair(pairGroupKey, { pairStatus: "pairing" });
+      try {
+        const result = await client.createLivePhotoPair(
+          projectId,
+          group.photoAssetId,
+          group.videoAssetId,
+        );
+        group.livePhotoPairId = result.data.livePhotoPairId;
+        patchPair(pairGroupKey, {
+          pairStatus: "paired",
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ["project", projectId],
+        });
+      } catch (error: unknown) {
+        patchPair(pairGroupKey, {
+          pairStatus: "failed",
+          pairErrorMessage:
+            error instanceof ApiProblemError
+              ? `Live Photo 配对失败(${error.code})。`
+              : "Live Photo 配对失败，请重试。",
+        });
+      } finally {
+        group.inFlight = false;
+      }
+    },
+    [client, patchPair, projectId, queryClient],
   );
 
   const processFile = useCallback(
@@ -176,6 +285,19 @@ function UploadPanel(): React.JSX.Element {
         const sha256 = await sha256Hex(await file.arrayBuffer());
         await client.confirmAsset(assetId, { bytes: file.size, sha256 });
         patchItem(key, "ready", { assetId });
+        const currentItem = itemMetadataRef.current.get(key);
+        const pairGroupKey = currentItem?.pairGroupKey;
+        if (currentItem && pairGroupKey !== undefined) {
+          const group = pairGroupsRef.current.get(pairGroupKey);
+          if (group) {
+            if (currentItem.mediaKind === "LIVE_PHOTO_VIDEO") {
+              group.videoAssetId = assetId;
+            } else {
+              group.photoAssetId = assetId;
+            }
+            await createPairIfReady(pairGroupKey);
+          }
+        }
         await queryClient.invalidateQueries({
           queryKey: ["project", projectId],
         });
@@ -183,7 +305,7 @@ function UploadPanel(): React.JSX.Element {
         patchItem(key, "failed", { errorMessage: uploadErrorMessage(error) });
       }
     },
-    [client, patchItem, projectId, queryClient],
+    [client, createPairIfReady, patchItem, projectId, queryClient],
   );
 
   const pump = useCallback((): void => {
@@ -240,31 +362,55 @@ function UploadPanel(): React.JSX.Element {
     const files = Array.from(event.target.files ?? []);
     event.target.value = "";
     if (files.length === 0) return;
+    const batchKey = crypto.randomUUID();
+    const prepared = prepareUploadItems(
+      files.map((file) => ({
+        key: crypto.randomUUID(),
+        fileName: file.name,
+        bytes: file.size,
+        mimeType: file.type,
+      })),
+      batchKey,
+    );
+    const fileByNameAndIndex = new Map(
+      prepared.map((item, index) => [item.key, files[index]]),
+    );
     const queuedKeys: string[] = [];
     setItems((prev) => {
-      const additions = files.map((file): UploadItem => {
-        const key = crypto.randomUUID();
-        const problem = validateUploadFile(file.name, file.size, file.type);
-        if (problem === null) {
-          filesRef.current.set(key, file);
-          queuedKeys.push(key);
-          return {
-            key,
-            fileName: file.name,
-            bytes: file.size,
-            status: "queued",
-          };
+      for (const item of prepared) {
+        const file = fileByNameAndIndex.get(item.key);
+        if (item.status === "queued" && file !== undefined) {
+          filesRef.current.set(item.key, file);
+          itemMetadataRef.current.set(item.key, {
+            mediaKind: item.mediaKind ?? "PHOTO",
+            ...(item.pairGroupKey === undefined
+              ? {}
+              : { pairGroupKey: item.pairGroupKey }),
+          });
+          queuedKeys.push(item.key);
         }
-        return {
-          key,
-          fileName: file.name,
-          bytes: file.size,
-          status: "failed",
-          errorMessage: problem,
-        };
-      });
-      return [...prev, ...additions];
+      }
+      return [...prev, ...prepared];
     });
+    const pairKeys = new Set(
+      prepared
+        .map((item) => item.pairGroupKey)
+        .filter((key): key is string => key !== undefined),
+    );
+    for (const pairGroupKey of pairKeys) {
+      const photo = prepared.find(
+        (item) =>
+          item.pairGroupKey === pairGroupKey && item.mediaKind === "PHOTO",
+      );
+      const video = prepared.find(
+        (item) =>
+          item.pairGroupKey === pairGroupKey &&
+          item.mediaKind === "LIVE_PHOTO_VIDEO",
+      );
+      if (photo && video) {
+        pairGroupsRef.current.set(pairGroupKey, {});
+      }
+    }
     queueRef.current.push(...queuedKeys);
     pump();
   };
@@ -276,12 +422,20 @@ function UploadPanel(): React.JSX.Element {
   };
 
   const summary = summarizeUploads(items);
+  const visibleItems = items.filter(
+    (item) =>
+      item.mediaKind !== "LIVE_PHOTO_VIDEO" ||
+      item.pairGroupKey === undefined,
+  );
   const canStart =
     summary.ready >= 1 &&
     confirmedCoverAssetId !== null &&
     items.some(
       (item) =>
-        item.status === "ready" && item.assetId === confirmedCoverAssetId,
+        item.status === "ready" &&
+        item.assetId === confirmedCoverAssetId &&
+        item.mediaKind !== "LIVE_PHOTO_VIDEO" &&
+        (item.pairGroupKey === undefined || item.pairStatus === "paired"),
     );
 
   const startGeneration = async (): Promise<void> => {
@@ -384,14 +538,18 @@ function UploadPanel(): React.JSX.Element {
                     素材工作区
                   </h2>
                 </div>
-                <span className={styles.supported}>HEIC · JPEG · PNG · WEBP</span>
+                <span className={styles.supported}>
+                  LIVE PHOTO · HEIC · JPEG · PNG · WEBP
+                </span>
               </div>
               <label className={styles.dropzone} htmlFor="asset-files">
                 <span className={styles.dropzoneMark} aria-hidden="true">
                   +
                 </span>
-                <strong>点击选择照片，或将多张素材拖放到这里</strong>
-                <span>单个文件不超过 20MiB，上传后可指定一张主封面。</span>
+                <strong>选择照片，或同时选择同名 HEIC + MOV</strong>
+                <span>
+                  Live Photo 会自动识别配对；单个文件不超过 20MiB。
+                </span>
               </label>
               <input
                 className={styles.fileInput}
@@ -413,7 +571,7 @@ function UploadPanel(): React.JSX.Element {
                   </h2>
                 </div>
                 <span className={styles.supported}>
-                  {summary.total} 个文件
+                  {summary.total} 组素材
                 </span>
               </div>
               {items.length === 0 ? (
@@ -428,8 +586,22 @@ function UploadPanel(): React.JSX.Element {
                     {summary.failed} 个失败。
                   </p>
                   <ul className={styles.list} aria-label="上传文件列表">
-                    {items.map((item, index) => (
-                      <li className={styles.item} key={item.key}>
+                    {visibleItems.map((item, index) => {
+                      const pairedVideo =
+                        item.pairGroupKey === undefined
+                          ? undefined
+                          : items.find(
+                              (candidate) =>
+                                candidate.pairGroupKey === item.pairGroupKey &&
+                                candidate.mediaKind === "LIVE_PHOTO_VIDEO",
+                            );
+                      const isLivePhoto = item.pairStatus !== undefined;
+                      return (
+                        <li
+                          className={styles.item}
+                          data-live-photo={isLivePhoto}
+                          key={item.key}
+                        >
                         <div
                           className={styles.assetPreview}
                           data-variant={index % 5}
@@ -465,21 +637,52 @@ function UploadPanel(): React.JSX.Element {
                               </small>
                             </div>
                           )}
+                          {isLivePhoto && (
+                            <span className={styles.livePhotoBadge}>
+                              LIVE
+                            </span>
+                          )}
                         </div>
                         <div className={styles.itemMain}>
-                          <span className={styles.itemName}>{item.fileName}</span>
+                          <span className={styles.itemName}>
+                            {item.fileName}
+                          </span>
                           <span className={styles.itemMeta}>
-                            {formatBytes(item.bytes)} ·{" "}
-                            {UPLOAD_STATUS_LABELS[item.status]}
+                            {formatBytes(item.bytes + (pairedVideo?.bytes ?? 0))}
+                            {" · "}
+                            {isLivePhoto
+                              ? item.pairStatus === "paired"
+                                ? "动态组件已配对"
+                                : item.pairStatus === "pairing"
+                                  ? "正在建立 Live Photo"
+                                  : item.pairStatus === "failed"
+                                    ? "配对失败"
+                                    : `照片 ${UPLOAD_STATUS_LABELS[item.status]} · MOV ${
+                                        pairedVideo
+                                          ? UPLOAD_STATUS_LABELS[
+                                              pairedVideo.status
+                                            ]
+                                          : "等待中"
+                                      }`
+                              : UPLOAD_STATUS_LABELS[item.status]}
                           </span>
                           {item.status === "failed" && (
                             <span className={styles.itemError} role="alert">
                               {item.errorMessage ?? "上传失败。"}
                             </span>
                           )}
+                          {item.pairStatus === "failed" && (
+                            <span className={styles.itemError} role="alert">
+                              {item.pairErrorMessage ??
+                                "Live Photo 配对失败。"}
+                            </span>
+                          )}
                         </div>
                         <div className={styles.itemActions}>
                           {item.status === "ready" &&
+                            item.mediaKind !== "LIVE_PHOTO_VIDEO" &&
+                            (item.pairGroupKey === undefined ||
+                              item.pairStatus === "paired") &&
                             item.assetId !== undefined && (
                               <label className={styles.coverChoice}>
                                 <input
@@ -508,9 +711,22 @@ function UploadPanel(): React.JSX.Element {
                                 重试
                               </button>
                             )}
+                          {item.pairStatus === "failed" &&
+                            item.pairGroupKey !== undefined && (
+                              <button
+                                className={styles.button}
+                                type="button"
+                                onClick={() =>
+                                  void createPairIfReady(item.pairGroupKey ?? "")
+                                }
+                              >
+                                重试配对
+                              </button>
+                            )}
                         </div>
-                      </li>
-                    ))}
+                        </li>
+                      );
+                    })}
                   </ul>
                 </>
               )}

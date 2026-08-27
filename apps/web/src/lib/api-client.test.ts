@@ -330,6 +330,15 @@ test("getProject parses the asset list with nullable fields", async () => {
           previewStatus: "READY",
         },
       ],
+      livePhotoPairs: [
+        {
+          livePhotoPairId: "00000000-0000-4000-8000-0000000000c3",
+          photoAssetId: ASSET_ID,
+          videoAssetId: "00000000-0000-4000-8000-0000000000d4",
+          status: "PAIRED",
+          createdAt: CREATED_AT,
+        },
+      ],
     },
   }));
   const result = await client.getProject(PROJECT_ID);
@@ -341,6 +350,7 @@ test("getProject parses the asset list with nullable fields", async () => {
     result.data.assets[0]?.previewUrl,
     "https://storage.example.test/signed-preview",
   );
+  assert.equal(result.data.livePhotoPairs[0]?.photoAssetId, ASSET_ID);
 });
 
 test("upload intent keys are scoped per project, file name and size", async () => {
@@ -390,6 +400,32 @@ test("setProjectCover posts the asset id with a per-project key", async () => {
     `http://test/v1/projects/${PROJECT_ID}/cover`,
   );
   assert.deepEqual(calls[0]?.body, { assetId: ASSET_ID });
+  assert.equal(calls[0]?.key, calls[1]?.key);
+});
+
+test("createLivePhotoPair posts both assets with a stable pair key", async () => {
+  const videoAssetId = "00000000-0000-4000-8000-0000000000d4";
+  const pairId = "00000000-0000-4000-8000-0000000000c3";
+  const { client, calls } = projectRecordingClient(() => ({
+    data: {
+      livePhotoPairId: pairId,
+      projectId: PROJECT_ID,
+      photoAssetId: ASSET_ID,
+      videoAssetId,
+      status: "PAIRED",
+      createdAt: CREATED_AT,
+    },
+  }));
+  await client.createLivePhotoPair(PROJECT_ID, ASSET_ID, videoAssetId);
+  await client.createLivePhotoPair(PROJECT_ID, ASSET_ID, videoAssetId);
+  assert.equal(
+    calls[0]?.url,
+    `http://test/v1/projects/${PROJECT_ID}/live-photo-pairs`,
+  );
+  assert.deepEqual(calls[0]?.body, {
+    photoAssetId: ASSET_ID,
+    videoAssetId,
+  });
   assert.equal(calls[0]?.key, calls[1]?.key);
 });
 
