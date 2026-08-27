@@ -15,6 +15,7 @@ import {
 } from "./asset-image-variant-service.js";
 import { RenderService } from "./export-service.js";
 import {
+  FfmpegExportRenderer,
   renderRequestedPayloadSchema,
 } from "./renderer.js";
 import { loadWorkerMediaConfig } from "./config.js";
@@ -28,7 +29,7 @@ async function main(): Promise<void> {
   const storage = createObjectStorageFromEnvironment();
   const service = new RenderService(
     pool,
-    undefined,
+    new FfmpegExportRenderer(storage, config.FFMPEG_PATH),
     config.EXPORT_DURATION_MS,
     storage,
   );

@@ -116,11 +116,13 @@ migration.
   invalid selected outputs fail fast before any domain write. The worker
   writes no project phases. Verified: repository-wide build/check/test green;
   worker-media unit 2 + integration 4/4 on PostgreSQL 16.
-  Deferred honestly: the FFmpeg-backed renderer adapter behind the same port
-  (real MOV encoding) plus object-storage upload of artifacts — the current
-  fake renderer yields placeholder bytes with valid ZIP structure and stable
-  hashes, sufficient for control-plane acceptance but not device-level media
-  validation per the HEIC/Live Photo boundary in AGENTS.md.
+  2026-08-27 follow-up: production now wires an FFmpeg-backed renderer behind
+  the same port. It reads the selected generated image from private object
+  storage, writes a real JPEG cover, encodes a playable H.264 QuickTime MOV
+  with a bounded Ken Burns motion recipe (`ken-burns.v2`), and uploads the
+  artifacts plus ZIP. The deterministic fake remains CI-only. This validates
+  Web package playback, but still does not claim PhotoKit Live Photo pairing
+  or iOS device import acceptance.
 - [x] Remove worker-owned project phase transitions on the Graph path.
 - [x] 2026-08-23: Audited the remaining Graph-path phase ownership boundary.
   AI and Media Workers write domain results and correlated signals only; no

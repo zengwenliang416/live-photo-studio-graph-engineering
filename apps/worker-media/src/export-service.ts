@@ -18,6 +18,12 @@ interface ExportRecord {
   readonly exportId: string;
 }
 
+interface SelectedOutputRecord {
+  readonly storageKey: string;
+  readonly width: number;
+  readonly height: number;
+}
+
 interface RenderJobRecord {
   readonly projectId: string;
   readonly workflowRunId: string | null;
@@ -47,7 +53,7 @@ export class RenderService {
     status: "SUCCEEDED" | "ALREADY_DONE" | "IN_PROGRESS";
     exportId?: string | undefined;
   }> {
-    await this.assertWorkflowInput(payload);
+    const selectedOutput = await this.assertWorkflowInput(payload);
     const existing = await this.findExistingFromPool(payload);
     if (existing) {
       await this.repairCompletionSignal(payload, existing.exportId);
@@ -70,6 +76,9 @@ export class RenderService {
       const artifacts = await this.renderer.render({
         projectId: payload.projectId,
         selectedOutputId: payload.selectedOutputId,
+        sourceObjectKey: selectedOutput.storageKey,
+        sourceWidth: selectedOutput.width,
+        sourceHeight: selectedOutput.height,
         durationMs: this.durationMs,
       });
       const manifestBytes = new TextEncoder().encode(
@@ -274,10 +283,14 @@ export class RenderService {
 
   private async assertWorkflowInput(
     payload: RenderRequestedPayload,
-  ): Promise<void> {
+  ): Promise<SelectedOutputRecord> {
     await this.assertWorkflowProject(payload);
-    const result = await this.pool.query(
-      `SELECT 1
+    const result = await this.pool.query<{
+      storage_key: string;
+      width: number;
+      height: number;
+    }>(
+      `SELECT o.storage_key, o.width, o.height
          FROM generation_outputs o
          JOIN generation_batches b ON b.id = o.batch_id
         WHERE o.id = $1::uuid
@@ -288,6 +301,15 @@ export class RenderService {
     if (result.rowCount === 0) {
       throw new Error("SELECTED_OUTPUT_NOT_FOUND");
     }
+    const row = result.rows[0];
+    if (!row) {
+      throw new Error("SELECTED_OUTPUT_NOT_FOUND");
+    }
+    return {
+      storageKey: row.storage_key,
+      width: row.width,
+      height: row.height,
+    };
   }
 
   private async assertWorkflowProject(

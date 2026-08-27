@@ -118,7 +118,7 @@ docs                 架构与 ADR
 - 添加病毒扫描、内容安全、配额和积分账本。
 - 增加 iOS Importer，写入 Live Photo 配对元数据并调用 PhotoKit。
 - 为 OpenAI Provider 增加组织验证、限流、成本预算和评估集。
-- 为 Media Worker 构建包含 FFmpeg、ImageMagick、libheif 的固定镜像。
+- 为 Media Worker 补齐 ImageMagick、libheif 的固定镜像能力，并持续验证 HEIC 解码。
 
 用户级生图接口(OpenAI 兼容端点)已支持：在 `/settings` 配置后由 `worker-ai` 在服务端调用，密钥经 `SETTINGS_ENCRYPTION_KEY`(AES-256-GCM）加密落库。风格 preset 由 `packages/prompt-kit` 管理，修改蓝图必须递增 preset version。风格列表只返回轻量元数据；完整 Prompt 由受认证的详情接口按参考图数量实时调用同一 `compilePrompt()` 编译，并返回 `promptVersion` 与 `promptHash`。OnePic 摄影写实目录通过 `pnpm --filter @live-photo-studio/prompt-kit generate:onepic -- /absolute/path/to/templates.json` 确定性重建。
 

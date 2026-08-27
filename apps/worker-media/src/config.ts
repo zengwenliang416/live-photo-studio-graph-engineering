@@ -17,6 +17,7 @@ export const workerMediaConfigSchema = z.object({
     .min(100)
     .max(3000)
     .default(1500),
+  FFMPEG_PATH: z.string().min(1).default("ffmpeg"),
 });
 
 export type WorkerMediaConfig = z.infer<typeof workerMediaConfigSchema>;
