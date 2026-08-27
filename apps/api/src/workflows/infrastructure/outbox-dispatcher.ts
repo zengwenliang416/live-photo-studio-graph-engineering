@@ -47,6 +47,15 @@ const EVENT_ONLY_EVENTS = new Set([
   "workflow.failed.v1",
 ]);
 
+const ROUTED_EVENT_TYPES = [
+  ...GRAPH_SIGNAL_EVENTS,
+  "START_WORKFLOW",
+  "CANCEL_WORKFLOW",
+  "workflow.generation.requested.v1",
+  "workflow.render.requested.v1",
+  "asset.preview.requested.v1",
+] as const;
+
 /**
  * Relays committed Outbox rows to BullMQ. Publication failures after commit
  * are recovered by polling; BullMQ deduplicates on the Outbox event id used
@@ -126,10 +135,18 @@ export class OutboxDispatcher {
     );
     await this.pool.query(
       `UPDATE outbox_events
-          SET status = 'PENDING', updated_at = now()
-        WHERE status = 'PROCESSING'
-          AND updated_at < now() - make_interval(secs => $1)`,
-      [timeoutSeconds],
+          SET status = 'PENDING',
+              last_error_code = NULL,
+              updated_at = now()
+        WHERE (
+          status = 'PROCESSING'
+          AND updated_at < now() - make_interval(secs => $1)
+        ) OR (
+          status = 'FAILED'
+          AND last_error_code = 'UNKNOWN_EVENT_TYPE'
+          AND event_type = ANY($2::text[])
+        )`,
+      [timeoutSeconds, ROUTED_EVENT_TYPES],
     );
   }
 
