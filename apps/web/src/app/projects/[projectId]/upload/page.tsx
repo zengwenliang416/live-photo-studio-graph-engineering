@@ -13,7 +13,7 @@ import {
   ApiProblemError,
   WorkflowApiClient,
 } from "../../../../lib/api-client.js";
-import { workflowRunStorageKey } from "../../../../lib/workflow-session.js";
+import { startOrResumeWorkflowRun } from "../../../../lib/workflow-session.js";
 import { AppShell } from "../../../../components/app-shell/app-shell.js";
 import { StyleCatalog } from "../../../../components/style-catalog/style-catalog.js";
 import {
@@ -443,13 +443,10 @@ function UploadPanel(): React.JSX.Element {
     setIsStarting(true);
     setStartError(null);
     try {
-      const started = await client.startWorkflowRun(
+      await startOrResumeWorkflowRun(
+        client,
         projectId,
         styleKey === null ? undefined : { styleKey },
-      );
-      window.localStorage.setItem(
-        workflowRunStorageKey(projectId),
-        started.data.workflowRunId,
       );
       router.push(`/projects/${projectId}`);
     } catch (error: unknown) {

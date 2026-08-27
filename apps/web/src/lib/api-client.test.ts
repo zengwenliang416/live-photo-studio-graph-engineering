@@ -72,6 +72,23 @@ test("duplicate start clicks reuse the same idempotency key", async () => {
   assert.match(String(calls[0]?.path), /\/v1\/projects\/p1\/workflow-runs$/u);
 });
 
+test("a terminal workflow restart uses a deterministic replacement key", async () => {
+  const { client, calls } = recordingClient();
+  const failedRunId = "00000000-0000-4000-8000-000000000099";
+  await client.startWorkflowRun("p1");
+  await client.startWorkflowRun("p1", undefined, {
+    restartAfterRunId: failedRunId,
+  });
+  await client.startWorkflowRun("p1", undefined, {
+    restartAfterRunId: failedRunId,
+  });
+
+  assert.ok(calls[0]?.key);
+  assert.notEqual(calls[0]?.key, calls[1]?.key);
+  assert.equal(calls[1]?.key, `workflow-restart:p1:${failedRunId}`);
+  assert.equal(calls[1]?.key, calls[2]?.key);
+});
+
 test("business requests use cookie credentials and never send x-user-id", async () => {
   const { client, calls } = recordingClient();
   await client.startWorkflowRun("p1");

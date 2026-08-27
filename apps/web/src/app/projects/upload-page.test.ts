@@ -23,10 +23,8 @@ const styleSource = readFileSync(
 );
 
 test("upload page starts the run with the style and persists the run id", () => {
-  assert.match(pageSource, /startWorkflowRun/u);
+  assert.match(pageSource, /startOrResumeWorkflowRun/u);
   assert.match(pageSource, /\{ styleKey \}/u);
-  assert.match(pageSource, /workflowRunStorageKey/u);
-  assert.match(pageSource, /window\.localStorage\.setItem/u);
   assert.match(pageSource, /router\.push\(`\/projects\/\$\{projectId\}`\)/u);
   assert.match(pageSource, /正在启动/u);
 });

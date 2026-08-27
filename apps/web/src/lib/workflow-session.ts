@@ -23,6 +23,11 @@ function isNotFound(error: unknown): boolean {
 }
 
 const inFlightRuns = new Map<string, Promise<string>>();
+const TERMINAL_WORKFLOW_STATUSES = new Set([
+  "SUCCEEDED",
+  "FAILED",
+  "CANCELLED",
+]);
 
 async function resolveWithoutInFlight(
   client: Pick<WorkflowApiClient, "getWorkflowRun" | "startWorkflowRun">,
@@ -72,4 +77,46 @@ export function resolveWorkflowRunId(
   };
   void promise.then(cleanup, cleanup);
   return promise;
+}
+
+/**
+ * Explicitly starts from the upload page while preserving recovery semantics:
+ * active runs are reopened, but a confirmed terminal run gets a fresh
+ * idempotency attempt. If the start response is lost, the terminal-run-bound
+ * key makes the next click replay that same server result.
+ */
+export async function startOrResumeWorkflowRun(
+  client: Pick<WorkflowApiClient, "getWorkflowRun" | "startWorkflowRun">,
+  projectId: string,
+  input?: { styleKey?: string },
+  storage: WorkflowSessionStorage | undefined = browserStorage(),
+): Promise<string> {
+  const storageKey = workflowRunStorageKey(projectId);
+  const storedRunId = storage?.getItem(storageKey)?.trim() ?? "";
+  let restartAfterRunId: string | undefined;
+
+  if (storedRunId.length > 0) {
+    try {
+      const storedRun = await client.getWorkflowRun(storedRunId);
+      if (
+        storedRun.data.projectId === projectId &&
+        !TERMINAL_WORKFLOW_STATUSES.has(storedRun.data.status)
+      ) {
+        return storedRunId;
+      }
+      restartAfterRunId = storedRunId;
+      storage?.removeItem(storageKey);
+    } catch (error: unknown) {
+      if (!isNotFound(error)) throw error;
+      restartAfterRunId = storedRunId;
+      storage?.removeItem(storageKey);
+    }
+  }
+
+  const started = await client.startWorkflowRun(projectId, input, {
+    ...(restartAfterRunId === undefined ? {} : { restartAfterRunId }),
+  });
+  const runId = started.data.workflowRunId;
+  storage?.setItem(storageKey, runId);
+  return runId;
 }

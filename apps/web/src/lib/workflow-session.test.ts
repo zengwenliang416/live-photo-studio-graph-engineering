@@ -3,6 +3,7 @@ import test from "node:test";
 import { ApiProblemError, type WorkflowApiClient } from "./api-client.js";
 import {
   resolveWorkflowRunId,
+  startOrResumeWorkflowRun,
   workflowRunStorageKey,
   type WorkflowSessionStorage,
 } from "./workflow-session.js";
@@ -38,9 +39,10 @@ function fakeClient(input: {
   readonly getWorkflowRun?: (
     workflowRunId: string,
   ) => Promise<WorkflowRunResponse>;
-  readonly startWorkflowRun?: () => Promise<{
-    data: { workflowRunId: string };
-  }>;
+  readonly startWorkflowRun?: Pick<
+    WorkflowApiClient,
+    "startWorkflowRun"
+  >["startWorkflowRun"];
 }): Pick<WorkflowApiClient, "getWorkflowRun" | "startWorkflowRun"> {
   return {
     getWorkflowRun:
@@ -170,5 +172,65 @@ test("non-404 reopen errors are not hidden by starting another run", async () =>
     ),
     (error: unknown) => error === failure,
   );
+  assert.equal(starts, 0);
+});
+
+test("an explicit restart rotates after a stored failed run", async () => {
+  const storage = new MemoryStorage();
+  storage.setItem(workflowRunStorageKey("project-6"), STORED_RUN_ID);
+  let restartAfterRunId: string | undefined;
+  const runId = await startOrResumeWorkflowRun(
+    fakeClient({
+      getWorkflowRun: async () => ({
+        data: {
+          projectId: "project-6",
+          status: "FAILED",
+          currentPhase: "FAILED",
+          pendingHumanTaskId: null,
+        },
+      }),
+      startWorkflowRun: async (_projectId, _input, options) => {
+        restartAfterRunId = options?.restartAfterRunId;
+        return { data: { workflowRunId: STARTED_RUN_ID } };
+      },
+    }),
+    "project-6",
+    { styleKey: "film" },
+    storage,
+  );
+
+  assert.equal(runId, STARTED_RUN_ID);
+  assert.equal(restartAfterRunId, STORED_RUN_ID);
+  assert.equal(
+    storage.getItem(workflowRunStorageKey("project-6")),
+    STARTED_RUN_ID,
+  );
+});
+
+test("an explicit start reopens a stored active run", async () => {
+  const storage = new MemoryStorage();
+  storage.setItem(workflowRunStorageKey("project-7"), STORED_RUN_ID);
+  let starts = 0;
+  const runId = await startOrResumeWorkflowRun(
+    fakeClient({
+      getWorkflowRun: async () => ({
+        data: {
+          projectId: "project-7",
+          status: "RUNNING",
+          currentPhase: "WAITING_GENERATION",
+          pendingHumanTaskId: null,
+        },
+      }),
+      startWorkflowRun: async () => {
+        starts += 1;
+        return { data: { workflowRunId: STARTED_RUN_ID } };
+      },
+    }),
+    "project-7",
+    { styleKey: "film" },
+    storage,
+  );
+
+  assert.equal(runId, STORED_RUN_ID);
   assert.equal(starts, 0);
 });

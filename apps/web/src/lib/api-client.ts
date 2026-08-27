@@ -380,22 +380,30 @@ export class WorkflowApiClient {
   /**
    * Starts the project workflow run. The idempotency key stays
    * `start:${projectId}` even when a styleKey is given: a project has at most
-   * one in-flight run, so restarting with a different style intentionally
-   * replays the first recorded run instead of opening a parallel one.
+   * one in-flight run. A confirmed terminal run may opt into a fresh attempt;
+   * its restart key stays bound to that terminal run across tabs and retries.
    */
   startWorkflowRun(
     projectId: string,
     input?: { styleKey?: string },
+    options: { restartAfterRunId?: string } = {},
   ): Promise<{
     data: { workflowRunId: string };
   }> {
     const styleKey = input?.styleKey;
+    const actionId = `start:${projectId}`;
+    if (options.restartAfterRunId !== undefined) {
+      this.keys.set(
+        actionId,
+        `workflow-restart:${projectId}:${options.restartAfterRunId}`,
+      );
+    }
     return this.request(
       "POST",
       `/v1/projects/${projectId}/workflow-runs`,
       startWorkflowResponseSchema,
       styleKey === undefined ? {} : { input: { styleKey } },
-      `start:${projectId}`,
+      actionId,
     );
   }
 
