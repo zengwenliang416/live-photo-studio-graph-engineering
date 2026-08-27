@@ -83,8 +83,14 @@ export class RenderService {
         motionAssetId: selectedOutput.motionAssetId,
         motionObjectKey: selectedOutput.motionObjectKey,
       });
+      const packageManifest = {
+        ...(artifacts.manifest as Record<string, unknown>),
+        schemaVersion: MANIFEST_SCHEMA_VERSION,
+        recipeVersion: this.renderer.recipeVersion,
+        entries: ["cover.jpg", "motion.mov", "manifest.json"],
+      };
       const manifestBytes = new TextEncoder().encode(
-        JSON.stringify(artifacts.manifest),
+        JSON.stringify(packageManifest),
       );
       const base = `projects/${payload.projectId}/exports/${payload.jobId}`;
       const zip = buildStoreZip([
@@ -107,11 +113,8 @@ export class RenderService {
         zip,
       });
       const manifest = {
-        ...(artifacts.manifest as Record<string, unknown>),
-        schemaVersion: MANIFEST_SCHEMA_VERSION,
-        recipeVersion: this.renderer.recipeVersion,
+        ...packageManifest,
         packageSha256: sha256,
-        entries: ["cover.jpg", "motion.mov", "manifest.json"],
       };
 
       const client = await this.pool.connect();

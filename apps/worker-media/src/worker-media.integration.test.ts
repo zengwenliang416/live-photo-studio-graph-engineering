@@ -33,6 +33,26 @@ let pool: Pool | null = null;
 let shared: { service: RenderService; storage: InMemoryObjectStorage } | null =
   null;
 
+function readStoredZipEntry(zip: Uint8Array, targetName: string): Uint8Array {
+  const view = new DataView(zip.buffer, zip.byteOffset, zip.byteLength);
+  const decoder = new TextDecoder();
+  let offset = 0;
+  while (offset + 30 <= zip.byteLength) {
+    if (view.getUint32(offset, true) !== 0x04034b50) break;
+    const compressedSize = view.getUint32(offset + 18, true);
+    const nameLength = view.getUint16(offset + 26, true);
+    const extraLength = view.getUint16(offset + 28, true);
+    const nameStart = offset + 30;
+    const bodyStart = nameStart + nameLength + extraLength;
+    const name = decoder.decode(zip.subarray(nameStart, nameStart + nameLength));
+    if (name === targetName) {
+      return zip.slice(bodyStart, bodyStart + compressedSize);
+    }
+    offset = bodyStart + compressedSize;
+  }
+  throw new Error(`ZIP_ENTRY_NOT_FOUND:${targetName}`);
+}
+
 after(async () => {
   if (pool) await pool.end().catch(() => undefined);
   const admin = createAppPool(ADMIN_URL);
@@ -311,6 +331,20 @@ if (!RUN_PG_TESTS) {
     const storedPackage = shared?.storage.objects.get(packageKey);
     assert.ok(storedPackage);
     assert.equal(sha256Hex(storedPackage), record.sha256);
+    const packagedManifest = JSON.parse(
+      new TextDecoder().decode(
+        readStoredZipEntry(storedPackage, "manifest.json"),
+      ),
+    ) as Record<string, unknown>;
+    assert.equal(packagedManifest["schemaVersion"], "1");
+    assert.equal(packagedManifest["recipeVersion"], "v1");
+    assert.deepEqual(packagedManifest["entries"], [
+      "cover.jpg",
+      "motion.mov",
+      "manifest.json",
+    ]);
+    assert.equal(packagedManifest["packageSha256"], undefined);
+    assert.equal(record.manifest["packageSha256"], record.sha256);
 
     // Deterministic renderer: a fresh job over the same input yields the
     // identical package hash.
